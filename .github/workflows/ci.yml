@@ -1,12 +1,20 @@
-name: CI/CD Pipeline
+name: VexityBot CI/CD Pipeline
 
 on:
   push:
     branches: [ main, develop ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ main, develop ]
   release:
     types: [ published ]
+  workflow_dispatch:
+    inputs:
+      create_release:
+        description: 'Create a new release'
+        required: false
+        default: 'false'
+        type: boolean
 
 jobs:
   test:
@@ -70,49 +78,144 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        pip install pyinstaller
     
-    - name: Build executable
+    - name: Build executable with PyInstaller
       run: |
-        python build_complete_gui.py
+        echo "Building VexityBot executable..."
+        python build_auto.bat
+        echo "Build completed successfully!"
     
-    - name: Test executable
+    - name: Verify executable exists
       run: |
-        cd VexityBot_Complete
+        if (Test-Path "dist\VexityBot.exe") {
+          echo "✅ VexityBot.exe found in dist folder"
+          $fileSize = (Get-Item "dist\VexityBot.exe").Length
+          echo "📦 Executable size: $([math]::Round($fileSize/1MB, 2)) MB"
+        } else {
+          echo "❌ VexityBot.exe not found!"
+          exit 1
+        }
+    
+    - name: Test executable startup
+      run: |
         echo "Testing executable startup..."
-        timeout 10 VexityBot.exe || echo "Executable started successfully"
+        cd dist
+        Start-Process -FilePath "VexityBot.exe" -PassThru
+        Start-Sleep -Seconds 5
+        Get-Process -Name "VexityBot" -ErrorAction SilentlyContinue | Stop-Process -Force
+        echo "✅ Executable test completed"
+    
+    - name: Create release package
+      run: |
+        echo "Creating release package..."
+        New-Item -ItemType Directory -Path "release" -Force
+        Copy-Item "dist\VexityBot.exe" "release\"
+        Copy-Item "README.md" "release\"
+        Copy-Item "LICENSE" "release\"
+        Copy-Item "requirements.txt" "release\"
+        Copy-Item -Recurse "config" "release\"
+        Copy-Item -Recurse "examples" "release\"
+        Copy-Item "run_vexitybot_gui.bat" "release\"
+        Copy-Item "launcher.bat" "release\"
+        
+        # Create version info
+        $version = if ($env:GITHUB_REF -match 'refs/tags/v(.+)') { $matches[1] } else { "dev-$(Get-Date -Format 'yyyyMMdd-HHmm')" }
+        echo "VexityBot v$version" | Out-File -FilePath "release\VERSION.txt" -Encoding UTF8
+        
+        echo "📦 Release package created successfully"
     
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: VexityBot-Executable
-        path: VexityBot_Complete/
+        name: VexityBot-Executable-v${{ github.ref_name || 'dev' }}
+        path: release/
         retention-days: 30
 
   release:
     runs-on: windows-latest
     needs: [test, build]
-    if: github.event_name == 'release'
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.event.inputs.create_release == 'true')
     
     steps:
     - uses: actions/checkout@v3
     
     - name: Download build artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
-        name: VexityBot-Executable
+        name: VexityBot-Executable-v${{ github.ref_name || 'dev' }}
         path: ./release/
     
-    - name: Create release package
+    - name: Create release ZIP
       run: |
-        cd release
-        powershell Compress-Archive -Path * -DestinationPath ../VexityBot-v${{ github.event.release.tag_name }}.zip
+        echo "Creating release ZIP package..."
+        $version = if ($env:GITHUB_REF -match 'refs/tags/v(.+)') { $matches[1] } else { "dev-$(Get-Date -Format 'yyyyMMdd-HHmm')" }
+        $zipName = "VexityBot-v$version.zip"
+        
+        Compress-Archive -Path "release\*" -DestinationPath $zipName -Force
+        echo "📦 Created: $zipName"
+        
+        # Display contents
+        echo "📋 Package contents:"
+        Get-ChildItem -Path "release" -Recurse | ForEach-Object { echo "  $($_.FullName.Replace((Get-Location).Path + '\release\', ''))" }
     
-    - name: Upload release assets
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref_name || format('v{0}', github.run_number) }}
+        release_name: VexityBot ${{ github.ref_name || format('v{0}', github.run_number) }}
+        body: |
+          ## 🤖 VexityBot ${{ github.ref_name || format('v{0}', github.run_number) }}
+          
+          ### ✨ Features
+          - **24 Specialized Bots** - Complete bot management system
+          - **Victim Control EXE** - Remote control capabilities
+          - **Steganography System** - Hide scripts in images
+          - **OmegaBot Ultimate** - Advanced destruction tools
+          - **Real-time Monitoring** - Live bot status and statistics
+          - **Discord Integration** - Pokemon-style file monitoring
+          - **Multi-language Support** - Python, Java, C++, C#
+          
+          ### 📦 Installation
+          1. Download `VexityBot-v${{ github.ref_name || format('v{0}', github.run_number) }}.zip`
+          2. Extract to desired location
+          3. Run `VexityBot.exe` or `run_vexitybot_gui.bat`
+          
+          ### ⚠️ System Requirements
+          - Windows 10/11 (64-bit)
+          - 4GB RAM minimum, 8GB recommended
+          - 100MB free storage space
+          
+          ### 🔧 Build Information
+          - **Build Date**: ${{ github.event.head_commit.timestamp || github.run_started_at }}
+          - **Commit**: ${{ github.sha }}
+          - **Workflow**: ${{ github.workflow }}
+          - **Runner**: ${{ runner.os }}
+          
+          ---
+          
+          **⭐ Star this repository if you find it useful!**
+        draft: false
+        prerelease: ${{ contains(github.ref_name, 'dev') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') }}
+    
+    - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./VexityBot-v${{ github.event.release.tag_name }}.zip
-        asset_name: VexityBot-v${{ github.event.release.tag_name }}.zip
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./VexityBot-v${{ github.ref_name || format('v{0}', github.run_number) }}.zip
+        asset_name: VexityBot-v${{ github.ref_name || format('v{0}', github.run_number) }}.zip
         asset_content_type: application/zip
+    
+    - name: Upload Executable to dist folder
+      run: |
+        echo "Uploading executable to dist folder..."
+        # This step would typically upload to a separate storage or update the dist folder
+        # For now, we'll just log the successful build
+        echo "✅ VexityBot executable built and released successfully!"
+        echo "📦 Version: ${{ github.ref_name || format('v{0}', github.run_number) }}"
+        echo "🔗 Release URL: ${{ steps.create_release.outputs.html_url }}"

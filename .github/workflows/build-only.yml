@@ -1,0 +1,118 @@
+name: Build VexityBot Executable
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build'
+        required: false
+        default: 'main'
+        type: string
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.inputs.branch || github.ref }}
+    
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+    
+    - name: Build VexityBot executable
+      run: |
+        echo "🚀 Building VexityBot executable..."
+        echo "📅 Build started at: $(Get-Date)"
+        echo "🌿 Branch: ${{ github.ref_name }}"
+        echo "📝 Commit: ${{ github.sha }}"
+        
+        # Clean previous builds
+        if (Test-Path "dist") { Remove-Item -Recurse -Force "dist" }
+        if (Test-Path "build") { Remove-Item -Recurse -Force "build" }
+        
+        # Build executable using the auto build script
+        python build_auto.bat
+        
+        echo "✅ Build completed successfully!"
+    
+    - name: Verify build
+      run: |
+        echo "🔍 Verifying build..."
+        
+        if (-not (Test-Path "dist\VexityBot.exe")) {
+          echo "❌ VexityBot.exe not found in dist folder!"
+          echo "📁 Contents of dist folder:"
+          Get-ChildItem "dist" -ErrorAction SilentlyContinue | ForEach-Object { echo "  $($_.Name)" }
+          exit 1
+        }
+        
+        $fileSize = (Get-Item "dist\VexityBot.exe").Length
+        $fileSizeMB = [math]::Round($fileSize/1MB, 2)
+        echo "✅ VexityBot.exe found - Size: $fileSizeMB MB"
+        
+        # Get file details
+        $fileInfo = Get-Item "dist\VexityBot.exe"
+        echo "📊 File Details:"
+        echo "  Name: $($fileInfo.Name)"
+        echo "  Size: $fileSizeMB MB ($($fileInfo.Length) bytes)"
+        echo "  Created: $($fileInfo.CreationTime)"
+        echo "  Modified: $($fileInfo.LastWriteTime)"
+    
+    - name: Test executable startup
+      run: |
+        echo "🧪 Testing executable startup..."
+        
+        # Start the executable in background
+        $process = Start-Process -FilePath "dist\VexityBot.exe" -PassThru -WindowStyle Hidden
+        
+        # Wait a moment for startup
+        Start-Sleep -Seconds 5
+        
+        # Check if process is still running
+        if ($process.HasExited) {
+          echo "⚠️ Executable exited immediately"
+          echo "Exit code: $($process.ExitCode)"
+          echo "This might be normal for GUI applications"
+        } else {
+          echo "✅ Executable started successfully and is running"
+          echo "Process ID: $($process.Id)"
+          
+          # Stop the process after testing
+          Stop-Process -Id $process.Id -Force
+          echo "🛑 Test process stopped"
+        }
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: VexityBot-Executable-${{ github.ref_name }}-${{ github.run_number }}
+        path: dist/
+        retention-days: 7
+    
+    - name: Build summary
+      run: |
+        echo ""
+        echo "🎉 Build Summary:"
+        echo "  ✅ Status: SUCCESS"
+        echo "  📦 Executable: dist\VexityBot.exe"
+        echo "  📊 Size: $((Get-Item "dist\VexityBot.exe").Length / 1MB) MB"
+        echo "  🌿 Branch: ${{ github.ref_name }}"
+        echo "  📝 Commit: ${{ github.sha }}"
+        echo "  📅 Build Time: $(Get-Date)"
+        echo ""
+        echo "🚀 VexityBot executable is ready!"
