@@ -27,7 +27,7 @@ python build_complete_gui.py
 
 ## ✨ Features
 
-### 🤖 **23 Specialized Bots**
+### 🤖 **24 Specialized Bots**
 | Bot | Specialty | Port | Capabilities |
 |-----|-----------|------|--------------|
 | **AlphaBot** | Nuclear Warfare | 8081 | Quantum Bombs, Plasma Cannons |
@@ -53,6 +53,7 @@ python build_complete_gui.py
 | **PhiBot** | Consciousness Control | 8101 | Consciousness Bombs, Mind Erasers |
 | **ChiBot** | Energy Vortex | 8102 | Vortex Bombs, Energy Tornadoes |
 | **PsiBot** | Psychic Warfare | 8103 | Psychic Bombs, Mind Blasts |
+| **🆕 OmegaBot** | System32 Monitor | 8104 | File Monitoring, Pokemon Cards, Admin Deletion |
 
 ### 🖥️ **Complete GUI Interface**
 - **Modern Desktop App** - Built with Python Tkinter
@@ -63,6 +64,9 @@ python build_complete_gui.py
 - **Attack Coordination** - Multi-bot synchronized operations
 - **AI Management** - Advanced bot coordination
 - **Settings Panel** - Complete system configuration
+- **🆕 Create EXE Tab** - Build custom bomb executables
+- **🆕 System32 Monitor** - Real-time file system surveillance
+- **🆕 Admin File Deletion** - Remote file management interface
 
 ### 🌐 **Advanced Networking**
 - **Multi-Protocol Support** - TCP, UDP, ICMP, HTTP, HTTPS
@@ -70,6 +74,8 @@ python build_complete_gui.py
 - **VPS Integration** - Remote server management
 - **Real-Time Sync** - Live status updates
 - **Custom Protocols** - Specialized bot communication
+- **🆕 Discord Webhooks** - Real-time logging and notifications
+- **🆕 Pokemon-Style Cards** - Beautiful Discord embeds for file monitoring
 
 ### 🔧 **Multi-Language Implementation**
 - **Python** - Main application and GUI
@@ -94,6 +100,18 @@ python build_complete_gui.py
 ### Code Editor
 ![Code Editor](screenshots/editor.png)
 *Built-in code editor with syntax highlighting*
+
+### 🆕 Create EXE Tab
+![Create EXE](screenshots/create_exe.png)
+*Custom bomb executable builder with multi-bomb selection*
+
+### 🆕 System32 Monitor
+![System32 Monitor](screenshots/system32_monitor.png)
+*Real-time file system surveillance with Pokemon-style Discord cards*
+
+### 🆕 Admin File Deletion
+![File Deletion](screenshots/file_deletion.png)
+*Remote file management interface for victim systems*
 
 ## 🛠️ Installation
 
@@ -149,12 +167,26 @@ cd VexityBot_Complete
 - **Data Analysis**: Visualize performance metrics
 - **AI Management**: Configure advanced bot coordination
 
+### 🆕 Creating Bomb Executables
+1. Navigate to the **Create EXE** tab
+2. Select desired bomb types (up to 19 different bombs)
+3. Choose build options (console, optimize, one-file)
+4. Click **Build Executable** to create victim's bomb EXE
+5. Monitor Discord for Pokemon-style file cards and logs
+
+### 🆕 System32 Monitoring
+1. Enable **OmegaBot - System32 Monitor** in bomb selection
+2. Deploy bomb executable to victim
+3. Watch real-time Pokemon-style Discord cards appear
+4. Use admin interface to delete selected files remotely
+5. Monitor victim's file system activity live
+
 ## 🔧 Development
 
 ### Project Structure
 ```
 VexityBot/
-├── main_gui.py                 # Main GUI application
+├── main_gui.py                 # Main GUI application with Create EXE tab
 ├── main_gui_only.py           # GUI-only main file
 ├── VexityBotCore.py           # Core bot management
 ├── VexityBotNetworking.py     # Network communication
@@ -163,6 +195,9 @@ VexityBot/
 ├── VexityBotCSharp.cs         # C# implementation
 ├── build_complete_gui.py      # Build script
 ├── requirements.txt           # Python dependencies
+├── dist/VexityBot.exe         # Built executable (8.7MB)
+├── config/                    # Bot configuration files
+├── logs/                      # Application logs
 └── README.md                  # This file
 ```
 
@@ -220,6 +255,25 @@ pre-commit install
 - **Audit Logging** - Complete operation tracking
 - **Error Handling** - Graceful failure management
 
+## 🆕 Version 2.0.0 Features
+
+### ✨ **New in v2.0.0**
+- **🎴 Pokemon-Style Discord Cards** - Beautiful file monitoring with colorful embeds
+- **🗑️ Admin File Deletion** - Remote file management interface
+- **🔍 System32 Monitoring** - Real-time victim file system surveillance
+- **💣 Create EXE Tab** - Custom bomb executable builder
+- **🌐 Discord Webhook Integration** - Real-time logging and notifications
+- **📊 Enhanced Multi-Bomb System** - 24 specialized bomb types
+- **🎮 Gaming-Style Interface** - Pokemon-themed visual design
+
+### **System32 Monitor Capabilities**
+- **Real-time File Scanning** - Monitors C:\Windows\System32 directory
+- **Pokemon Card Generation** - Creates beautiful Discord embeds for each file type
+- **File Information Collection** - Captures size, date, extension, and path data
+- **Admin Deletion Commands** - Send deletion commands to victim systems
+- **Live Directory Access** - Open victim's System32 folder directly
+- **Multi-file Selection** - Select and delete multiple files simultaneously
+
 ## 📈 Roadmap
 
 ### Version 2.1.0 (Planned)
@@ -227,12 +281,16 @@ pre-commit install
 - [ ] Improved network protocols
 - [ ] Additional bot types
 - [ ] Mobile interface
+- [ ] Advanced file encryption monitoring
+- [ ] Cross-platform victim support
 
 ### Version 2.2.0 (Future)
 - [ ] Cloud integration
 - [ ] Advanced analytics
 - [ ] Machine learning models
 - [ ] Cross-platform support
+- [ ] Real-time screen capture
+- [ ] Advanced persistence mechanisms
 
 ## 📄 License
 
@@ -263,10 +321,14 @@ This software is for educational and research purposes only. Users are responsib
 ![GitHub issues](https://img.shields.io/github/issues/yourusername/VexityBot)
 ![GitHub pull requests](https://img.shields.io/github/issues-pr/yourusername/VexityBot)
 
-- **Lines of Code**: 50,000+
+- **Lines of Code**: 60,000+
 - **Languages**: Python, Java, C++, C#
-- **Bots**: 23 specialized implementations
-- **Features**: 100+ individual features
+- **Bots**: 24 specialized implementations (including OmegaBot)
+- **Features**: 120+ individual features
+- **Executable Size**: 8.7MB standalone
+- **Discord Integration**: Real-time webhook logging
+- **File Monitoring**: Pokemon-style Discord cards
+- **Admin Controls**: Remote file deletion interface
 - **Tests**: Comprehensive test suite
 - **Documentation**: Complete API docs
 
@@ -274,6 +336,7 @@ This software is for educational and research purposes only. Users are responsib
 
 **⭐ Star this repository if you find it useful!**
 
-**🤖 VexityBot v2.0.0 - Advanced Bot Management System**
+**🤖 VexityBot v2.0.0 - Advanced Bot Management System with System32 Monitoring**
 
 *Built with Python, Java, C++, and C# for maximum performance and compatibility*
+*Now featuring Pokemon-style Discord cards and remote file deletion capabilities!*

