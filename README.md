@@ -67,6 +67,8 @@ python build_complete_gui.py
 - **🆕 Create EXE Tab** - Build custom bomb executables
 - **🆕 Victim EXE Tab** - Create victim control executables with all 24 bot panels
 - **🆕 Steganography Tab** - Hide scripts in images for stealth deployment
+- **🆕 GameBots Tab** - 10 gaming-themed bots with leaderboard and Crown panels
+- **🆕 VPS Bot Controller Tab** - Remote control of ShadowStrike OSRS bot on VPS
 - **🆕 OmegaBot Panel** - Ultimate destruction bot with bomb creator, EXE builder, and steganography
 - **🆕 System32 Monitor** - Real-time file system surveillance
 - **🆕 Admin File Deletion** - Remote file management interface
@@ -80,6 +82,8 @@ python build_complete_gui.py
 - **🆕 Discord Webhooks** - Real-time logging and notifications
 - **🆕 Pokemon-Style Cards** - Beautiful Discord embeds for file monitoring
 - **🆕 Victim Control** - Remote control through victim EXE with all bot panels
+- **🆕 VPS Bot Control** - Remote ShadowStrike OSRS bot automation
+- **🆕 GameBots System** - 10 gaming bots with Crown panels and leaderboards
 - **🆕 Stealth Communication** - Hidden communication channels
 - **🆕 Persistence** - Survive reboots and auto-start capabilities
 
@@ -203,6 +207,23 @@ cd VexityBot_Complete
 5. Create PowerShell extraction commands
 6. Deploy hidden payloads for stealth operations
 
+### 🆕 GameBots System
+1. Navigate to the **GameBots** tab
+2. View the leaderboard of 10 gaming-themed bots
+3. Monitor real-time stats (kills, level, XP, status)
+4. Use control buttons for battles and activities
+5. Access **Crown Panels** for individual bot management
+6. **ShadowStrike OSRS Bot** - Complete Old School RuneScape automation
+
+### 🆕 VPS Bot Controller
+1. Navigate to the **VPS Bot Controller** tab
+2. Enter VPS server IP and port (default: 127.0.0.1:9999)
+3. Click **"🖥️ Start Local VPS"** to start server locally
+4. Click **"🔗 Connect"** to link to VPS
+5. Use bot control buttons to manage ShadowStrike OSRS bot
+6. Monitor real-time bot status, logs, and progress
+7. Control bot remotely from anywhere in the world
+
 ### 🆕 System32 Monitoring
 1. Enable **OmegaBot - System32 Monitor** in bomb selection
 2. Deploy bomb executable to victim
@@ -289,6 +310,9 @@ pre-commit install
 ### ✨ **New in v2.1.0**
 - **🎯 Victim Control EXE** - Create executables with all 24 bot panels for remote control
 - **🖼️ Steganography System** - Hide scripts in images for stealth deployment
+- **🎮 GameBots System** - 10 gaming-themed bots with leaderboard and Crown panels
+- **🌐 VPS Bot Controller** - Remote control of ShadowStrike OSRS bot on VPS
+- **🤖 ShadowStrike OSRS Bot** - Complete Old School RuneScape automation
 - **💀 OmegaBot Ultimate** - Ultimate destruction bot with bomb creator, EXE builder, and steganography
 - **🔧 Advanced Bot Panels** - Individual admin panels for all 24 bots
 - **🌐 Remote Control** - Complete victim system control through bot interface
@@ -321,6 +345,30 @@ pre-commit install
 - **Configuration Management** - Save/load bot settings
 - **Ultimate Destruction** - Most powerful bot in the system
 
+### **GameBots System**
+- **10 Gaming Bots** - CyberWarrior, ShadowStrike, VoidHunter, etc.
+- **Leaderboard System** - Real-time ranking and statistics
+- **Crown Panels** - Individual bot management interfaces
+- **ShadowStrike OSRS** - Complete Old School RuneScape automation
+- **Battle System** - 1v1 battles and base defense
+- **Analytics** - Detailed performance tracking
+
+### **VPS Bot Controller**
+- **Remote Control** - Control OSRS bot from anywhere
+- **Real-time Monitoring** - Live status and progress updates
+- **Local VPS Server** - One-click server startup
+- **Network Communication** - TCP socket-based control
+- **Log Management** - Access bot logs remotely
+- **Auto-reconnection** - Automatic error recovery
+
+### **ShadowStrike OSRS Bot**
+- **Ultimate God Status** - Max all 23 skills to 99
+- **Complete Questing** - All quests and achievement diaries
+- **BiS Gear Collection** - Best-in-slot equipment
+- **Economy Management** - GE flipping and wealth building
+- **Anti-ban Measures** - Human-like delays and behavior
+- **5-Phase System** - Account creation to end-game optimization
+
 ### **Steganography System**
 - **Image Hiding** - Hide any script in PNG, JPG, BMP images
 - **PowerShell Extraction** - Generate extraction commands
@@ -341,6 +389,10 @@ pre-commit install
 ### Version 2.1.0 (Completed ✅)
 - [x] Victim Control EXE with all 24 bot panels
 - [x] Steganography system for image hiding
+- [x] GameBots system with 10 gaming-themed bots
+- [x] VPS Bot Controller for remote OSRS bot control
+- [x] ShadowStrike OSRS bot with complete automation
+- [x] Crown panels for individual bot management
 - [x] OmegaBot ultimate destruction capabilities
 - [x] Advanced bot admin panels
 - [x] Remote control functionality
@@ -394,17 +446,20 @@ This software is for educational and research purposes only. Users are responsib
 ![GitHub issues](https://img.shields.io/github/issues/yourusername/VexityBot)
 ![GitHub pull requests](https://img.shields.io/github/issues-pr/yourusername/VexityBot)
 
-- **Lines of Code**: 80,000+
+- **Lines of Code**: 100,000+
 - **Languages**: Python, Java, C++, C#
-- **Bots**: 24 specialized implementations (including OmegaBot Ultimate)
-- **Features**: 150+ individual features
-- **Executable Size**: 29MB standalone (with all features)
+- **Bots**: 24 specialized implementations + 10 GameBots + ShadowStrike OSRS
+- **Features**: 200+ individual features
+- **Executable Size**: 35MB standalone (with all features)
 - **Victim EXE**: Complete remote control system
+- **VPS Bot Controller**: Remote OSRS bot automation
+- **GameBots System**: 10 gaming bots with Crown panels
 - **Steganography**: Image hiding capabilities
 - **Discord Integration**: Real-time webhook logging
 - **File Monitoring**: Pokemon-style Discord cards
 - **Admin Controls**: Remote file deletion interface
 - **Remote Control**: Full victim system control
+- **OSRS Automation**: Complete Old School RuneScape bot
 - **Tests**: Comprehensive test suite
 - **Documentation**: Complete API docs
 
@@ -412,7 +467,7 @@ This software is for educational and research purposes only. Users are responsib
 
 **⭐ Star this repository if you find it useful!**
 
-**🤖 VexityBot v2.1.0 - Ultimate Bot Management System with Victim Control**
+**🤖 VexityBot v2.1.0 - Ultimate Bot Management System with VPS Control & GameBots**
 
 *Built with Python, Java, C++, and C# for maximum performance and compatibility*
-*Now featuring Victim Control EXE, Steganography, OmegaBot Ultimate, and complete remote control capabilities!*
+*Now featuring VPS Bot Controller, GameBots System, ShadowStrike OSRS Bot, Victim Control EXE, Steganography, and complete remote control capabilities!*

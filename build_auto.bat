@@ -18,9 +18,13 @@ echo.
 echo Building VexityBot Ultimate executable...
 python -m PyInstaller ^
     --onefile ^
-    --windowed ^
+    --console ^
     --name=VexityBot_Ultimate ^
-    --icon=icon.ico ^
+    --distpath=dist ^
+    --workpath=build ^
+    --specpath=. ^
+    --clean ^
+    --noconfirm ^
     --add-data="README.md;." ^
     --add-data="DEPLOYMENT_GUIDE.md;." ^
     --add-data="bot_deployment_config.json;." ^
@@ -41,14 +45,26 @@ python -m PyInstaller ^
     --hidden-import=os ^
     --hidden-import=sys ^
     --hidden-import=pathlib ^
+    --hidden-import=queue ^
+    --hidden-import=pickle ^
+    --collect-all=tkinter ^
+    --collect-all=tkinter.ttk ^
+    --exclude-module=matplotlib ^
+    --exclude-module=numpy ^
+    --exclude-module=pandas ^
+    --exclude-module=scipy ^
+    --exclude-module=sklearn ^
+    --exclude-module=tensorflow ^
+    --exclude-module=torch ^
+    --exclude-module=opencv-python ^
+    --exclude-module=pyautogui ^
+    --exclude-module=pillow ^
+    --exclude-module=requests ^
+    --exclude-module=urllib3 ^
+    --exclude-module=cryptography ^
     --exclude-module=dnspython ^
     --exclude-module=scapy ^
     --exclude-module=nmap ^
-    --exclude-module=cryptography ^
-    --exclude-module=requests ^
-    --exclude-module=tensorflow ^
-    --exclude-module=opencv-python ^
-    --exclude-module=pyautogui ^
     main_gui.py
 
 echo.

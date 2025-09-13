@@ -1,16 +1,28 @@
 @echo off
 echo VexityBot Simple Build Script
 echo =============================
+echo.
 
-echo Removing enum34 package...
-pip uninstall enum34 -y
+echo Cleaning previous builds...
+if exist "build" rmdir /s /q "build"
+if exist "dist" rmdir /s /q "dist"
+if exist "*.spec" del "*.spec"
 
-echo Installing basic dependencies...
-pip install requests pyinstaller
+echo.
+echo Building VexityBot with minimal dependencies...
+python -m PyInstaller --onefile --console --name=VexityBot_Simple main_gui.py
 
-echo Building executable...
-python build_fixed.py
+echo.
+echo Checking if build was successful...
+if exist "dist\VexityBot_Simple.exe" (
+    echo.
+    echo SUCCESS: VexityBot_Simple.exe created!
+    echo Location: dist\VexityBot_Simple.exe
+    echo.
+    echo This version has minimal dependencies to avoid DLL issues.
+    echo.
+) else (
+    echo ERROR: Build failed!
+)
 
-echo Build complete!
-echo Check dist/VexityBot.exe
 pause
