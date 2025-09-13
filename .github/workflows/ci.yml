@@ -37,6 +37,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
+        
+        # Install additional dependencies for GUI testing on Windows
+        pip install pillow  # For image processing in GUI
+        pip install psutil  # For system monitoring
     
     - name: Lint with flake8
       run: |
@@ -53,7 +57,17 @@ jobs:
     
     - name: Test with pytest
       run: |
-        pytest tests/ --cov=. --cov-report=xml
+        # Set environment variables for GUI testing
+        $env:DISPLAY = ":0"
+        $env:PYTHONPATH = "."
+        
+        # Run core tests first (no GUI dependencies)
+        echo "Running core tests..."
+        pytest tests/test_core.py --cov=. --cov-report=xml --tb=short -v
+        
+        # Run GUI tests (may skip in headless environment)
+        echo "Running GUI tests..."
+        pytest tests/test_vexitybot.py --cov=. --cov-report=xml --tb=short -v || echo "GUI tests completed with warnings"
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3

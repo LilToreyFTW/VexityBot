@@ -1,0 +1,51 @@
+name: Simple Build
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+    
+    - name: Build executable
+      run: |
+        echo "🚀 Building VexityBot executable..."
+        python build_auto.bat
+        echo "✅ Build completed!"
+    
+    - name: Verify build
+      run: |
+        if (Test-Path "dist\VexityBot.exe") {
+          $fileSize = (Get-Item "dist\VexityBot.exe").Length
+          $fileSizeMB = [math]::Round($fileSize/1MB, 2)
+          echo "✅ VexityBot.exe found - Size: $fileSizeMB MB"
+        } else {
+          echo "❌ VexityBot.exe not found!"
+          exit 1
+        }
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: VexityBot-Executable
+        path: dist/
+        retention-days: 7

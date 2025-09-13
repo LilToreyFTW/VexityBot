@@ -27,6 +27,10 @@ pathlib  # Built-in with Python
 # Build Tools
 pyinstaller>=6.0.0
 
+# GUI Dependencies
+pillow>=9.0.0
+psutil>=5.9.0
+
 # Optional Dependencies (excluded from build)
 # These are not included in the final executable to avoid dependency issues
 # dnspython>=2.0.0
