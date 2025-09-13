@@ -117,6 +117,33 @@ class VexityBotGUI:
         # Bind events
 
         self.bind_events()
+    
+    def add_scrollbar_to_frame(self, parent_frame):
+        """Add vertical scrollbar to any frame"""
+        # Create a canvas and scrollbar
+        canvas = tk.Canvas(parent_frame, bg=TSM_COLORS['dark'], highlightthickness=0)
+        scrollbar = ttk.Scrollbar(parent_frame, orient="vertical", command=canvas.yview)
+        scrollable_frame = ttk.Frame(canvas, style='TSM.TFrame')
+        
+        # Configure scrolling
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        # Pack canvas and scrollbar
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+        
+        # Bind mousewheel to canvas
+        def _on_mousewheel(event):
+            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        canvas.bind_all("<MouseWheel>", _on_mousewheel)
+        
+        return scrollable_frame
 
         
         
@@ -611,24 +638,27 @@ class VexityBotGUI:
         welcome_frame = ttk.Frame(self.notebook, style='TSM.TFrame')
         self.notebook.add(welcome_frame, text="🏠 Welcome")
         
+        # Add scrollbar to welcome frame
+        scrollable_welcome = self.add_scrollbar_to_frame(welcome_frame)
+        
         # Welcome content with TSM styling
-        title_label = ttk.Label(welcome_frame, text="VexityBot Ultimate", style='TSM.Title.TLabel')
+        title_label = ttk.Label(scrollable_welcome, text="VexityBot Ultimate", style='TSM.Title.TLabel')
         title_label.pack(pady=30)
         
-        subtitle_label = ttk.Label(welcome_frame, text="TSM-Framework Anticheat System", style='TSM.Heading.TLabel')
+        subtitle_label = ttk.Label(scrollable_welcome, text="TSM-Framework Anticheat System", style='TSM.Heading.TLabel')
         subtitle_label.pack(pady=10)
         
         
 
         # Status indicator
-        status_frame = ttk.Frame(welcome_frame, style='TSM.Dark.TFrame')
+        status_frame = ttk.Frame(scrollable_welcome, style='TSM.Dark.TFrame')
         status_frame.pack(fill=tk.X, padx=20, pady=10)
         
         status_label = ttk.Label(status_frame, text="🟢 SYSTEM ONLINE", style='TSM.Success.TLabel')
         status_label.pack(pady=10)
         
         # Feature overview with TSM styling
-        features_frame = ttk.LabelFrame(welcome_frame, text="🎯 Available Features", style='TSM.TLabelframe', padding=20)
+        features_frame = ttk.LabelFrame(scrollable_welcome, text="🎯 Available Features", style='TSM.TLabelframe', padding=20)
         features_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
         
         
@@ -12355,10 +12385,13 @@ if __name__ == "__main__":
         stego_frame = ttk.Frame(self.notebook)
         self.notebook.add(stego_frame, text="🖼️ Steganography")
         
+        # Add scrollbar to the main frame
+        scrollable_container = self.add_scrollbar_to_frame(stego_frame)
+        
         # Import and create steganography GUI
         try:
             from VexityBotSteganographyGUI import VexityBotSteganographyGUI
-            self.stego_gui = VexityBotSteganographyGUI(stego_frame)
+            self.stego_gui = VexityBotSteganographyGUI(scrollable_container)
         except ImportError as e:
             # Fallback if steganography module is not available
             error_frame = ttk.Frame(stego_frame)
@@ -12376,8 +12409,11 @@ if __name__ == "__main__":
         gamebots_frame = ttk.Frame(self.notebook, style='TSM.TFrame')
         self.notebook.add(gamebots_frame, text="🎮 GameBots")
         
+        # Add scrollbar to the main frame
+        scrollable_container = self.add_scrollbar_to_frame(gamebots_frame)
+        
         # Main container
-        main_container = ttk.Frame(gamebots_frame, style='TSM.TFrame')
+        main_container = ttk.Frame(scrollable_container, style='TSM.TFrame')
         main_container.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         
         # Title
@@ -12698,8 +12734,11 @@ if __name__ == "__main__":
         crown_window.transient(self.root)
         crown_window.grab_set()
         
+        # Add scrollbar to the main frame
+        scrollable_container = self.add_scrollbar_to_frame(crown_window)
+        
         # Main container
-        main_frame = ttk.Frame(crown_window, style='TSM.TFrame')
+        main_frame = ttk.Frame(scrollable_container, style='TSM.TFrame')
         main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         
         # Title
@@ -12745,11 +12784,18 @@ if __name__ == "__main__":
         ttk.Label(info_grid, text=f"Port: {bot['port']}", style='TSM.TLabel').grid(row=1, column=3, sticky=tk.W)
         
         # Specialized panel based on GameBot
-        if bot['name'] == 'ShadowStrike':
-            self.create_shadowstrike_osrs_panel(main_container, bot)
-        elif bot['name'] == 'Thunderbolt':
-            self.create_thunderbolt_pokemongo_panel(main_container, bot)
-        else:
+        try:
+            if bot['name'] == 'ShadowStrike':
+                self.create_shadowstrike_osrs_panel(main_container, bot)
+            elif bot['name'] == 'Thunderbolt':
+                self.create_thunderbolt_pokemongo_panel(main_container, bot)
+            else:
+                self.create_generic_crown_panel(main_container, bot)
+        except Exception as e:
+            print(f"Error creating specialized panel for {bot['name']}: {e}")
+            import traceback
+            traceback.print_exc()
+            # Fall back to generic panel
             self.create_generic_crown_panel(main_container, bot)
     
     def create_shadowstrike_osrs_panel(self, parent, bot):
@@ -12918,17 +12964,153 @@ if __name__ == "__main__":
     
     def create_thunderbolt_pokemongo_panel(self, parent, bot):
         """Create Thunderbolt Pokemon GO-specific Crown panel"""
-        # Pokemon GO Stats Frame
+        # Initialize Pokemon data manager
+        try:
+            from PokemonDataManager import PokemonDataManager
+            self.pokemon_data_manager = PokemonDataManager()
+        except Exception as e:
+            print(f"Warning: Could not load Pokemon data: {e}")
+            self.pokemon_data_manager = None
+        
+        # Add scrollbar to the main frame
+        scrollable_container = self.add_scrollbar_to_frame(parent)
+        
+        # Create notebook for tabs
+        notebook = ttk.Notebook(scrollable_container, style='TNotebook')
+        notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Basic Control Tab
+        basic_tab = ttk.Frame(notebook, style='TSM.TFrame')
+        notebook.add(basic_tab, text="🎮 Basic Control")
+        
+        # Advanced Bot Tab
+        advanced_tab = ttk.Frame(notebook, style='TSM.TFrame')
+        notebook.add(advanced_tab, text="⚙️ Advanced Bot")
+        
+        # Pokemon Data Tab
+        data_tab = ttk.Frame(notebook, style='TSM.TFrame')
+        notebook.add(data_tab, text="📊 Pokemon Data")
+        
+        # Create basic content for each tab
+        self.create_basic_control_tab(basic_tab)
+        self.create_advanced_bot_tab(advanced_tab)
+        self.create_pokemon_data_tab(data_tab)
+    
+    def create_basic_control_tab(self, parent):
+        """Create basic control tab"""
+        # Add scrollbar to the tab
+        scrollable_container = self.add_scrollbar_to_frame(parent)
+        
+        # Basic controls
+        control_frame = ttk.LabelFrame(scrollable_container, text="🎮 Basic Controls", style='TSM.TLabelframe')
+        control_frame.pack(fill=tk.X, pady=10)
+        
+        buttons_frame = ttk.Frame(control_frame, style='TSM.TFrame')
+        buttons_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        ttk.Button(buttons_frame, text="🚀 Start Bot", command=self.thunderbolt_start_bot).pack(side=tk.LEFT, padx=5)
+        ttk.Button(buttons_frame, text="⏹️ Stop Bot", command=self.thunderbolt_stop_bot).pack(side=tk.LEFT, padx=5)
+        ttk.Button(buttons_frame, text="📊 Status", command=self.thunderbolt_bot_status).pack(side=tk.LEFT, padx=5)
+        ttk.Button(buttons_frame, text="🔐 Login", command=self.thunderbolt_login_pokemongo).pack(side=tk.LEFT, padx=5)
+        ttk.Button(buttons_frame, text="🌐 Test API", command=self.thunderbolt_test_api).pack(side=tk.LEFT, padx=5)
+    
+    def create_advanced_bot_tab(self, parent):
+        """Create advanced bot tab"""
+        # Add scrollbar to the tab
+        scrollable_container = self.add_scrollbar_to_frame(parent)
+        
+        # Advanced controls
+        advanced_frame = ttk.LabelFrame(scrollable_container, text="⚙️ Advanced Controls", style='TSM.TLabelframe')
+        advanced_frame.pack(fill=tk.BOTH, expand=True, pady=10)
+        
+        controls_frame = ttk.Frame(advanced_frame, style='TSM.TFrame')
+        controls_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        ttk.Button(controls_frame, text="🎯 Start Catching", command=self.thunderbolt_start_catching).pack(side=tk.LEFT, padx=5)
+        ttk.Button(controls_frame, text="🏰 Start Raiding", command=self.thunderbolt_start_raiding).pack(side=tk.LEFT, padx=5)
+        ttk.Button(controls_frame, text="⚔️ Start Battling", command=self.thunderbolt_start_battling).pack(side=tk.LEFT, padx=5)
+        ttk.Button(controls_frame, text="🌍 Start Exploring", command=self.thunderbolt_start_exploring).pack(side=tk.LEFT, padx=5)
+        
+        # Status display
+        status_frame = ttk.LabelFrame(parent, text="📊 Bot Status", style='TSM.TLabelframe')
+        status_frame.pack(fill=tk.BOTH, expand=True, pady=10)
+        
+        self.bot_status_text = tk.Text(status_frame, height=10, width=80, 
+                                      bg='#2b2b2b', fg='#ffffff',
+                                      font=('Consolas', 9), wrap=tk.WORD)
+        self.bot_status_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Initialize status
+        self.bot_status_text.insert(tk.END, "🤖 Thunderbolt Pokemon GO Bot Ready!\n")
+        self.bot_status_text.insert(tk.END, "• Bot Status: Stopped\n")
+        self.bot_status_text.insert(tk.END, "• API Connection: Disconnected\n")
+        self.bot_status_text.insert(tk.END, "• Location: Times Square, NYC\n")
+        self.bot_status_text.insert(tk.END, "• Ready to start automation...\n")
+    
+    def create_pokemon_data_tab(self, parent):
+        """Create Pokemon data tab"""
+        # Add scrollbar to the tab
+        scrollable_container = self.add_scrollbar_to_frame(parent)
+        
+        # Pokemon data display
+        data_frame = ttk.LabelFrame(scrollable_container, text="📊 Pokemon Database", style='TSM.TLabelframe')
+        data_frame.pack(fill=tk.BOTH, expand=True, pady=10)
+        
+        # Search frame
+        search_frame = ttk.Frame(data_frame, style='TSM.TFrame')
+        search_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        ttk.Label(search_frame, text="Search Pokemon:", style='TSM.TLabel').pack(side=tk.LEFT, padx=(0, 10))
+        search_entry = ttk.Entry(search_frame, width=30, style='TSM.TEntry')
+        search_entry.pack(side=tk.LEFT, padx=(0, 10))
+        ttk.Button(search_frame, text="🔍 Search", style='TSM.TButton').pack(side=tk.LEFT, padx=5)
+        
+        # Pokemon list
+        list_frame = ttk.Frame(data_frame, style='TSM.TFrame')
+        list_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Create treeview for Pokemon list
+        columns = ('Number', 'Name', 'Type', 'CP')
+        pokemon_tree = ttk.Treeview(list_frame, columns=columns, show='headings', style='TSM.Treeview')
+        
+        for col in columns:
+            pokemon_tree.heading(col, text=col)
+            pokemon_tree.column(col, width=100)
+        
+        pokemon_tree.pack(fill=tk.BOTH, expand=True)
+        
+        # Add some sample Pokemon data
+        sample_pokemon = [
+            ('001', 'Bulbasaur', 'Grass/Poison', '1,234'),
+            ('002', 'Ivysaur', 'Grass/Poison', '1,567'),
+            ('003', 'Venusaur', 'Grass/Poison', '2,345'),
+            ('004', 'Charmander', 'Fire', '1,123'),
+            ('005', 'Charmeleon', 'Fire', '1,456'),
+            ('006', 'Charizard', 'Fire/Flying', '2,678'),
+            ('007', 'Squirtle', 'Water', '1,089'),
+            ('008', 'Wartortle', 'Water', '1,345'),
+            ('009', 'Blastoise', 'Water', '2,456'),
+            ('150', 'Mewtwo', 'Psychic', '4,000+')
+        ]
+        
+        for pokemon in sample_pokemon:
+            pokemon_tree.insert('', tk.END, values=pokemon)
+        
+        # Add some basic stats
         stats_frame = ttk.LabelFrame(parent, text="⚡ Pokemon GO Stats", style='TSM.TLabelframe')
-        stats_frame.pack(fill=tk.X, pady=(0, 10))
+        stats_frame.pack(fill=tk.X, pady=10)
         
-        # Pokemon GO Stats Grid
-        stats_grid = ttk.Frame(stats_frame, style='TSM.TFrame')
-        stats_grid.pack(fill=tk.X, padx=10, pady=10)
+        stats_text = tk.Text(stats_frame, height=6, width=80, 
+                            bg='#2b2b2b', fg='#ffffff',
+                            font=('Consolas', 9), wrap=tk.WORD)
+        stats_text.pack(fill=tk.X, padx=10, pady=10)
         
-        # Trainer Stats
-        trainer_frame = ttk.LabelFrame(stats_grid, text="🎮 Trainer", style='TSM.TLabelframe')
-        trainer_frame.grid(row=0, column=0, sticky=tk.W+tk.E, padx=(0, 10), pady=5)
+        stats_text.insert(tk.END, "🎮 Trainer Level: 50\n")
+        stats_text.insert(tk.END, "⭐ XP: 50,000,000\n")
+        stats_text.insert(tk.END, "💎 Stardust: 999,999,999\n")
+        stats_text.insert(tk.END, "🔴 Pokemon Caught: 50,000\n")
+        stats_text.insert(tk.END, "👁️ Pokemon Seen: 50,000\n")
+        stats_text.insert(tk.END, "⚔️ Battles Won: 10,000\n")
         
         trainer_stats = [
             ("Trainer Level", 50), ("XP", "50,000,000"), ("Stardust", "999,999,999"),
@@ -13589,15 +13771,18 @@ Click 'Start Ultimate Bot' to begin!
         vps_frame = ttk.Frame(self.notebook, style='TSM.TFrame')
         self.notebook.add(vps_frame, text="🌐 VPS Bot Controller")
         
+        # Add scrollbar to the main frame
+        scrollable_container = self.add_scrollbar_to_frame(vps_frame)
+        
         # Title
-        title_label = ttk.Label(vps_frame, 
+        title_label = ttk.Label(scrollable_container, 
                                text="🌐 VPS Bot Controller - Remote ShadowStrike OSRS Bot Control", 
                                font=('Arial', 16, 'bold'),
                                style='TSM.Title.TLabel')
         title_label.pack(pady=(20, 30))
         
         # Main content frame
-        main_content = ttk.Frame(vps_frame, style='TSM.TFrame')
+        main_content = ttk.Frame(scrollable_container, style='TSM.TFrame')
         main_content.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
         
         # Left panel - Connection and Control
