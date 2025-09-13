@@ -1,0 +1,24 @@
+# VexityBot Example Configuration
+# Copy this file to config/vexitybot.ini and modify as needed
+
+[General]
+bot_count = 23
+max_threads = 100
+log_level = INFO
+auto_start = false
+
+[Network]
+vps_host = 191.96.152.162
+vps_port = 8080
+ssl_enabled = true
+timeout = 30
+
+[Security]
+encryption_key = YourSecretKeyHere
+access_control = true
+audit_logging = true
+
+[Performance]
+memory_limit = 1024
+cpu_limit = 80
+response_timeout = 100

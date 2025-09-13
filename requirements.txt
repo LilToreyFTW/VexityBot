@@ -1,0 +1,36 @@
+# VexityBot Requirements
+# Core Python dependencies for the bot management system
+
+# GUI Framework
+tkinter  # Built-in with Python
+
+# Core Libraries
+asyncio  # Built-in with Python
+threading  # Built-in with Python
+socket  # Built-in with Python
+ssl  # Built-in with Python
+json  # Built-in with Python
+hashlib  # Built-in with Python
+hmac  # Built-in with Python
+base64  # Built-in with Python
+zlib  # Built-in with Python
+sqlite3  # Built-in with Python
+logging  # Built-in with Python
+random  # Built-in with Python
+string  # Built-in with Python
+time  # Built-in with Python
+datetime  # Built-in with Python
+os  # Built-in with Python
+sys  # Built-in with Python
+pathlib  # Built-in with Python
+
+# Build Tools
+pyinstaller>=6.0.0
+
+# Optional Dependencies (excluded from build)
+# These are not included in the final executable to avoid dependency issues
+# dnspython>=2.0.0
+# scapy>=2.4.0
+# nmap>=0.0.1
+# cryptography>=3.0.0
+# requests>=2.25.0

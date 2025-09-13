@@ -1,0 +1,1 @@
+🤖 VexityBot v2.0.0 - Advanced Bot Management System with 23 specialized bots. Complete GUI desktop app built with Python, Java, C++, C#. Features real-time monitoring, attack coordination, multi-protocol networking, encrypted communication. Standalone executable, no dependencies. Educational/research purposes only.
