@@ -1,0 +1,110 @@
+[
+  {
+    "id": 1,
+    "name": "Tackle",
+    "type": "Normal",
+    "damage": 5,
+    "energy": 5,
+    "dps": 10.0,
+    "duration": 500
+  },
+  {
+    "id": 2,
+    "name": "Vine Whip",
+    "type": "Grass",
+    "damage": 7,
+    "energy": 6,
+    "dps": 11.67,
+    "duration": 600
+  },
+  {
+    "id": 3,
+    "name": "Psycho Cut",
+    "type": "Psychic",
+    "damage": 5,
+    "energy": 8,
+    "dps": 8.33,
+    "duration": 600
+  },
+  {
+    "id": 4,
+    "name": "Confusion",
+    "type": "Psychic",
+    "damage": 20,
+    "energy": 15,
+    "dps": 12.0,
+    "duration": 1500
+  },
+  {
+    "id": 5,
+    "name": "Thunder Shock",
+    "type": "Electric",
+    "damage": 5,
+    "energy": 8,
+    "dps": 8.33,
+    "duration": 600
+  },
+  {
+    "id": 6,
+    "name": "Charge Beam",
+    "type": "Electric",
+    "damage": 8,
+    "energy": 12,
+    "dps": 8.0,
+    "duration": 1000
+  },
+  {
+    "id": 7,
+    "name": "Fire Spin",
+    "type": "Fire",
+    "damage": 14,
+    "energy": 10,
+    "dps": 12.73,
+    "duration": 1100
+  },
+  {
+    "id": 8,
+    "name": "Wing Attack",
+    "type": "Flying",
+    "damage": 8,
+    "energy": 6,
+    "dps": 12.0,
+    "duration": 800
+  },
+  {
+    "id": 9,
+    "name": "Frost Breath",
+    "type": "Ice",
+    "damage": 9,
+    "energy": 7,
+    "dps": 11.25,
+    "duration": 800
+  },
+  {
+    "id": 10,
+    "name": "Ice Shard",
+    "type": "Ice",
+    "damage": 12,
+    "energy": 10,
+    "dps": 10.91,
+    "duration": 1100
+  },
+  {
+    "id": 11,
+    "name": "Pound",
+    "type": "Normal",
+    "damage": 7,
+    "energy": 6,
+    "dps": 10.0,
+    "duration": 600
+  },
+  {
+    "id": 12,
+    "name": "Steel Wing",
+    "type": "Steel",
+    "damage": 11,
+    "energy": 6,
+    "dps": 11.0,
+    "duration": 1000
+  }
+]

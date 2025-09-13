@@ -1,0 +1,159 @@
+[
+  {
+    "Number": "001",
+    "Name": "Bulbasaur",
+    "Classification": "Seed Pokemon",
+    "Type I": ["Grass"],
+    "Type II": ["Poison"],
+    "Weaknesses": ["Fire", "Ice", "Flying", "Psychic"],
+    "Fast Attack(s)": ["Vine Whip", "Tackle"],
+    "Weight": "6.9 kg",
+    "Height": "0.7 m",
+    "Candy": {
+      "Name": "Bulbasaur candies",
+      "FamilyID": 1
+    },
+    "Next Evolution Requirements": {
+      "Amount": 25,
+      "Family": 1,
+      "Name": "Bulbasaur candies"
+    },
+    "Next evolution(s)": [
+      {
+        "Number": "002",
+        "Name": "Ivysaur"
+      },
+      {
+        "Number": "003",
+        "Name": "Venusaur"
+      }
+    ],
+    "Special Attack(s)": ["Sludge Bomb", "Seed Bomb", "Power Whip"],
+    "BaseAttack": 118,
+    "BaseDefense": 118,
+    "BaseStamina": 90,
+    "CaptureRate": 0.2,
+    "FleeRate": 0.1,
+    "BuddyDistanceNeeded": 3
+  },
+  {
+    "Number": "150",
+    "Name": "Mewtwo",
+    "Classification": "Genetic Pokemon",
+    "Type I": ["Psychic"],
+    "Type II": [],
+    "Weaknesses": ["Bug", "Dark", "Ghost"],
+    "Fast Attack(s)": ["Psycho Cut", "Confusion"],
+    "Weight": "122.0 kg",
+    "Height": "2.0 m",
+    "Candy": {
+      "Name": "Mewtwo candies",
+      "FamilyID": 150
+    },
+    "Next Evolution Requirements": null,
+    "Next evolution(s)": [],
+    "Special Attack(s)": ["Psychic", "Shadow Ball", "Focus Blast", "Hyper Beam"],
+    "BaseAttack": 300,
+    "BaseDefense": 182,
+    "BaseStamina": 193,
+    "CaptureRate": 0.05,
+    "FleeRate": 0.05,
+    "BuddyDistanceNeeded": 20
+  },
+  {
+    "Number": "151",
+    "Name": "Mew",
+    "Classification": "New Species Pokemon",
+    "Type I": ["Psychic"],
+    "Type II": [],
+    "Weaknesses": ["Bug", "Dark", "Ghost"],
+    "Fast Attack(s)": ["Pound", "Steel Wing"],
+    "Weight": "4.0 kg",
+    "Height": "0.4 m",
+    "Candy": {
+      "Name": "Mew candies",
+      "FamilyID": 151
+    },
+    "Next Evolution Requirements": null,
+    "Next evolution(s)": [],
+    "Special Attack(s)": ["Psychic", "Dragon Pulse", "Thunder", "Blizzard", "Solar Beam", "Fire Blast"],
+    "BaseAttack": 210,
+    "BaseDefense": 210,
+    "BaseStamina": 200,
+    "CaptureRate": 0.01,
+    "FleeRate": 0.01,
+    "BuddyDistanceNeeded": 20
+  },
+  {
+    "Number": "144",
+    "Name": "Articuno",
+    "Classification": "Freeze Pokemon",
+    "Type I": ["Ice"],
+    "Type II": ["Flying"],
+    "Weaknesses": ["Fire", "Electric", "Rock", "Steel"],
+    "Fast Attack(s)": ["Frost Breath", "Ice Shard"],
+    "Weight": "55.4 kg",
+    "Height": "1.7 m",
+    "Candy": {
+      "Name": "Articuno candies",
+      "FamilyID": 144
+    },
+    "Next Evolution Requirements": null,
+    "Next evolution(s)": [],
+    "Special Attack(s)": ["Ice Beam", "Blizzard", "Icy Wind"],
+    "BaseAttack": 192,
+    "BaseDefense": 249,
+    "BaseStamina": 207,
+    "CaptureRate": 0.05,
+    "FleeRate": 0.05,
+    "BuddyDistanceNeeded": 20
+  },
+  {
+    "Number": "145",
+    "Name": "Zapdos",
+    "Classification": "Electric Pokemon",
+    "Type I": ["Electric"],
+    "Type II": ["Flying"],
+    "Weaknesses": ["Ice", "Rock"],
+    "Fast Attack(s)": ["Thunder Shock", "Charge Beam"],
+    "Weight": "52.6 kg",
+    "Height": "1.6 m",
+    "Candy": {
+      "Name": "Zapdos candies",
+      "FamilyID": 145
+    },
+    "Next Evolution Requirements": null,
+    "Next evolution(s)": [],
+    "Special Attack(s)": ["Thunder", "Thunderbolt", "Zap Cannon"],
+    "BaseAttack": 253,
+    "BaseDefense": 185,
+    "BaseStamina": 207,
+    "CaptureRate": 0.05,
+    "FleeRate": 0.05,
+    "BuddyDistanceNeeded": 20
+  },
+  {
+    "Number": "146",
+    "Name": "Moltres",
+    "Classification": "Flame Pokemon",
+    "Type I": ["Fire"],
+    "Type II": ["Flying"],
+    "Weaknesses": ["Water", "Electric", "Rock"],
+    "Fast Attack(s)": ["Fire Spin", "Wing Attack"],
+    "Weight": "60.0 kg",
+    "Height": "2.0 m",
+    "Candy": {
+      "Name": "Moltres candies",
+      "FamilyID": 146
+    },
+    "Next Evolution Requirements": null,
+    "Next evolution(s)": [],
+    "Special Attack(s)": ["Fire Blast", "Overheat", "Heat Wave"],
+    "BaseAttack": 251,
+    "BaseDefense": 181,
+    "BaseStamina": 207,
+    "CaptureRate": 0.05,
+    "FleeRate": 0.05,
+    "BuddyDistanceNeeded": 20
+  }
+]

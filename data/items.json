@@ -1,0 +1,91 @@
+{
+  "pokeball": {
+    "name": "Pokeball",
+    "type": "ball",
+    "catch_rate_modifier": 1.0,
+    "description": "A basic Pokeball for catching Pokemon"
+  },
+  "greatball": {
+    "name": "Great Ball",
+    "type": "ball",
+    "catch_rate_modifier": 1.5,
+    "description": "A better Pokeball with improved catch rate"
+  },
+  "ultraball": {
+    "name": "Ultra Ball",
+    "type": "ball",
+    "catch_rate_modifier": 2.0,
+    "description": "The best Pokeball with highest catch rate"
+  },
+  "masterball": {
+    "name": "Master Ball",
+    "type": "ball",
+    "catch_rate_modifier": 255.0,
+    "description": "A special Pokeball that never fails"
+  },
+  "razzberry": {
+    "name": "Razz Berry",
+    "type": "berry",
+    "catch_rate_modifier": 1.5,
+    "description": "A berry that makes Pokemon easier to catch"
+  },
+  "goldenrazzberry": {
+    "name": "Golden Razz Berry",
+    "type": "berry",
+    "catch_rate_modifier": 2.5,
+    "description": "A rare berry that greatly improves catch rate"
+  },
+  "silverpinapberry": {
+    "name": "Silver Pinap Berry",
+    "type": "berry",
+    "catch_rate_modifier": 1.8,
+    "candy_modifier": 2.0,
+    "description": "A berry that improves catch rate and gives extra candy"
+  },
+  "potion": {
+    "name": "Potion",
+    "type": "healing",
+    "heal_amount": 20,
+    "description": "Restores 20 HP to a Pokemon"
+  },
+  "superpotion": {
+    "name": "Super Potion",
+    "type": "healing",
+    "heal_amount": 50,
+    "description": "Restores 50 HP to a Pokemon"
+  },
+  "hyperpotion": {
+    "name": "Hyper Potion",
+    "type": "healing",
+    "heal_amount": 200,
+    "description": "Restores 200 HP to a Pokemon"
+  },
+  "maxpotion": {
+    "name": "Max Potion",
+    "type": "healing",
+    "heal_amount": 999,
+    "description": "Fully restores a Pokemon's HP"
+  },
+  "revive": {
+    "name": "Revive",
+    "type": "revival",
+    "heal_amount": 50,
+    "description": "Revives a fainted Pokemon with 50% HP"
+  },
+  "maxrevive": {
+    "name": "Max Revive",
+    "type": "revival",
+    "heal_amount": 100,
+    "description": "Fully revives a fainted Pokemon"
+  },
+  "rarecandy": {
+    "name": "Rare Candy",
+    "type": "candy",
+    "description": "A special candy that can power up any Pokemon"
+  },
+  "stardust": {
+    "name": "Stardust",
+    "type": "currency",
+    "description": "A special dust used to power up Pokemon"
+  }
+}

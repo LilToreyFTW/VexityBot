@@ -1,0 +1,164 @@
+[
+  {
+    "id": 1,
+    "name": "Sludge Bomb",
+    "type": "Poison",
+    "damage": 80,
+    "energy": 50,
+    "dps": 26.67,
+    "duration": 3000
+  },
+  {
+    "id": 2,
+    "name": "Seed Bomb",
+    "type": "Grass",
+    "damage": 55,
+    "energy": 40,
+    "dps": 22.0,
+    "duration": 2500
+  },
+  {
+    "id": 3,
+    "name": "Power Whip",
+    "type": "Grass",
+    "damage": 90,
+    "energy": 50,
+    "dps": 30.0,
+    "duration": 3000
+  },
+  {
+    "id": 4,
+    "name": "Psychic",
+    "type": "Psychic",
+    "damage": 90,
+    "energy": 50,
+    "dps": 30.0,
+    "duration": 3000
+  },
+  {
+    "id": 5,
+    "name": "Shadow Ball",
+    "type": "Ghost",
+    "damage": 100,
+    "energy": 55,
+    "dps": 28.57,
+    "duration": 3500
+  },
+  {
+    "id": 6,
+    "name": "Focus Blast",
+    "type": "Fighting",
+    "damage": 140,
+    "energy": 75,
+    "dps": 28.0,
+    "duration": 5000
+  },
+  {
+    "id": 7,
+    "name": "Hyper Beam",
+    "type": "Normal",
+    "damage": 150,
+    "energy": 100,
+    "dps": 39.47,
+    "duration": 3800
+  },
+  {
+    "id": 8,
+    "name": "Thunder",
+    "type": "Electric",
+    "damage": 100,
+    "energy": 50,
+    "dps": 33.33,
+    "duration": 3000
+  },
+  {
+    "id": 9,
+    "name": "Thunderbolt",
+    "type": "Electric",
+    "damage": 80,
+    "energy": 50,
+    "dps": 26.67,
+    "duration": 3000
+  },
+  {
+    "id": 10,
+    "name": "Zap Cannon",
+    "type": "Electric",
+    "damage": 140,
+    "energy": 100,
+    "dps": 28.0,
+    "duration": 5000
+  },
+  {
+    "id": 11,
+    "name": "Fire Blast",
+    "type": "Fire",
+    "damage": 140,
+    "energy": 80,
+    "dps": 28.0,
+    "duration": 5000
+  },
+  {
+    "id": 12,
+    "name": "Overheat",
+    "type": "Fire",
+    "damage": 160,
+    "energy": 100,
+    "dps": 32.0,
+    "duration": 5000
+  },
+  {
+    "id": 13,
+    "name": "Heat Wave",
+    "type": "Fire",
+    "damage": 95,
+    "energy": 60,
+    "dps": 27.14,
+    "duration": 3500
+  },
+  {
+    "id": 14,
+    "name": "Ice Beam",
+    "type": "Ice",
+    "damage": 90,
+    "energy": 50,
+    "dps": 30.0,
+    "duration": 3000
+  },
+  {
+    "id": 15,
+    "name": "Blizzard",
+    "type": "Ice",
+    "damage": 130,
+    "energy": 75,
+    "dps": 26.0,
+    "duration": 5000
+  },
+  {
+    "id": 16,
+    "name": "Icy Wind",
+    "type": "Ice",
+    "damage": 60,
+    "energy": 45,
+    "dps": 20.0,
+    "duration": 3000
+  },
+  {
+    "id": 17,
+    "name": "Dragon Pulse",
+    "type": "Dragon",
+    "damage": 90,
+    "energy": 60,
+    "dps": 22.5,
+    "duration": 4000
+  },
+  {
+    "id": 18,
+    "name": "Solar Beam",
+    "type": "Grass",
+    "damage": 180,
+    "energy": 100,
+    "dps": 36.0,
+    "duration": 5000
+  }
+]
