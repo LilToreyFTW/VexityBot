@@ -1,0 +1,39 @@
+# VexityBot VPS Server Requirements
+# Core dependencies for the VPS server GUI
+
+# GUI Framework
+tkinter  # Built-in with Python
+
+# Web Server
+Flask==2.3.3
+requests==2.31.0
+
+# System Monitoring
+psutil==5.9.6
+
+# Data Processing
+pandas==2.1.1
+numpy==1.24.3
+
+# Image Processing (for steganography)
+Pillow==10.0.1
+
+# Network Tools
+scapy==2.5.0
+
+# Database
+sqlite3  # Built-in with Python
+pymysql==1.1.0
+
+# Additional Utilities
+webbrowser  # Built-in with Python
+threading  # Built-in with Python
+socket  # Built-in with Python
+json  # Built-in with Python
+subprocess  # Built-in with Python
+datetime  # Built-in with Python
+logging  # Built-in with Python
+random  # Built-in with Python
+time  # Built-in with Python
+os  # Built-in with Python
+sys  # Built-in with Python

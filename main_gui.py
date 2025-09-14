@@ -97,10 +97,13 @@ class VexityBotGUI:
         # Initialize VPS Bot Controller variables
         self.vps_connected = False
         self.vps_socket = None
-        self.vps_host = "YOUR_VPS_IP_HERE"
+        self.vps_host = "191.96.152.162"
         self.vps_port = 9999
         self.bot_running = False
         self.bot_status = {}
+        
+        # Initialize DeathBot #25
+        self.initialize_deathbot()
 
         # Create main components
 
@@ -112,10 +115,13 @@ class VexityBotGUI:
 
         self.create_status_bar()
 
-        
+        # Update DeathBot status now that status bar is created
+        if hasattr(self, 'deathbot') and self.deathbot:
+            self.update_status("💀 DeathBot #25 initialized - Ultimate Destruction Bot")
+        else:
+            self.update_status("⚠️ DeathBot module not found - Limited functionality")
         
         # Bind events
-
         self.bind_events()
     
     def add_scrollbar_to_frame(self, parent_frame):
@@ -626,8 +632,10 @@ class VexityBotGUI:
         # VPS Bot Controller Tab
         self.create_vps_bot_controller_tab()
         
+        # DeathBot #25 Tab
+        self.create_deathbot_tab()
+        
         # Settings Tab
-
         self.create_settings_tab()
     
     
@@ -15031,8 +15039,10 @@ Bot is not running. Click "Start Thunderbolt Bot" to begin!
     def update_status(self, message):
 
         """Update status bar message"""
-
-        self.status_label.config(text=message)
+        
+        # Check if status_label exists before trying to update it
+        if hasattr(self, 'status_label') and self.status_label:
+            self.status_label.config(text=message)
     
     
 
@@ -15051,7 +15061,1194 @@ Bot is not running. Click "Start Thunderbolt Bot" to begin!
         self.root.quit()
 
         self.root.destroy()
+    
+    # DeathBot #25 Methods
+    def initialize_deathbot(self):
+        """Initialize DeathBot #25"""
+        try:
+            from DeathBot import DeathBot
+            self.deathbot = DeathBot(bot_id=25, name="DeathBot")
+            # Don't call update_status during initialization as status_label may not exist yet
+            print("💀 DeathBot #25 initialized - Ultimate Destruction Bot")
+        except ImportError:
+            self.deathbot = None
+            print("⚠️ DeathBot module not found - Limited functionality")
+    
+    def create_deathbot_tab(self):
+        """Create the DeathBot #25 tab"""
+        deathbot_frame = ttk.Frame(self.notebook, style='TSM.TFrame')
+        self.notebook.add(deathbot_frame, text="💀 DeathBot #25")
+        
+        # DeathBot header
+        header_frame = ttk.Frame(deathbot_frame, style='TSM.Dark.TFrame')
+        header_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        title_label = ttk.Label(header_frame, text="💀 DeathBot #25 - Ultimate Destruction Bot", style='TSM.Title.TLabel')
+        title_label.pack(side=tk.LEFT)
+        
+        # Warning label
+        warning_label = ttk.Label(header_frame, text="⚠️ EXTREMELY DANGEROUS - USE WITH CAUTION", style='TSM.Error.TLabel')
+        warning_label.pack(side=tk.RIGHT)
+        
+        # Main control panel
+        control_frame = ttk.LabelFrame(deathbot_frame, text="💀 DeathBot Control Panel", style='TSM.TLabelframe')
+        control_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        # Control buttons
+        control_buttons = ttk.Frame(control_frame, style='TSM.TFrame')
+        control_buttons.pack(fill=tk.X, padx=10, pady=10)
+        
+        ttk.Button(control_buttons, text="🚀 ACTIVATE DEATHBOT", command=self.start_deathbot, style='TSM.Error.TButton').pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_buttons, text="⏹️ STOP DEATHBOT", command=self.stop_deathbot, style='TSM.Warning.TButton').pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_buttons, text="🚨 EMERGENCY SHUTDOWN", command=self.emergency_shutdown_deathbot, style='TSM.Error.TButton').pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_buttons, text="⚙️ CONFIGURE", command=self.configure_deathbot, style='TSM.Secondary.TButton').pack(side=tk.LEFT, padx=5)
+        
+        # Status and info
+        info_frame = ttk.LabelFrame(deathbot_frame, text="📊 DeathBot Status & Information", style='TSM.TLabelframe')
+        info_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        info_buttons = ttk.Frame(info_frame, style='TSM.TFrame')
+        info_buttons.pack(fill=tk.X, padx=10, pady=10)
+        
+        ttk.Button(info_buttons, text="📊 Show Status", command=self.show_deathbot_status, style='TSM.Primary.TButton').pack(side=tk.LEFT, padx=5)
+        ttk.Button(info_buttons, text="📋 Generate Report", command=self.generate_deathbot_report, style='TSM.Primary.TButton').pack(side=tk.LEFT, padx=5)
+        ttk.Button(info_buttons, text="🔍 View Dump Files", command=self.view_deathbot_dump, style='TSM.Secondary.TButton').pack(side=tk.LEFT, padx=5)
+        
+        # DeathBot EXE Builder
+        exe_frame = ttk.LabelFrame(deathbot_frame, text="💀 DeathBot EXE Builder - Create Client Executable", style='TSM.TLabelframe')
+        exe_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        exe_buttons = ttk.Frame(exe_frame, style='TSM.TFrame')
+        exe_buttons.pack(fill=tk.X, padx=10, pady=10)
+        
+        ttk.Button(exe_buttons, text="🔧 Build DeathBot EXE", command=self.open_deathbot_exe_builder, style='TSM.Error.TButton').pack(side=tk.LEFT, padx=5)
+        ttk.Button(exe_buttons, text="⚙️ Configure EXE", command=self.configure_deathbot_exe, style='TSM.Warning.TButton').pack(side=tk.LEFT, padx=5)
+        ttk.Button(exe_buttons, text="📁 Open Output", command=self.open_deathbot_exe_output, style='TSM.Secondary.TButton').pack(side=tk.LEFT, padx=5)
+        
+        # DeathBot features
+        features_frame = ttk.LabelFrame(deathbot_frame, text="🔥 DeathBot Features", style='TSM.TLabelframe')
+        features_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        features_text = """
+💀 DEATHBOT #25 CAPABILITIES:
+============================
 
+⚡ Ricochet Boom AC/12v Power Mode
+🔥 Auto-initiate Python Script execution
+⏰ 12-second countdown to activation
+📁 Advanced file scraping across multiple directories
+💥 Simulated destruction sequences
+🗄️ File dump and logging system
+🌪️ System resource monitoring
+💀 Ultimate destruction protocols
+
+TARGET DIRECTORIES:
+• C:/Downloads - User download files
+• C:/Documents - Document files
+• C:/Pictures - Image files  
+• C:/Desktop - Desktop files
+• C:/Users - User directories
+• C:/Program Files - Program files
+• C:/Windows/System32 - System files
+
+FILE TYPES TARGETED:
+• .txt, .doc, .docx, .pdf - Documents
+• .jpg, .png - Images
+• .mp4, .mp3 - Media files
+• .zip, .rar - Archives
+
+⚠️  WARNING: DEATHBOT IS SIMULATION ONLY  ⚠️
+        """
+        
+        features_display = scrolledtext.ScrolledText(features_frame, height=15, font=('Consolas', 9))
+        features_display.pack(fill=tk.X, padx=10, pady=10)
+        features_display.insert(tk.END, features_text)
+        features_display.config(state=tk.DISABLED)
+        
+        # Destruction log
+        log_frame = ttk.LabelFrame(deathbot_frame, text="📋 DeathBot Destruction Log", style='TSM.TLabelframe')
+        log_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        self.deathbot_log = scrolledtext.ScrolledText(log_frame, font=('Consolas', 9))
+        self.deathbot_log.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Initialize log
+        self.deathbot_log.insert(tk.END, "💀 DeathBot #25 - Ultimate Destruction Bot\n")
+        self.deathbot_log.insert(tk.END, "⚡ Ricochet Boom AC/12v Power - AUTO INITIATE PYSCRIPT\n")
+        self.deathbot_log.insert(tk.END, "🔥 Ready for destruction sequence...\n")
+        self.deathbot_log.insert(tk.END, "⏰ Countdown timer: 12 seconds\n")
+        self.deathbot_log.insert(tk.END, "📁 Target directories: 7 configured\n")
+        self.deathbot_log.insert(tk.END, "💀 DeathBot #25 initialized and ready\n\n")
+    
+    def start_deathbot(self):
+        """Start DeathBot with special controls"""
+        if not self.deathbot:
+            messagebox.showerror("DeathBot Error", "DeathBot module not available")
+            return
+        
+        # Show DeathBot warning dialog
+        warning_text = """
+💀 DEATHBOT #25 - ULTIMATE DESTRUCTION BOT
+=========================================
+
+⚠️  WARNING: DEATHBOT IS EXTREMELY DANGEROUS  ⚠️
+
+This bot will:
+• Scrape files from multiple directories
+• Simulate destruction sequences
+• Create file dumps and logs
+• Execute advanced system operations
+
+⚡ Ricochet Boom AC/12v Power Mode
+🔥 Auto-initiate Python Script
+⏰ 12-second countdown to activation
+
+Are you sure you want to activate DeathBot?
+        """
+        
+        if messagebox.askyesno("💀 DeathBot Activation", warning_text):
+            if self.deathbot.start_bot():
+                self.update_status("💀 DeathBot #25 ACTIVATED - DESTRUCTION SEQUENCE INITIATED")
+                self.deathbot_log.insert(tk.END, f"{datetime.now().strftime('%H:%M:%S')} - 💀 DeathBot #25 ACTIVATED\n")
+                self.deathbot_log.insert(tk.END, f"{datetime.now().strftime('%H:%M:%S')} - ⚡ Ricochet Boom mode engaged\n")
+                self.deathbot_log.insert(tk.END, f"{datetime.now().strftime('%H:%M:%S')} - 🔥 Destruction sequence in progress\n")
+                self.deathbot_log.see(tk.END)
+                messagebox.showwarning("DeathBot Active", "💀 DeathBot #25 is now active!\n⚡ Ricochet Boom mode engaged\n🔥 Destruction sequence in progress")
+            else:
+                messagebox.showerror("DeathBot Error", "Failed to activate DeathBot")
+    
+    def stop_deathbot(self):
+        """Stop DeathBot safely"""
+        if not self.deathbot:
+            return
+        
+        if messagebox.askyesno("DeathBot Shutdown", "Are you sure you want to stop DeathBot?"):
+            if self.deathbot.stop_bot():
+                self.update_status("💀 DeathBot #25 STOPPED - Destruction sequence terminated")
+                self.deathbot_log.insert(tk.END, f"{datetime.now().strftime('%H:%M:%S')} - ⏹️ DeathBot #25 STOPPED\n")
+                self.deathbot_log.insert(tk.END, f"{datetime.now().strftime('%H:%M:%S')} - 🔥 Destruction sequence terminated\n")
+                self.deathbot_log.see(tk.END)
+                messagebox.showinfo("DeathBot Stopped", "💀 DeathBot #25 has been safely stopped")
+            else:
+                messagebox.showerror("DeathBot Error", "Failed to stop DeathBot")
+    
+    def emergency_shutdown_deathbot(self):
+        """Emergency shutdown of DeathBot"""
+        if not self.deathbot:
+            return
+        
+        if messagebox.askyesno("🚨 Emergency Shutdown", "EMERGENCY SHUTDOWN DEATHBOT?\n\nThis will immediately terminate all DeathBot operations!"):
+            self.deathbot.emergency_shutdown()
+            self.update_status("🚨 DeathBot #25 EMERGENCY SHUTDOWN - All operations terminated")
+            self.deathbot_log.insert(tk.END, f"{datetime.now().strftime('%H:%M:%S')} - 🚨 EMERGENCY SHUTDOWN INITIATED\n")
+            self.deathbot_log.insert(tk.END, f"{datetime.now().strftime('%H:%M:%S')} - ⚡ All DeathBot operations terminated\n")
+            self.deathbot_log.see(tk.END)
+            messagebox.showinfo("Emergency Shutdown", "🚨 DeathBot #25 emergency shutdown complete")
+    
+    def show_deathbot_status(self):
+        """Show DeathBot status and statistics"""
+        if not self.deathbot:
+            messagebox.showerror("DeathBot Error", "DeathBot not available")
+            return
+        
+        status = self.deathbot.get_status()
+        stats = self.deathbot.get_stats()
+        
+        status_text = f"""
+💀 DEATHBOT #25 STATUS REPORT
+============================
+
+Bot ID: {status['bot_id']}
+Name: {status['name']}
+Status: {status['status']}
+Running: {status['running']}
+Port: {status['port']}
+
+DESTRUCTION MODE: {status['destruction_mode']}
+SCRAPING ACTIVE: {status['scraping_active']}
+
+DESTRUCTION STATISTICS:
+• Files Scraped: {stats['files_scraped']:,}
+• Files Destroyed: {stats['files_destroyed']:,}
+• Directories Scanned: {stats['directories_scanned']:,}
+• Total Size Scraped: {stats['total_size_scraped']:,} bytes
+• Destruction Events: {stats['destruction_events']:,}
+• Uptime: {stats['uptime']} seconds
+• Last Activity: {stats['last_activity']}
+
+CONFIGURATION:
+• Destruction Power: {status['config']['destruction_power']}/100
+• AC Voltage: {status['config']['ac_plug_voltage']}
+• Ricochet Boom: {status['config']['ricochet_boom_mode']}
+• Auto Initiate: {status['config']['auto_initiate']}
+• Countdown Timer: {status['config']['countdown_timer']} seconds
+
+TARGET DIRECTORIES:
+{chr(10).join(f"• {dir}" for dir in status['config']['target_directories'])}
+
+💀 DEATHBOT READY FOR DESTRUCTION 💀
+        """
+        
+        messagebox.showinfo("💀 DeathBot Status", status_text)
+    
+    def configure_deathbot(self):
+        """Configure DeathBot settings"""
+        if not self.deathbot:
+            messagebox.showerror("DeathBot Error", "DeathBot not available")
+            return
+        
+        # Create configuration window
+        config_window = tk.Toplevel(self.root)
+        config_window.title("💀 DeathBot Configuration")
+        config_window.geometry("600x500")
+        config_window.configure(bg=TSM_COLORS['dark'])
+        config_window.transient(self.root)
+        config_window.grab_set()
+        
+        # Main frame
+        main_frame = ttk.Frame(config_window, style='TSM.TFrame')
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        
+        # Title
+        title_label = ttk.Label(main_frame, 
+                               text="💀 DeathBot #25 Configuration", 
+                               font=('Arial', 16, 'bold'),
+                               style='TSM.Title.TLabel')
+        title_label.pack(pady=(0, 20))
+        
+        # Destruction Power
+        power_frame = ttk.Frame(main_frame, style='TSM.TFrame')
+        power_frame.pack(fill=tk.X, pady=10)
+        
+        ttk.Label(power_frame, text="Destruction Power (1-100):", style='TSM.Text.TLabel').pack(side=tk.LEFT)
+        power_var = tk.StringVar(value=str(self.deathbot.config['destruction_power']))
+        power_entry = ttk.Entry(power_frame, textvariable=power_var, width=10, style='TSM.TEntry')
+        power_entry.pack(side=tk.LEFT, padx=10)
+        
+        # Countdown Timer
+        timer_frame = ttk.Frame(main_frame, style='TSM.TFrame')
+        timer_frame.pack(fill=tk.X, pady=10)
+        
+        ttk.Label(timer_frame, text="Countdown Timer (seconds):", style='TSM.Text.TLabel').pack(side=tk.LEFT)
+        timer_var = tk.StringVar(value=str(self.deathbot.config['countdown_timer']))
+        timer_entry = ttk.Entry(timer_frame, textvariable=timer_var, width=10, style='TSM.TEntry')
+        timer_entry.pack(side=tk.LEFT, padx=10)
+        
+        # AC Voltage
+        voltage_frame = ttk.Frame(main_frame, style='TSM.TFrame')
+        voltage_frame.pack(fill=tk.X, pady=10)
+        
+        ttk.Label(voltage_frame, text="AC Voltage:", style='TSM.Text.TLabel').pack(side=tk.LEFT)
+        voltage_var = tk.StringVar(value=self.deathbot.config['ac_plug_voltage'])
+        voltage_combo = ttk.Combobox(voltage_frame, textvariable=voltage_var,
+                                   values=['12v', '24v', '48v', '120v', '240v'],
+                                   style='TSM.TCombobox', width=10)
+        voltage_combo.pack(side=tk.LEFT, padx=10)
+        
+        # Options
+        options_frame = ttk.LabelFrame(main_frame, text="DeathBot Options", style='TSM.TLabelframe')
+        options_frame.pack(fill=tk.X, pady=10)
+        
+        auto_init_var = tk.BooleanVar(value=self.deathbot.config['auto_initiate'])
+        ttk.Checkbutton(options_frame, text="Auto Initiate", variable=auto_init_var, 
+                       style='TSM.TCheckbutton').pack(anchor=tk.W, padx=10, pady=5)
+        
+        ricochet_var = tk.BooleanVar(value=self.deathbot.config['ricochet_boom_mode'])
+        ttk.Checkbutton(options_frame, text="Ricochet Boom Mode", variable=ricochet_var, 
+                       style='TSM.TCheckbutton').pack(anchor=tk.W, padx=10, pady=5)
+        
+        auto_seq_var = tk.BooleanVar(value=self.deathbot.config['auto_sequence'])
+        ttk.Checkbutton(options_frame, text="Auto Sequence", variable=auto_seq_var, 
+                       style='TSM.TCheckbutton').pack(anchor=tk.W, padx=10, pady=5)
+        
+        # Buttons
+        button_frame = ttk.Frame(main_frame, style='TSM.TFrame')
+        button_frame.pack(fill=tk.X, pady=20)
+        
+        def save_config():
+            try:
+                self.deathbot.config['destruction_power'] = int(power_var.get())
+                self.deathbot.config['countdown_timer'] = int(timer_var.get())
+                self.deathbot.config['ac_plug_voltage'] = voltage_var.get()
+                self.deathbot.config['auto_initiate'] = auto_init_var.get()
+                self.deathbot.config['ricochet_boom_mode'] = ricochet_var.get()
+                self.deathbot.config['auto_sequence'] = auto_seq_var.get()
+                
+                messagebox.showinfo("Configuration Saved", "💀 DeathBot configuration updated")
+                config_window.destroy()
+            except ValueError:
+                messagebox.showerror("Configuration Error", "Please enter valid numeric values")
+        
+        ttk.Button(button_frame, text="💾 Save Configuration", 
+                  command=save_config, style='TSM.Success.TButton').pack(side=tk.LEFT, padx=5)
+        
+        ttk.Button(button_frame, text="❌ Cancel", 
+                  command=config_window.destroy, style='TSM.Error.TButton').pack(side=tk.LEFT, padx=5)
+    
+    def generate_deathbot_report(self):
+        """Generate DeathBot destruction report"""
+        if not self.deathbot:
+            messagebox.showerror("DeathBot Error", "DeathBot not available")
+            return
+        
+        report = self.deathbot.generate_destruction_report()
+        
+        # Create report window
+        report_window = tk.Toplevel(self.root)
+        report_window.title("💀 DeathBot Destruction Report")
+        report_window.geometry("800x600")
+        report_window.configure(bg=TSM_COLORS['dark'])
+        report_window.transient(self.root)
+        
+        # Main frame
+        main_frame = ttk.Frame(report_window, style='TSM.TFrame')
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        
+        # Report text
+        report_text = scrolledtext.ScrolledText(main_frame, font=('Consolas', 10))
+        report_text.pack(fill=tk.BOTH, expand=True)
+        report_text.insert(tk.END, report)
+        report_text.config(state=tk.DISABLED)
+        
+        # Close button
+        close_btn = ttk.Button(main_frame, text="❌ Close Report", 
+                              command=report_window.destroy, style='TSM.Error.TButton')
+        close_btn.pack(pady=10)
+    
+    def view_deathbot_dump(self):
+        """View DeathBot dump files"""
+        if not self.deathbot:
+            messagebox.showerror("DeathBot Error", "DeathBot not available")
+            return
+        
+        dump_location = self.deathbot.config['file_dump_location']
+        
+        if os.path.exists(dump_location):
+            # Open file explorer to dump location
+            os.startfile(dump_location)
+            self.update_status(f"DeathBot dump folder opened: {dump_location}")
+        else:
+            messagebox.showwarning("DeathBot Dump", "DeathBot dump directory not found")
+    
+    def open_deathbot_exe_builder(self):
+        """Open the DeathBot EXE Builder window"""
+        if not self.deathbot:
+            messagebox.showerror("DeathBot Error", "DeathBot not available")
+            return
+        
+        # Create DeathBot EXE Builder window
+        builder_window = tk.Toplevel(self.root)
+        builder_window.title("💀 DeathBot EXE Builder - Create Client Executable")
+        builder_window.geometry("900x700")
+        builder_window.configure(bg=TSM_COLORS['dark'])
+        builder_window.transient(self.root)
+        builder_window.grab_set()
+        
+        # Main frame
+        main_frame = ttk.Frame(builder_window, style='TSM.TFrame')
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        
+        # Title
+        title_label = ttk.Label(main_frame, 
+                               text="💀 DeathBot #25 EXE Builder", 
+                               font=('Arial', 18, 'bold'),
+                               style='TSM.Title.TLabel')
+        title_label.pack(pady=(0, 20))
+        
+        # Create notebook for different sections
+        notebook = ttk.Notebook(main_frame, style='TSM.TNotebook')
+        notebook.pack(fill=tk.BOTH, expand=True, pady=10)
+        
+        # Function Selection Tab
+        functions_frame = ttk.Frame(notebook, style='TSM.TFrame')
+        notebook.add(functions_frame, text="🔧 Select Functions")
+        
+        # Function selection
+        self.create_deathbot_function_selection(functions_frame)
+        
+        # Configuration Tab
+        config_frame = ttk.Frame(notebook, style='TSM.TFrame')
+        notebook.add(config_frame, text="⚙️ Configuration")
+        
+        # Configuration options
+        self.create_deathbot_exe_config(config_frame)
+        
+        # Build Tab
+        build_frame = ttk.Frame(notebook, style='TSM.TFrame')
+        notebook.add(build_frame, text="🚀 Build & Deploy")
+        
+        # Build options
+        self.create_deathbot_exe_build(build_frame)
+        
+        # Bottom buttons
+        button_frame = ttk.Frame(main_frame, style='TSM.TFrame')
+        button_frame.pack(fill=tk.X, pady=20)
+        
+        ttk.Button(button_frame, text="💀 BUILD DEATHBOT EXE", 
+                  command=lambda: self.build_deathbot_exe(builder_window), 
+                  style='TSM.Error.TButton').pack(side=tk.LEFT, padx=5)
+        
+        ttk.Button(button_frame, text="❌ Cancel", 
+                  command=builder_window.destroy, 
+                  style='TSM.Error.TButton').pack(side=tk.LEFT, padx=5)
+    
+    def create_deathbot_function_selection(self, parent):
+        """Create function selection interface"""
+        # Available DeathBot functions
+        functions_frame = ttk.LabelFrame(parent, text="💀 Available DeathBot Functions", style='TSM.TLabelframe')
+        functions_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Create scrollable frame
+        canvas = tk.Canvas(functions_frame, bg=TSM_COLORS['dark'], highlightthickness=0)
+        scrollbar = ttk.Scrollbar(functions_frame, orient="vertical", command=canvas.yview)
+        scrollable_frame = ttk.Frame(canvas, style='TSM.TFrame')
+        
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        # DeathBot functions
+        self.deathbot_functions = {
+            "ricochet_boom_mode": {"name": "⚡ Ricochet Boom AC/12v Power Mode", "description": "High-power destruction simulation with AC voltage control"},
+            "auto_initiate": {"name": "🔥 Auto-initiate Python Script", "description": "Automatically start destruction sequences"},
+            "countdown_timer": {"name": "⏰ 12-Second Countdown Timer", "description": "Countdown before activation"},
+            "file_scraping": {"name": "📁 Advanced File Scraping", "description": "Scrape files from multiple directories"},
+            "destruction_simulation": {"name": "💥 Destruction Simulation", "description": "Simulate file destruction sequences"},
+            "file_dump": {"name": "🗄️ File Dump System", "description": "Create organized file dumps"},
+            "system_monitoring": {"name": "🌪️ System Resource Monitoring", "description": "Monitor CPU, memory, and network usage"},
+            "stealth_mode": {"name": "👻 Stealth Mode", "description": "Operate in hidden mode"},
+            "persistence": {"name": "🔄 Persistence Mode", "description": "Maintain operation across reboots"},
+            "encryption": {"name": "🔐 File Encryption", "description": "Encrypt scraped files"},
+            "compression": {"name": "📦 File Compression", "description": "Compress scraped data"},
+            "network_scan": {"name": "🌐 Network Scanning", "description": "Scan for additional targets"},
+            "log_clearing": {"name": "🧹 Log Clearing", "description": "Clear system logs"},
+            "process_killing": {"name": "⚔️ Process Termination", "description": "Terminate specific processes"},
+            "registry_modification": {"name": "📝 Registry Modification", "description": "Modify system registry"},
+            "backdoor_creation": {"name": "🚪 Backdoor Creation", "description": "Create system backdoors"},
+            "keylogger": {"name": "⌨️ Keylogger", "description": "Capture keystrokes"},
+            "screenshot_capture": {"name": "📸 Screenshot Capture", "description": "Capture screenshots"},
+            "webcam_access": {"name": "📹 Webcam Access", "description": "Access webcam feed"},
+            "microphone_recording": {"name": "🎤 Microphone Recording", "description": "Record audio"},
+            "browser_data": {"name": "🌐 Browser Data Extraction", "description": "Extract browser data"},
+            "password_extraction": {"name": "🔑 Password Extraction", "description": "Extract saved passwords"},
+            "crypto_mining": {"name": "⛏️ Cryptocurrency Mining", "description": "Mine cryptocurrency"},
+            "ddos_attack": {"name": "🌊 DDoS Attack", "description": "Launch DDoS attacks"},
+            "ransomware": {"name": "💰 Ransomware", "description": "Encrypt files for ransom"}
+        }
+        
+        # Function checkboxes
+        self.deathbot_function_vars = {}
+        
+        for func_id, func_info in self.deathbot_functions.items():
+            var = tk.BooleanVar()
+            self.deathbot_function_vars[func_id] = var
+            
+            func_frame = ttk.Frame(scrollable_frame, style='TSM.TFrame')
+            func_frame.pack(fill=tk.X, padx=5, pady=2)
+            
+            ttk.Checkbutton(func_frame, text=func_info["name"], variable=var, 
+                           style='TSM.TCheckbutton').pack(side=tk.LEFT, anchor=tk.W)
+            
+            desc_label = ttk.Label(func_frame, text=func_info["description"], 
+                                  style='TSM.Text.TLabel', font=('Arial', 8))
+            desc_label.pack(side=tk.LEFT, padx=20, anchor=tk.W)
+        
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+        
+        # Select all/none buttons
+        select_frame = ttk.Frame(parent, style='TSM.TFrame')
+        select_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        ttk.Button(select_frame, text="✅ Select All", 
+                  command=self.select_all_deathbot_functions, 
+                  style='TSM.Success.TButton').pack(side=tk.LEFT, padx=5)
+        
+        ttk.Button(select_frame, text="❌ Select None", 
+                  command=self.deselect_all_deathbot_functions, 
+                  style='TSM.Error.TButton').pack(side=tk.LEFT, padx=5)
+    
+    def create_deathbot_exe_config(self, parent):
+        """Create EXE configuration interface"""
+        # Basic configuration
+        basic_frame = ttk.LabelFrame(parent, text="⚙️ Basic Configuration", style='TSM.TLabelframe')
+        basic_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        # EXE name
+        name_frame = ttk.Frame(basic_frame, style='TSM.TFrame')
+        name_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        ttk.Label(name_frame, text="EXE Name:", style='TSM.Text.TLabel').pack(side=tk.LEFT)
+        self.deathbot_exe_name = tk.StringVar(value="DeathBot_Client")
+        ttk.Entry(name_frame, textvariable=self.deathbot_exe_name, style='TSM.TEntry').pack(side=tk.LEFT, padx=10, fill=tk.X, expand=True)
+        
+        # Output directory
+        output_frame = ttk.Frame(basic_frame, style='TSM.TFrame')
+        output_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        ttk.Label(output_frame, text="Output Directory:", style='TSM.Text.TLabel').pack(side=tk.LEFT)
+        self.deathbot_output_dir = tk.StringVar(value="C:/DeathBot_Output/")
+        ttk.Entry(output_frame, textvariable=self.deathbot_output_dir, style='TSM.TEntry').pack(side=tk.LEFT, padx=10, fill=tk.X, expand=True)
+        ttk.Button(output_frame, text="📁 Browse", command=self.browse_deathbot_output_dir, 
+                  style='TSM.Secondary.TButton').pack(side=tk.LEFT, padx=5)
+        
+        # Advanced configuration
+        advanced_frame = ttk.LabelFrame(parent, text="🔧 Advanced Configuration", style='TSM.TLabelframe')
+        advanced_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        # Stealth options
+        stealth_frame = ttk.Frame(advanced_frame, style='TSM.TFrame')
+        stealth_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        self.deathbot_stealth_mode = tk.BooleanVar()
+        ttk.Checkbutton(stealth_frame, text="👻 Stealth Mode (Hide from Task Manager)", 
+                       variable=self.deathbot_stealth_mode, style='TSM.TCheckbutton').pack(anchor=tk.W)
+        
+        self.deathbot_auto_start = tk.BooleanVar()
+        ttk.Checkbutton(stealth_frame, text="🚀 Auto-start on Boot", 
+                       variable=self.deathbot_auto_start, style='TSM.TCheckbutton').pack(anchor=tk.W)
+        
+        self.deathbot_persistence = tk.BooleanVar()
+        ttk.Checkbutton(stealth_frame, text="🔄 Persistence Mode", 
+                       variable=self.deathbot_persistence, style='TSM.TCheckbutton').pack(anchor=tk.W)
+        
+        # Target configuration
+        target_frame = ttk.LabelFrame(parent, text="🎯 Target Configuration", style='TSM.TLabelframe')
+        target_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        # Target directories
+        dirs_frame = ttk.Frame(target_frame, style='TSM.TFrame')
+        dirs_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        ttk.Label(dirs_frame, text="Target Directories:", style='TSM.Text.TLabel').pack(anchor=tk.W)
+        
+        self.deathbot_target_dirs = tk.Text(dirs_frame, height=4, font=('Consolas', 9))
+        self.deathbot_target_dirs.pack(fill=tk.X, pady=5)
+        self.deathbot_target_dirs.insert(tk.END, "C:/Downloads\nC:/Documents\nC:/Pictures\nC:/Desktop")
+        
+        # File extensions
+        ext_frame = ttk.Frame(target_frame, style='TSM.TFrame')
+        ext_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        ttk.Label(ext_frame, text="Target File Extensions:", style='TSM.Text.TLabel').pack(anchor=tk.W)
+        
+        self.deathbot_file_exts = tk.Text(ext_frame, height=3, font=('Consolas', 9))
+        self.deathbot_file_exts.pack(fill=tk.X, pady=5)
+        self.deathbot_file_exts.insert(tk.END, ".txt .doc .docx .pdf .jpg .png .mp4 .mp3 .zip .rar")
+    
+    def create_deathbot_exe_build(self, parent):
+        """Create build interface"""
+        # Build options
+        build_frame = ttk.LabelFrame(parent, text="🚀 Build Options", style='TSM.TLabelframe')
+        build_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        # Build type
+        type_frame = ttk.Frame(build_frame, style='TSM.TFrame')
+        type_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        ttk.Label(type_frame, text="Build Type:", style='TSM.Text.TLabel').pack(side=tk.LEFT)
+        self.deathbot_build_type = tk.StringVar(value="single")
+        
+        ttk.Radiobutton(type_frame, text="📦 Single EXE", variable=self.deathbot_build_type, 
+                       value="single", style='TSM.TRadiobutton').pack(side=tk.LEFT, padx=10)
+        ttk.Radiobutton(type_frame, text="📁 Directory", variable=self.deathbot_build_type, 
+                       value="directory", style='TSM.TRadiobutton').pack(side=tk.LEFT, padx=10)
+        
+        # Compression
+        comp_frame = ttk.Frame(build_frame, style='TSM.TFrame')
+        comp_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        self.deathbot_compression = tk.BooleanVar(value=True)
+        ttk.Checkbutton(comp_frame, text="📦 Enable Compression", 
+                       variable=self.deathbot_compression, style='TSM.TCheckbutton').pack(anchor=tk.W)
+        
+        # Icon
+        icon_frame = ttk.Frame(build_frame, style='TSM.TFrame')
+        icon_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        ttk.Label(icon_frame, text="Icon File:", style='TSM.Text.TLabel').pack(side=tk.LEFT)
+        self.deathbot_icon_path = tk.StringVar(value="icon.ico")
+        ttk.Entry(icon_frame, textvariable=self.deathbot_icon_path, style='TSM.TEntry').pack(side=tk.LEFT, padx=10, fill=tk.X, expand=True)
+        ttk.Button(icon_frame, text="📁 Browse", command=self.browse_deathbot_icon, 
+                  style='TSM.Secondary.TButton').pack(side=tk.LEFT, padx=5)
+        
+        # Build log
+        log_frame = ttk.LabelFrame(parent, text="📋 Build Log", style='TSM.TLabelframe')
+        log_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        self.deathbot_build_log = scrolledtext.ScrolledText(log_frame, font=('Consolas', 9))
+        self.deathbot_build_log.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # Initialize log
+        self.deathbot_build_log.insert(tk.END, "💀 DeathBot EXE Builder Ready\n")
+        self.deathbot_build_log.insert(tk.END, "Select functions and configure options to build\n")
+        self.deathbot_build_log.insert(tk.END, "Click 'BUILD DEATHBOT EXE' to start building\n\n")
+    
+    def select_all_deathbot_functions(self):
+        """Select all DeathBot functions"""
+        for var in self.deathbot_function_vars.values():
+            var.set(True)
+        self.update_status("All DeathBot functions selected")
+    
+    def deselect_all_deathbot_functions(self):
+        """Deselect all DeathBot functions"""
+        for var in self.deathbot_function_vars.values():
+            var.set(False)
+        self.update_status("All DeathBot functions deselected")
+    
+    def browse_deathbot_output_dir(self):
+        """Browse for output directory"""
+        directory = filedialog.askdirectory(title="Select Output Directory")
+        if directory:
+            self.deathbot_output_dir.set(directory)
+    
+    def browse_deathbot_icon(self):
+        """Browse for icon file"""
+        file_path = filedialog.askopenfilename(
+            title="Select Icon File",
+            filetypes=[("Icon files", "*.ico"), ("All files", "*.*")]
+        )
+        if file_path:
+            self.deathbot_icon_path.set(file_path)
+    
+    def configure_deathbot_exe(self):
+        """Configure DeathBot EXE settings"""
+        messagebox.showinfo("DeathBot EXE Configuration", 
+                           "💀 DeathBot EXE Configuration\n\n"
+                           "Use the EXE Builder to configure all settings:\n"
+                           "• Select functions to include\n"
+                           "• Set target directories\n"
+                           "• Configure stealth options\n"
+                           "• Choose build type\n\n"
+                           "All settings are saved automatically!")
+    
+    def open_deathbot_exe_output(self):
+        """Open DeathBot EXE output directory"""
+        output_dir = self.deathbot_output_dir.get()
+        if os.path.exists(output_dir):
+            os.startfile(output_dir)
+            self.update_status(f"DeathBot EXE output directory opened: {output_dir}")
+        else:
+            messagebox.showwarning("Directory Not Found", 
+                                 f"Output directory not found: {output_dir}\n\n"
+                                 "Please build an EXE first or change the output directory.")
+    
+    def build_deathbot_exe(self, builder_window):
+        """Build the DeathBot EXE"""
+        try:
+            # Get selected functions
+            selected_functions = [func_id for func_id, var in self.deathbot_function_vars.items() if var.get()]
+            
+            if not selected_functions:
+                messagebox.showwarning("No Functions Selected", 
+                                     "Please select at least one DeathBot function to include in the EXE.")
+                return
+            
+            # Get configuration
+            exe_name = self.deathbot_exe_name.get()
+            output_dir = self.deathbot_output_dir.get()
+            build_type = self.deathbot_build_type.get()
+            compression = self.deathbot_compression.get()
+            icon_path = self.deathbot_icon_path.get()
+            
+            # Create output directory
+            os.makedirs(output_dir, exist_ok=True)
+            
+            # Log build start
+            self.deathbot_build_log.insert(tk.END, f"\n{'='*50}\n")
+            self.deathbot_build_log.insert(tk.END, f"💀 Starting DeathBot EXE Build\n")
+            self.deathbot_build_log.insert(tk.END, f"{'='*50}\n")
+            self.deathbot_build_log.insert(tk.END, f"EXE Name: {exe_name}\n")
+            self.deathbot_build_log.insert(tk.END, f"Output Directory: {output_dir}\n")
+            self.deathbot_build_log.insert(tk.END, f"Build Type: {build_type}\n")
+            self.deathbot_build_log.insert(tk.END, f"Compression: {compression}\n")
+            self.deathbot_build_log.insert(tk.END, f"Selected Functions: {len(selected_functions)}\n")
+            self.deathbot_build_log.see(tk.END)
+            
+            # Build the EXE
+            self.build_deathbot_executable(selected_functions, exe_name, output_dir, 
+                                         build_type, compression, icon_path, builder_window)
+            
+        except Exception as e:
+            self.deathbot_build_log.insert(tk.END, f"\n❌ Build Error: {str(e)}\n")
+            self.deathbot_build_log.see(tk.END)
+            messagebox.showerror("Build Error", f"Failed to build DeathBot EXE:\n{str(e)}")
+    
+    def build_deathbot_executable(self, selected_functions, exe_name, output_dir, 
+                                build_type, compression, icon_path, builder_window):
+        """Build the actual DeathBot executable"""
+        try:
+            # Create the DeathBot client script
+            client_script = self.create_deathbot_client_script(selected_functions)
+            
+            # Write client script
+            script_path = os.path.join(output_dir, f"{exe_name}_client.py")
+            with open(script_path, 'w', encoding='utf-8') as f:
+                f.write(client_script)
+            
+            self.deathbot_build_log.insert(tk.END, f"✅ Client script created: {script_path}\n")
+            self.deathbot_build_log.see(tk.END)
+            
+            # Create PyInstaller spec file
+            spec_content = self.create_deathbot_spec_file(exe_name, script_path, icon_path, compression)
+            spec_path = os.path.join(output_dir, f"{exe_name}.spec")
+            
+            with open(spec_path, 'w', encoding='utf-8') as f:
+                f.write(spec_content)
+            
+            self.deathbot_build_log.insert(tk.END, f"✅ Spec file created: {spec_path}\n")
+            self.deathbot_build_log.see(tk.END)
+            
+            # Build with PyInstaller
+            self.deathbot_build_log.insert(tk.END, f"🔨 Building EXE with PyInstaller...\n")
+            self.deathbot_build_log.see(tk.END)
+            
+            import subprocess
+            result = subprocess.run([
+                'pyinstaller', '--clean', '--noconfirm', spec_path
+            ], cwd=output_dir, capture_output=True, text=True)
+            
+            if result.returncode == 0:
+                self.deathbot_build_log.insert(tk.END, f"✅ DeathBot EXE built successfully!\n")
+                self.deathbot_build_log.insert(tk.END, f"📁 Output: {output_dir}/dist/{exe_name}.exe\n")
+                self.deathbot_build_log.see(tk.END)
+                
+                # Show success message
+                messagebox.showinfo("Build Complete", 
+                                  f"💀 DeathBot EXE built successfully!\n\n"
+                                  f"Location: {output_dir}/dist/{exe_name}.exe\n"
+                                  f"Functions: {len(selected_functions)} included\n"
+                                  f"Size: {self.get_file_size(os.path.join(output_dir, 'dist', f'{exe_name}.exe'))}")
+                
+                # Update status
+                self.update_status(f"💀 DeathBot EXE built: {exe_name}.exe")
+                
+            else:
+                self.deathbot_build_log.insert(tk.END, f"❌ PyInstaller Error:\n{result.stderr}\n")
+                self.deathbot_build_log.see(tk.END)
+                messagebox.showerror("Build Failed", f"PyInstaller failed:\n{result.stderr}")
+                
+        except Exception as e:
+            self.deathbot_build_log.insert(tk.END, f"❌ Build Error: {str(e)}\n")
+            self.deathbot_build_log.see(tk.END)
+            raise e
+    
+    def create_deathbot_client_script(self, selected_functions):
+        """Create the DeathBot client script"""
+        script_content = f'''#!/usr/bin/env python3
+"""
+DeathBot #25 Client - Ultimate Destruction Bot
+Generated by VexityBot Main GUI
+"""
+
+import os
+import sys
+import time
+import random
+import hashlib
+import shutil
+import threading
+from datetime import datetime
+import tkinter as tk
+from tkinter import messagebox, scrolledtext
+
+class DeathBotClient:
+    def __init__(self):
+        self.bot_id = 25
+        self.name = "DeathBot"
+        self.status = "Ready"
+        self.running = False
+        self.destruction_mode = False
+        self.scraping_active = False
+        self.port = 9999
+        
+        # Configuration
+        self.config = {{
+            'destruction_power': 100,
+            'countdown_timer': 12,
+            'ac_plug_voltage': '12v',
+            'ricochet_boom_mode': True,
+            'auto_initiate': True,
+            'auto_sequence': True,
+            'target_directories': [
+                'C:/Downloads',
+                'C:/Documents', 
+                'C:/Pictures',
+                'C:/Desktop',
+                'C:/Users',
+                'C:/Program Files',
+                'C:/Windows/System32'
+            ],
+            'file_extensions': ['.txt', '.doc', '.docx', '.pdf', '.jpg', '.png', '.mp4', '.mp3', '.zip', '.rar'],
+            'file_dump_location': 'C:/DeathBot_Dump/',
+            'stealth_mode': True,
+            'persistence': True
+        }}
+        
+        # Statistics
+        self.stats = {{
+            'files_scraped': 0,
+            'files_destroyed': 0,
+            'directories_scanned': 0,
+            'total_size_scraped': 0,
+            'destruction_events': 0,
+            'uptime': 0,
+            'last_activity': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        }}
+        
+        # Selected functions
+        self.selected_functions = {selected_functions}
+        
+        # Create dump directory
+        os.makedirs(self.config['file_dump_location'], exist_ok=True)
+        
+        # Initialize GUI
+        self.setup_gui()
+    
+    def setup_gui(self):
+        """Setup the DeathBot client GUI"""
+        self.root = tk.Tk()
+        self.root.title("💀 DeathBot #25 - Ultimate Destruction Bot")
+        self.root.geometry("800x600")
+        self.root.configure(bg='#0a0a0a')
+        
+        # Main frame
+        main_frame = tk.Frame(self.root, bg='#0a0a0a')
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Title
+        title_label = tk.Label(main_frame, text="💀 DeathBot #25 - Ultimate Destruction Bot", 
+                              font=('Arial', 16, 'bold'), fg='#00d4ff', bg='#0a0a0a')
+        title_label.pack(pady=(0, 20))
+        
+        # Control buttons
+        control_frame = tk.Frame(main_frame, bg='#0a0a0a')
+        control_frame.pack(fill=tk.X, pady=10)
+        
+        self.start_btn = tk.Button(control_frame, text="🚀 ACTIVATE DEATHBOT", 
+                                  command=self.start_bot, bg='#ff4444', fg='white', 
+                                  font=('Arial', 12, 'bold'))
+        self.start_btn.pack(side=tk.LEFT, padx=5)
+        
+        self.stop_btn = tk.Button(control_frame, text="⏹️ STOP DEATHBOT", 
+                                 command=self.stop_bot, bg='#ffaa00', fg='white', 
+                                 font=('Arial', 12, 'bold'))
+        self.stop_btn.pack(side=tk.LEFT, padx=5)
+        
+        # Status display
+        status_frame = tk.LabelFrame(main_frame, text="📊 Status", fg='#00d4ff', bg='#0a0a0a')
+        status_frame.pack(fill=tk.X, pady=10)
+        
+        self.status_label = tk.Label(status_frame, text="Status: Ready", fg='#ffffff', bg='#0a0a0a')
+        self.status_label.pack(pady=5)
+        
+        # Log display
+        log_frame = tk.LabelFrame(main_frame, text="📋 DeathBot Log", fg='#00d4ff', bg='#0a0a0a')
+        log_frame.pack(fill=tk.BOTH, expand=True, pady=10)
+        
+        self.log_text = scrolledtext.ScrolledText(log_frame, font=('Consolas', 9), 
+                                                 bg='#1a1a1a', fg='#ffffff')
+        self.log_text.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # Initialize log
+        self.log_text.insert(tk.END, "💀 DeathBot #25 - Ultimate Destruction Bot\\n")
+        self.log_text.insert(tk.END, "⚡ Ricochet Boom AC/12v Power - AUTO INITIATE PYSCRIPT\\n")
+        self.log_text.insert(tk.END, "🔥 Ready for destruction sequence...\\n")
+        self.log_text.insert(tk.END, f"⏰ Countdown timer: {{self.config['countdown_timer']}} seconds\\n")
+        self.log_text.insert(tk.END, f"📁 Target directories: {{len(self.config['target_directories'])}} configured\\n")
+        self.log_text.insert(tk.END, f"🔧 Selected functions: {{len(self.selected_functions)}}\\n")
+        self.log_text.insert(tk.END, "💀 DeathBot #25 initialized and ready\\n\\n")
+    
+    def start_bot(self):
+        """Start DeathBot"""
+        if self.running:
+            return
+        
+        # Show warning
+        warning_text = """
+💀 DEATHBOT #25 - ULTIMATE DESTRUCTION BOT
+=========================================
+
+⚠️  WARNING: DEATHBOT IS EXTREMELY DANGEROUS  ⚠️
+
+This bot will:
+• Scrape files from multiple directories
+• Simulate destruction sequences
+• Create file dumps and logs
+• Execute advanced system operations
+
+⚡ Ricochet Boom AC/12v Power Mode
+🔥 Auto-initiate Python Script
+⏰ 12-second countdown to activation
+
+Are you sure you want to activate DeathBot?
+        """
+        
+        if messagebox.askyesno("💀 DeathBot Activation", warning_text):
+            self.running = True
+            self.status = "Active"
+            self.destruction_mode = True
+            self.scraping_active = True
+            
+            self.start_btn.config(state='disabled')
+            self.stop_btn.config(state='normal')
+            self.status_label.config(text="Status: ACTIVE - DESTRUCTION MODE")
+            
+            self.log_text.insert(tk.END, f"{{datetime.now().strftime('%H:%M:%S')}} - 💀 DeathBot #25 ACTIVATED\\n")
+            self.log_text.insert(tk.END, f"{{datetime.now().strftime('%H:%M:%S')}} - ⚡ Ricochet Boom mode engaged\\n")
+            self.log_text.insert(tk.END, f"{{datetime.now().strftime('%H:%M:%S')}} - 🔥 Destruction sequence in progress\\n")
+            self.log_text.see(tk.END)
+            
+            # Start destruction sequence in background
+            threading.Thread(target=self.destruction_sequence, daemon=True).start()
+    
+    def stop_bot(self):
+        """Stop DeathBot"""
+        if not self.running:
+            return
+        
+        if messagebox.askyesno("DeathBot Shutdown", "Are you sure you want to stop DeathBot?"):
+            self.running = False
+            self.status = "Stopped"
+            self.destruction_mode = False
+            self.scraping_active = False
+            
+            self.start_btn.config(state='normal')
+            self.stop_btn.config(state='disabled')
+            self.status_label.config(text="Status: STOPPED")
+            
+            self.log_text.insert(tk.END, f"{{datetime.now().strftime('%H:%M:%S')}} - ⏹️ DeathBot #25 STOPPED\\n")
+            self.log_text.insert(tk.END, f"{{datetime.now().strftime('%H:%M:%S')}} - 🔥 Destruction sequence terminated\\n")
+            self.log_text.see(tk.END)
+    
+    def destruction_sequence(self):
+        """Main destruction sequence"""
+        try:
+            # Countdown
+            for i in range(self.config['countdown_timer'], 0, -1):
+                if not self.running:
+                    return
+                self.log_text.insert(tk.END, f"{{datetime.now().strftime('%H:%M:%S')}} - ⏰ Countdown: {{i}} seconds\\n")
+                self.log_text.see(tk.END)
+                time.sleep(1)
+            
+            # Start destruction
+            self.log_text.insert(tk.END, f"{{datetime.now().strftime('%H:%M:%S')}} - 💥 DESTRUCTION SEQUENCE INITIATED\\n")
+            self.log_text.see(tk.END)
+            
+            # Execute selected functions
+            for func in self.selected_functions:
+                if not self.running:
+                    return
+                self.execute_function(func)
+                time.sleep(0.5)
+            
+            # Continuous operation
+            while self.running:
+                self.scrape_files()
+                time.sleep(5)
+                
+        except Exception as e:
+            self.log_text.insert(tk.END, f"{{datetime.now().strftime('%H:%M:%S')}} - ❌ Error: {{str(e)}}\\n")
+            self.log_text.see(tk.END)
+    
+    def execute_function(self, func_name):
+        """Execute a specific DeathBot function"""
+        try:
+            if func_name == "ricochet_boom_mode":
+                self.log_text.insert(tk.END, f"{{datetime.now().strftime('%H:%M:%S')}} - ⚡ Ricochet Boom mode activated\\n")
+                self.log_text.see(tk.END)
+                
+            elif func_name == "file_scraping":
+                self.scrape_files()
+                
+            elif func_name == "destruction_simulation":
+                self.simulate_destruction()
+                
+            elif func_name == "system_monitoring":
+                self.monitor_system()
+                
+            elif func_name == "file_dump":
+                self.create_file_dump()
+                
+            # Add more function implementations as needed
+            else:
+                self.log_text.insert(tk.END, f"{{datetime.now().strftime('%H:%M:%S')}} - 🔧 Executing {{func_name}}\\n")
+                self.log_text.see(tk.END)
+                
+        except Exception as e:
+            self.log_text.insert(tk.END, f"{{datetime.now().strftime('%H:%M:%S')}} - ❌ Function {{func_name}} error: {{str(e)}}\\n")
+            self.log_text.see(tk.END)
+    
+    def scrape_files(self):
+        """Scrape files from target directories"""
+        try:
+            for directory in self.config['target_directories']:
+                if not self.running:
+                    return
+                    
+                if os.path.exists(directory):
+                    self.stats['directories_scanned'] += 1
+                    
+                    for root, dirs, files in os.walk(directory):
+                        for file in files:
+                            if not self.running:
+                                return
+                                
+                            file_path = os.path.join(root, file)
+                            file_ext = os.path.splitext(file)[1].lower()
+                            
+                            if file_ext in self.config['file_extensions']:
+                                try:
+                                    file_size = os.path.getsize(file_path)
+                                    self.stats['files_scraped'] += 1
+                                    self.stats['total_size_scraped'] += file_size
+                                    
+                                    # Simulate file processing
+                                    time.sleep(0.1)
+                                    
+                                except Exception:
+                                    pass
+                                    
+        except Exception as e:
+            self.log_text.insert(tk.END, f"{{datetime.now().strftime('%H:%M:%S')}} - ❌ Scraping error: {{str(e)}}\\n")
+            self.log_text.see(tk.END)
+    
+    def simulate_destruction(self):
+        """Simulate file destruction"""
+        try:
+            self.stats['destruction_events'] += 1
+            self.log_text.insert(tk.END, f"{{datetime.now().strftime('%H:%M:%S')}} - 💥 Destruction event #{{self.stats['destruction_events']}}\\n")
+            self.log_text.see(tk.END)
+            
+        except Exception as e:
+            self.log_text.insert(tk.END, f"{{datetime.now().strftime('%H:%M:%S')}} - ❌ Destruction error: {{str(e)}}\\n")
+            self.log_text.see(tk.END)
+    
+    def monitor_system(self):
+        """Monitor system resources"""
+        try:
+            import psutil
+            
+            cpu_percent = psutil.cpu_percent()
+            memory_percent = psutil.virtual_memory().percent
+            
+            self.log_text.insert(tk.END, f"{{datetime.now().strftime('%H:%M:%S')}} - 🌪️ CPU: {{cpu_percent}}% | Memory: {{memory_percent}}%\\n")
+            self.log_text.see(tk.END)
+            
+        except ImportError:
+            self.log_text.insert(tk.END, f"{{datetime.now().strftime('%H:%M:%S')}} - ⚠️ psutil not available for system monitoring\\n")
+            self.log_text.see(tk.END)
+        except Exception as e:
+            self.log_text.insert(tk.END, f"{{datetime.now().strftime('%H:%M:%S')}} - ❌ Monitoring error: {{str(e)}}\\n")
+            self.log_text.see(tk.END)
+    
+    def create_file_dump(self):
+        """Create file dump"""
+        try:
+            dump_file = os.path.join(self.config['file_dump_location'], 
+                                   f"deathbot_dump_{{datetime.now().strftime('%Y%m%d_%H%M%S')}}.txt")
+            
+            with open(dump_file, 'w', encoding='utf-8') as f:
+                f.write(f"DeathBot #25 File Dump\\n")
+                f.write(f"Generated: {{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}}\\n")
+                f.write(f"Files Scraped: {{self.stats['files_scraped']}}\\n")
+                f.write(f"Directories Scanned: {{self.stats['directories_scanned']}}\\n")
+                f.write(f"Total Size: {{self.stats['total_size_scraped']}} bytes\\n")
+                f.write(f"Destruction Events: {{self.stats['destruction_events']}}\\n")
+            
+            self.log_text.insert(tk.END, f"{{datetime.now().strftime('%H:%M:%S')}} - 🗄️ File dump created: {{dump_file}}\\n")
+            self.log_text.see(tk.END)
+            
+        except Exception as e:
+            self.log_text.insert(tk.END, f"{{datetime.now().strftime('%H:%M:%S')}} - ❌ Dump error: {{str(e)}}\\n")
+            self.log_text.see(tk.END)
+    
+    def run(self):
+        """Run the DeathBot client"""
+        try:
+            self.root.mainloop()
+        except KeyboardInterrupt:
+            self.log_text.insert(tk.END, f"{{datetime.now().strftime('%H:%M:%S')}} - ⚠️ Interrupted by user\\n")
+            self.log_text.see(tk.END)
+        except Exception as e:
+            self.log_text.insert(tk.END, f"{{datetime.now().strftime('%H:%M:%S')}} - ❌ Fatal error: {{str(e)}}\\n")
+            self.log_text.see(tk.END)
+
+if __name__ == "__main__":
+    try:
+        deathbot = DeathBotClient()
+        deathbot.run()
+    except Exception as e:
+        print(f"Fatal error: {{e}}")
+        input("Press Enter to exit...")
+'''
+        return script_content
+    
+    def create_deathbot_spec_file(self, exe_name, script_path, icon_path, compression):
+        """Create PyInstaller spec file for DeathBot"""
+        spec_content = f'''# -*- mode: python ; coding: utf-8 -*-
+
+block_cipher = None
+
+a = Analysis(
+    ['{script_path}'],
+    pathex=[],
+    binaries=[],
+    datas=[],
+    hiddenimports=[],
+    hookspath=[],
+    hooksconfig={{}},
+    runtime_hooks=[],
+    excludes=[],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=block_cipher,
+    noarchive=False,
+)
+
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+
+exe = EXE(
+    pyz,
+    a.scripts,
+    a.binaries,
+    a.zipfiles,
+    a.datas,
+    [],
+    name='{exe_name}',
+    debug=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx={'True' if compression else 'False'},
+    upx_exclude=[],
+    runtime_tmpdir=None,
+    console=False,
+    disable_windowed_traceback=False,
+    argv_emulation=False,
+    target_arch=None,
+    codesign_identity=None,
+    entitlements_file=None,
+    icon='{icon_path}' if os.path.exists('{icon_path}') else None,
+)
+'''
+        return spec_content
+    
+    def get_file_size(self, file_path):
+        """Get human readable file size"""
+        try:
+            size = os.path.getsize(file_path)
+            for unit in ['B', 'KB', 'MB', 'GB']:
+                if size < 1024.0:
+                    return f"{size:.1f} {unit}"
+                size /= 1024.0
+            return f"{size:.1f} TB"
+        except:
+            return "Unknown"
 
 
 def main():

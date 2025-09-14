@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VexityBot VPS Server - {{ server_ip }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(90deg, #00d4ff 0%, #0099cc 100%);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #333333;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card h3 {
+            color: #00d4ff;
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }
+        
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #00ff88;
+        }
+        
+        .bots-section {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #333333;
+            margin-bottom: 30px;
+        }
+        
+        .bots-section h2 {
+            color: #00d4ff;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .bots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .bot-card {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333333;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .bot-card:hover {
+            border-color: #00d4ff;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+        }
+        
+        .bot-card.online {
+            border-color: #00ff88;
+        }
+        
+        .bot-card.offline {
+            border-color: #ff4444;
+        }
+        
+        .bot-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #ffffff;
+        }
+        
+        .bot-status {
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        
+        .bot-status.online {
+            color: #00ff88;
+        }
+        
+        .bot-status.offline {
+            color: #ff4444;
+        }
+        
+        .bot-port {
+            font-size: 0.8em;
+            color: #cccccc;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: #ffffff;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #00ff88 0%, #00cc66 100%);
+            color: #ffffff;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ff4444 0%, #cc3333 100%);
+            color: #ffffff;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #888888;
+            border-top: 1px solid #333333;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .bots-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 VexityBot VPS Server</h1>
+        <p>Server: {{ server_ip }}:{{ server_port }} | Advanced Bot Management System</p>
+    </div>
+    
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>🌐 Server Status</h3>
+                <div class="value">ONLINE</div>
+            </div>
+            <div class="stat-card">
+                <h3>🤖 Total Bots</h3>
+                <div class="value">{{ bots|length }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>✅ Online Bots</h3>
+                <div class="value">{{ bots|selectattr('status', 'equalto', 'Online')|list|length }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>📊 Uptime</h3>
+                <div class="value">99.9%</div>
+            </div>
+        </div>
+        
+        <div class="bots-section">
+            <h2>🤖 Bot Management</h2>
+            <div class="bots-grid">
+                {% for bot in bots %}
+                <div class="bot-card {{ 'online' if bot.status == 'Online' else 'offline' }}">
+                    <div class="bot-name">{{ bot.name }}</div>
+                    <div class="bot-status {{ 'online' if bot.status == 'Online' else 'offline' }}">
+                        {{ bot.status }}
+                    </div>
+                    <div class="bot-port">Port: {{ bot.port }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-success" onclick="startAllBots()">🚀 Start All Bots</button>
+            <button class="btn btn-danger" onclick="stopAllBots()">⏹️ Stop All Bots</button>
+            <button class="btn btn-primary" onclick="refreshStatus()">🔄 Refresh Status</button>
+            <a href="/api/server/status" class="btn btn-primary" target="_blank">📊 API Status</a>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>© 2024 VexityBot Team | TSM-Framework Anticheat System</p>
+    </div>
+    
+    <script>
+        function startAllBots() {
+            fetch('/api/bots/start_all', {method: 'POST'})
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message || 'All bots started');
+                    location.reload();
+                })
+                .catch(error => {
+                    alert('Error starting bots: ' + error);
+                });
+        }
+        
+        function stopAllBots() {
+            fetch('/api/bots/stop_all', {method: 'POST'})
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message || 'All bots stopped');
+                    location.reload();
+                })
+                .catch(error => {
+                    alert('Error stopping bots: ' + error);
+                });
+        }
+        
+        function refreshStatus() {
+            location.reload();
+        }
+        
+        // Auto-refresh every 30 seconds
+        setInterval(refreshStatus, 30000);
+    </script>
+</body>
+</html>
