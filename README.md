@@ -1,4 +1,4 @@
-# 🤖 VexityBot - Ultimate Bot Management System v2.1.0
+# 🤖 VexityBot - Ultimate Bot Management System v2.2.0
 
 [![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://python.org)
 [![Java](https://img.shields.io/badge/Java-11+-orange.svg)](https://openjdk.java.net/)
@@ -27,7 +27,7 @@ python build_complete_gui.py
 
 ## ✨ Features
 
-### 🤖 **24 Specialized Bots**
+### 🤖 **25 Specialized Bots**
 | Bot | Specialty | Port | Capabilities |
 |-----|-----------|------|--------------|
 | **AlphaBot** | Nuclear Warfare | 8081 | Quantum Bombs, Plasma Cannons, Time-Dilation Attacks |
@@ -70,6 +70,7 @@ python build_complete_gui.py
 - **🆕 GameBots Tab** - 10 gaming-themed bots with leaderboard and Crown panels
 - **🆕 VPS Bot Controller Tab** - Remote control of ShadowStrike OSRS bot on VPS
 - **🆕 OmegaBot Panel** - Ultimate destruction bot with bomb creator, EXE builder, and steganography
+- **💀 DeathBot #25 Tab** - Ultimate destruction bot with EXE builder, file scraping, and destruction simulation
 - **🆕 System32 Monitor** - Real-time file system surveillance
 - **🆕 Admin File Deletion** - Remote file management interface
 
@@ -199,6 +200,15 @@ cd VexityBot_Complete
 4. Use **Steganography** tab to hide scripts in images
 5. Save/load configurations for persistent settings
 
+### 💀 DeathBot #25 Ultimate Destruction
+1. Navigate to the **DeathBot #25** tab
+2. Use **🔧 Build DeathBot EXE** to create client executables
+3. Select from 25+ DeathBot functions to include
+4. Configure target directories and file extensions
+5. Choose stealth options (hidden mode, auto-start, persistence)
+6. Build standalone EXE with selected functions
+7. Deploy to clients for ultimate destruction capabilities
+
 ### 🆕 Steganography Features
 1. Navigate to the **Steganography** tab
 2. Select script file to hide (PowerShell, Python, etc.)
@@ -305,15 +315,28 @@ pre-commit install
 - **Audit Logging** - Complete operation tracking
 - **Error Handling** - Graceful failure management
 
-## 🆕 Version 2.1.0 Features
+## 🆕 Version 2.2.0 Features
 
-### ✨ **New in v2.1.0**
+### ✨ **New in v2.2.0**
+- **💀 DeathBot #25** - Ultimate destruction bot with EXE builder and 25+ selectable functions
+- **🔧 DeathBot EXE Builder** - Create client executables with customizable function selection
+- **⚡ Ricochet Boom Mode** - High-power destruction simulation with AC voltage control
+- **📁 Advanced File Scraping** - Multi-directory file collection and processing
+- **💥 Destruction Simulation** - Realistic destruction sequence simulation
+- **🗄️ File Dump System** - Organized file collection and logging
+- **🌪️ System Monitoring** - Real-time CPU, memory, and network monitoring
+- **👻 Stealth Operations** - Hidden mode and persistence capabilities
+- **🎯 Target Configuration** - Customizable directories and file extensions
+- **📊 Real-time Statistics** - Live activity monitoring and reporting
+
+### ✨ **Previous v2.1.0 Features**
 - **🎯 Victim Control EXE** - Create executables with all 24 bot panels for remote control
 - **🖼️ Steganography System** - Hide scripts in images for stealth deployment
 - **🎮 GameBots System** - 10 gaming-themed bots with leaderboard and Crown panels
 - **🌐 VPS Bot Controller** - Remote control of ShadowStrike OSRS bot on VPS
 - **🤖 ShadowStrike OSRS Bot** - Complete Old School RuneScape automation
 - **💀 OmegaBot Ultimate** - Ultimate destruction bot with bomb creator, EXE builder, and steganography
+- **💀 DeathBot #25** - Ultimate destruction bot with EXE builder and 25+ selectable functions
 - **🔧 Advanced Bot Panels** - Individual admin panels for all 24 bots
 - **🌐 Remote Control** - Complete victim system control through bot interface
 - **💾 Configuration Management** - Save/load settings for all bot panels
@@ -344,6 +367,16 @@ pre-commit install
 - **Steganography** - Hide scripts in images for stealth
 - **Configuration Management** - Save/load bot settings
 - **Ultimate Destruction** - Most powerful bot in the system
+
+### **DeathBot #25 Ultimate Features**
+- **EXE Builder** - Create client executables with selectable functions
+- **25+ Functions** - Choose from ricochet boom, file scraping, destruction simulation, etc.
+- **Stealth Options** - Hidden mode, auto-start, persistence capabilities
+- **Target Configuration** - Customizable directories and file extensions
+- **Real-time Monitoring** - Live activity logs and statistics
+- **Professional GUI** - TSM-styled interface for clients
+- **Safety Controls** - Warning dialogs and confirmations
+- **File Dumping** - Organized file collection and logging
 
 ### **GameBots System**
 - **10 Gaming Bots** - CyberWarrior, ShadowStrike, VoidHunter, etc.
@@ -386,6 +419,18 @@ pre-commit install
 
 ## 📈 Roadmap
 
+### Version 2.2.0 (Completed ✅)
+- [x] DeathBot #25 ultimate destruction bot
+- [x] DeathBot EXE Builder with 25+ selectable functions
+- [x] Ricochet Boom AC/12v Power Mode
+- [x] Advanced file scraping capabilities
+- [x] Destruction simulation system
+- [x] File dump and logging system
+- [x] System resource monitoring
+- [x] Stealth operations and persistence
+- [x] Target configuration system
+- [x] Real-time statistics and monitoring
+
 ### Version 2.1.0 (Completed ✅)
 - [x] Victim Control EXE with all 24 bot panels
 - [x] Steganography system for image hiding
@@ -399,7 +444,7 @@ pre-commit install
 - [x] Configuration management system
 - [x] Enhanced GUI interface
 
-### Version 2.2.0 (Planned)
+### Version 2.3.0 (Planned)
 - [ ] Enhanced AI capabilities
 - [ ] Improved network protocols
 - [ ] Additional bot types
@@ -409,7 +454,7 @@ pre-commit install
 - [ ] Real-time screen capture
 - [ ] Advanced persistence mechanisms
 
-### Version 2.3.0 (Future)
+### Version 2.4.0 (Future)
 - [ ] Cloud integration
 - [ ] Advanced analytics
 - [ ] Machine learning models
@@ -448,7 +493,7 @@ This software is for educational and research purposes only. Users are responsib
 
 - **Lines of Code**: 100,000+
 - **Languages**: Python, Java, C++, C#
-- **Bots**: 24 specialized implementations + 10 GameBots + ShadowStrike OSRS
+- **Bots**: 25 specialized implementations + 10 GameBots + ShadowStrike OSRS + DeathBot #25
 - **Features**: 200+ individual features
 - **Executable Size**: 35MB standalone (with all features)
 - **Victim EXE**: Complete remote control system
@@ -467,7 +512,7 @@ This software is for educational and research purposes only. Users are responsib
 
 **⭐ Star this repository if you find it useful!**
 
-**🤖 VexityBot v2.1.0 - Ultimate Bot Management System with VPS Control & GameBots**
+**🤖 VexityBot v2.2.0 - Ultimate Bot Management System with DeathBot #25 & Advanced EXE Builder**
 
 *Built with Python, Java, C++, and C# for maximum performance and compatibility*
 *Now featuring VPS Bot Controller, GameBots System, ShadowStrike OSRS Bot, Victim Control EXE, Steganography, and complete remote control capabilities!*
