@@ -1,0 +1,217 @@
+{
+  "pokemon_spawns": [
+    {
+      "id": 72,
+      "name": "Eevee",
+      "lat": 40.754556158207436,
+      "lng": -73.97718012049253,
+      "cp": 1645,
+      "iv": 100,
+      "level": 33,
+      "time_left": 1687,
+      "rarity": "rare",
+      "is_shiny": false,
+      "weather_boost": "windy"
+    },
+    {
+      "id": 64,
+      "name": "Eevee",
+      "lat": 40.75829734269474,
+      "lng": -73.98736669566536,
+      "cp": 1657,
+      "iv": 31,
+      "level": 28,
+      "time_left": 1696,
+      "rarity": "rare",
+      "is_shiny": false,
+      "weather_boost": "snowy"
+    },
+    {
+      "id": 42,
+      "name": "Eevee",
+      "lat": 40.74936303122067,
+      "lng": -73.98458701320358,
+      "cp": 874,
+      "iv": 38,
+      "level": 16,
+      "time_left": 304,
+      "rarity": "rare",
+      "is_shiny": false,
+      "weather_boost": "sunny"
+    },
+    {
+      "id": 149,
+      "name": "Pidgey",
+      "lat": 40.766483085731274,
+      "lng": -73.99117652188659,
+      "cp": 1950,
+      "iv": 33,
+      "level": 6,
+      "time_left": 1314,
+      "rarity": "rare",
+      "is_shiny": false,
+      "weather_boost": "cloudy"
+    },
+    {
+      "id": 38,
+      "name": "Pikachu",
+      "lat": 40.76311413403712,
+      "lng": -73.98070571289101,
+      "cp": 139,
+      "iv": 76,
+      "level": 1,
+      "time_left": 1150,
+      "rarity": "legendary",
+      "is_shiny": false,
+      "weather_boost": "snowy"
+    },
+    {
+      "id": 31,
+      "name": "Charmander",
+      "lat": 40.763180650939795,
+      "lng": -73.98356787854878,
+      "cp": 1650,
+      "iv": 46,
+      "level": 14,
+      "time_left": 314,
+      "rarity": "uncommon",
+      "is_shiny": false,
+      "weather_boost": "cloudy"
+    },
+    {
+      "id": 150,
+      "name": "Weedle",
+      "lat": 40.749331346990765,
+      "lng": -73.97640586391144,
+      "cp": 1929,
+      "iv": 17,
+      "level": 15,
+      "time_left": 976,
+      "rarity": "rare",
+      "is_shiny": false,
+      "weather_boost": "snowy"
+    },
+    {
+      "id": 12,
+      "name": "Pidgey",
+      "lat": 40.76825822942211,
+      "lng": -73.97844861886334,
+      "cp": 1536,
+      "iv": 53,
+      "level": 27,
+      "time_left": 1036,
+      "rarity": "uncommon",
+      "is_shiny": false,
+      "weather_boost": "sunny"
+    },
+    {
+      "id": 122,
+      "name": "Eevee",
+      "lat": 40.76392932144563,
+      "lng": -73.98762564172374,
+      "cp": 1882,
+      "iv": 80,
+      "level": 7,
+      "time_left": 1648,
+      "rarity": "uncommon",
+      "is_shiny": false,
+      "weather_boost": "foggy"
+    }
+  ],
+  "pokestops": [
+    {
+      "id": "stop_0",
+      "name": "Pokestop 1",
+      "lat": 40.75481574584784,
+      "lng": -73.9836702858196,
+      "lure_type": "magnetic",
+      "lure_expires": null,
+      "last_spun": 125
+    },
+    {
+      "id": "stop_1",
+      "name": "Pokestop 2",
+      "lat": 40.762326499241766,
+      "lng": -73.98907380101308,
+      "lure_type": "normal",
+      "lure_expires": null,
+      "last_spun": 116
+    },
+    {
+      "id": "stop_2",
+      "name": "Pokestop 3",
+      "lat": 40.76071903149273,
+      "lng": -73.98016946692933,
+      "lure_type": "mossy",
+      "lure_expires": 789,
+      "last_spun": 43
+    },
+    {
+      "id": "stop_3",
+      "name": "Pokestop 4",
+      "lat": 40.75706587518971,
+      "lng": -73.98667863266823,
+      "lure_type": "normal",
+      "lure_expires": null,
+      "last_spun": 124
+    },
+    {
+      "id": "stop_4",
+      "name": "Pokestop 5",
+      "lat": 40.754579163142004,
+      "lng": -73.98903265089652,
+      "lure_type": "glacial",
+      "lure_expires": null,
+      "last_spun": 25
+    },
+    {
+      "id": "stop_5",
+      "name": "Pokestop 6",
+      "lat": 40.761588749215015,
+      "lng": -73.9886952096929,
+      "lure_type": "glacial",
+      "lure_expires": null,
+      "last_spun": 197
+    }
+  ],
+  "gyms": [
+    {
+      "id": "gym_0",
+      "name": "Gym 1",
+      "lat": 40.76084334175676,
+      "lng": -73.97832860948716,
+      "team": "Mystic",
+      "level": 6,
+      "defenders": 6,
+      "raid_boss": null,
+      "raid_tier": null
+    },
+    {
+      "id": "gym_1",
+      "name": "Gym 2",
+      "lat": 40.76585811536938,
+      "lng": -73.98182631658695,
+      "team": "Neutral",
+      "level": 1,
+      "defenders": 6,
+      "raid_boss": null,
+      "raid_tier": null
+    }
+  ],
+  "nests": [],
+  "weather": {
+    "condition": "snowy",
+    "temperature": 59,
+    "humidity": 82,
+    "wind_speed": 4,
+    "pokemon_boost": [
+      "ice",
+      "steel"
+    ]
+  },
+  "last_updated": 1757996902.0743027,
+  "location": {
+    "lat": 40.7589,
+    "lng": -73.9851
+  }
+}

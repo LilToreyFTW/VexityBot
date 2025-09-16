@@ -37,6 +37,16 @@ class PokemonGoBotAPI:
             'transfer_pokemon': f"/api/bot/{bot_name}/pokemon/{{id}}/transfer",
             'power_up_pokemon': f"/api/bot/{bot_name}/pokemon/{{id}}/powerup"
         }
+        
+        # Enhanced AI System - ADDED
+        self.ai_system = {
+            'mew_hunt_active': False,
+            'mewtwo_hunt_active': False,
+            'target_pokemon': [],
+            'priority_catch': True,
+            'gps_map_scanning': False,
+            'last_scan_time': None
+        }
     
     def _log(self, message):
         """Log message and send to GUI if callback available"""
@@ -338,3 +348,79 @@ class PokemonGoBotAPI:
         except Exception as e:
             self._log(f"❌ Connection test failed: {e}")
             return False
+    
+    def start_mew_hunt(self):
+        """Start AI hunt for Mew - ADDED"""
+        try:
+            self.ai_system['mew_hunt_active'] = True
+            self.ai_system['target_pokemon'] = ['mew']
+            self._log("🎯 MEW HUNT STARTED! AI is now prioritizing Mew!")
+            return True
+        except Exception as e:
+            self._log(f"❌ Mew hunt start error: {e}")
+            return False
+    
+    def start_mewtwo_hunt(self):
+        """Start AI hunt for Mewtwo - ADDED"""
+        try:
+            self.ai_system['mewtwo_hunt_active'] = True
+            self.ai_system['target_pokemon'] = ['mewtwo']
+            self._log("🎯 MEWTWO HUNT STARTED! AI is now prioritizing Mewtwo!")
+            return True
+        except Exception as e:
+            self._log(f"❌ Mewtwo hunt start error: {e}")
+            return False
+    
+    def stop_ai_hunt(self):
+        """Stop AI hunt - ADDED"""
+        try:
+            self.ai_system['mew_hunt_active'] = False
+            self.ai_system['mewtwo_hunt_active'] = False
+            self.ai_system['target_pokemon'] = []
+            self._log("🛑 AI HUNT STOPPED!")
+            return True
+        except Exception as e:
+            self._log(f"❌ Stop hunt error: {e}")
+            return False
+    
+    def ai_catch_decision(self, pokemon_data):
+        """AI decision making for catching Pokemon with Mew/Mewtwo priority - ADDED"""
+        try:
+            pokemon_name = pokemon_data.get('name', '').lower()
+            cp = pokemon_data.get('cp', 0)
+            
+            # ULTIMATE PRIORITY: Mew and Mewtwo
+            if pokemon_name in ['mew', 'mewtwo']:
+                self._log(f"🎯 ULTIMATE PRIORITY: {pokemon_name.upper()} DETECTED! INSTANT CATCH!")
+                return True
+            
+            # Check if Mew/Mewtwo hunt is active
+            if self.ai_system['mew_hunt_active'] and pokemon_name == 'mew':
+                self._log(f"🔥 MEW HUNT: {pokemon_name.upper()} - MAXIMUM PRIORITY!")
+                return True
+            
+            if self.ai_system['mewtwo_hunt_active'] and pokemon_name == 'mewtwo':
+                self._log(f"🔥 MEWTWO HUNT: {pokemon_name.upper()} - MAXIMUM PRIORITY!")
+                return True
+            
+            # Shiny Pokemon (always catch)
+            if pokemon_data.get('is_shiny', False):
+                self._log(f"✨ SHINY {pokemon_name.upper()} DETECTED! INSTANT CATCH!")
+                return True
+            
+            # High CP Pokemon
+            if cp >= 1000:
+                return True
+            
+            # Legendary Pokemon
+            legendary_names = ['articuno', 'zapdos', 'moltres', 'mew', 'mewtwo', 'lugia', 'ho-oh', 'celebi']
+            if pokemon_name in legendary_names:
+                self._log(f"👑 LEGENDARY {pokemon_name.upper()} DETECTED! INSTANT CATCH!")
+                return True
+            
+            # Default catch logic
+            return cp >= 100
+            
+        except Exception as e:
+            self._log(f"❌ AI catch decision error: {e}")
+            return True

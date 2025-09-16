@@ -1,0 +1,32 @@
+{
+  "bot_name": "test_bot",
+  "enabled": true,
+  "location": {
+    "lat": 40.7589,
+    "lng": -73.9851,
+    "alt": 10
+  },
+  "credentials": {
+    "username": "test_user",
+    "password": "test_pass",
+    "auth_type": "PTC"
+  },
+  "settings": {
+    "walk_speed": 4.16,
+    "catch_pokemon": true,
+    "spin_pokestops": true,
+    "battle_gyms": false,
+    "catch_legendary": true,
+    "catch_shiny": true,
+    "transfer_duplicates": true,
+    "min_cp_threshold": 100,
+    "max_pokemon_storage": 1000
+  },
+  "advanced": {
+    "human_like_delays": true,
+    "random_movements": true,
+    "smart_timing": true,
+    "ban_bypass": true,
+    "ai_automation": true
+  }
+}
