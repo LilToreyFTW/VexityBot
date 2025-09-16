@@ -1,0 +1,51 @@
+{
+  "vps_server": {
+    "host": "0.0.0.0",
+    "port": 9999,
+    "max_clients": 10,
+    "log_level": "INFO"
+  },
+  "client": {
+    "default_vps_ip": "YOUR_VPS_IP_HERE",
+    "default_port": 9999,
+    "auto_connect": false,
+    "update_interval": 5,
+    "connection_timeout": 10
+  },
+  "bot": {
+    "auto_start": false,
+    "restart_on_crash": true,
+    "max_restarts": 5,
+    "log_retention_days": 7
+  },
+  "security": {
+    "require_authentication": false,
+    "allowed_ips": [],
+    "rate_limit": {
+      "max_requests_per_minute": 60,
+      "max_commands_per_minute": 10
+    }
+  },
+  "deployment": {
+    "vps_requirements": [
+      "python3",
+      "python3-pip",
+      "git"
+    ],
+    "python_packages": [
+      "socket",
+      "json",
+      "threading",
+      "time",
+      "logging",
+      "datetime",
+      "queue",
+      "pickle",
+      "pathlib"
+    ],
+    "client_packages": [
+      "pyinstaller",
+      "tkinter"
+    ]
+  }
+}

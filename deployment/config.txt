@@ -1,0 +1,4 @@
+# VexityBot Client Configuration 
+VPS_IP=YOUR_VPS_IP_HERE 
+VPS_PORT=9999 
+AUTO_CONNECT=false 

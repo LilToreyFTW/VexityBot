@@ -1,0 +1,9 @@
+@echo off 
+echo Setting up VPS Bot Server... 
+echo. 
+echo Installing Python dependencies... 
+pip install -r osrs_bot_requirements.txt 
+echo. 
+echo Starting VPS Bot Server... 
+VPS_Bot_Server.exe --host 0.0.0.0 --port 9999 
+pause 
