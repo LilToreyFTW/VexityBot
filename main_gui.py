@@ -15966,17 +15966,6 @@ if __name__ == "__main__":
         messagebox.showinfo("Bot Configuration", "{bot['name']} configuration opened!")
 """
 
-    def open_bot_admin_panel(self, bot):
-            error_frame = ttk.Frame(stego_frame)
-            error_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
-            
-            error_label = ttk.Label(error_frame, 
-                                  text="❌ Steganography module not available\n\nPlease ensure VexityBotSteganographyGUI.py is in the same directory.",
-                                  font=('Arial', 12), justify=tk.CENTER)
-            error_label.pack(expand=True)
-            
-            self.log_build(f"Steganography module import error: {str(e)}")
-    
     def create_steganography_tab(self):
         """Create the Steganography tab for hiding data in images"""
         stego_frame = ttk.Frame(self.notebook)
