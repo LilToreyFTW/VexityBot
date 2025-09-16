@@ -27,6 +27,18 @@ except ImportError:
     GEOLOCATION_AVAILABLE = False
     print("Warning: Geolocation libraries not available. Some features may be limited.")
 
+# Pokemon Map integration imports
+try:
+    from bs4 import BeautifulSoup
+    import urllib.parse
+    import json
+    from urllib.request import urlopen
+    import webbrowser
+    MAP_INTEGRATION_AVAILABLE = True
+except ImportError:
+    MAP_INTEGRATION_AVAILABLE = False
+    print("Warning: Map integration libraries not available. Some features may be limited.")
+
 try:
     import zipcode
     ZIPCODE_AVAILABLE = True
@@ -104,7 +116,15 @@ class ThunderboltPokemonGOBot:
             'random_movements': True,
             'smart_timing': True,
             'geolocation_enabled': True,
-            'auto_location_update': True
+            'auto_location_update': True,
+            'map_integration_enabled': True,
+            'map_auto_refresh': True,
+            'map_refresh_interval': 30,
+            'map_radius_km': 2.0,
+            'prioritize_rare_pokemon': True,
+            'auto_navigate_to_pokemon': True,
+            'auto_navigate_to_pokestops': True,
+            'auto_navigate_to_gyms': True
         }
         
         # Bot statistics
@@ -166,13 +186,29 @@ class ThunderboltPokemonGOBot:
         self.event_queue = queue.Queue()
         self.status_queue = queue.Queue()
         
+        # Pokemon Map integration
+        self.map_integration = {
+            'enabled': True,
+            'base_url': 'https://www.pokemap.net',
+            'api_endpoint': 'https://www.pokemap.net/api',
+            'map_data': {},
+            'pokemon_spawns': [],
+            'pokestops': [],
+            'gyms': [],
+            'nests': [],
+            'last_update': None,
+            'update_interval': 30,  # seconds
+            'auto_refresh': True
+        }
+        
         # Bot modes
         self.modes = {
             'catching': self._catching_mode,
             'raiding': self._raiding_mode,
             'battling': self._battling_mode,
             'exploring': self._exploring_mode,
-            'idle': self._idle_mode
+            'idle': self._idle_mode,
+            'map_mode': self._map_mode
         }
     
     def set_gui_callback(self, callback):
@@ -801,7 +837,8 @@ class ThunderboltPokemonGOBot:
                 'pokestops': self.get_pokestop_density(),
                 'gyms': self.get_gym_density(),
                 'pokemon_spawns': self.get_pokemon_spawn_data(),
-                'hotspots': self.get_pokemon_hotspots()
+                'hotspots': self.get_pokemon_hotspots(),
+                'map_data': self.get_map_data()
             }
             
             return info
@@ -912,6 +949,550 @@ class ThunderboltPokemonGOBot:
         except Exception as e:
             self.logger.error(f"Error in fallback address: {e}")
             return None
+    
+    # ADDED - Pokemon Map Integration Methods
+    def open_pokemon_map(self):
+        """Open Pokemon Map website in browser"""
+        try:
+            if not MAP_INTEGRATION_AVAILABLE:
+                self.update_status("❌ Map integration not available - missing dependencies")
+                return False
+            
+            lat = self.config['location']['lat']
+            lng = self.config['location']['lng']
+            
+            # Construct Pokemon Map URL with current location
+            map_url = f"https://www.pokemap.net/?lat={lat}&lng={lng}&zoom=15"
+            
+            webbrowser.open(map_url)
+            self.update_status(f"🗺️ Opening Pokemon Map at {lat:.6f}, {lng:.6f}")
+            return True
+            
+        except Exception as e:
+            self.update_status(f"❌ Failed to open Pokemon Map: {e}")
+            return False
+    
+    def get_map_data(self):
+        """Get Pokemon Map data for current location"""
+        try:
+            if not MAP_INTEGRATION_AVAILABLE:
+                return self._get_simulated_map_data()
+            
+            # Check if we need to update map data
+            current_time = time.time()
+            if (self.map_integration['last_update'] is None or 
+                current_time - self.map_integration['last_update'] > self.map_integration['update_interval']):
+                
+                self.update_status("🗺️ Fetching Pokemon Map data...")
+                self._fetch_map_data()
+                self.map_integration['last_update'] = current_time
+            
+            return self.map_integration['map_data']
+            
+        except Exception as e:
+            self.logger.error(f"Error getting map data: {e}")
+            return self._get_simulated_map_data()
+    
+    def _fetch_map_data(self):
+        """Fetch real data from Pokemon Map website"""
+        try:
+            lat = self.config['location']['lat']
+            lng = self.config['location']['lng']
+            
+            # Construct API URL for Pokemon Map
+            api_url = f"https://www.pokemap.net/api/pokemon?lat={lat}&lng={lng}&radius=1000"
+            
+            # Set headers to mimic a real browser
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                'Accept': 'application/json, text/plain, */*',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Referer': 'https://www.pokemap.net/',
+                'Origin': 'https://www.pokemap.net'
+            }
+            
+            # Make request to Pokemon Map API
+            response = requests.get(api_url, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                self.map_integration['map_data'] = data
+                self.update_status("✅ Pokemon Map data updated successfully!")
+            else:
+                self.update_status(f"⚠️ Pokemon Map API returned status {response.status_code}")
+                self.map_integration['map_data'] = self._get_simulated_map_data()
+                
+        except requests.exceptions.RequestException as e:
+            self.update_status(f"⚠️ Pokemon Map API request failed: {e}")
+            self.map_integration['map_data'] = self._get_simulated_map_data()
+        except Exception as e:
+            self.logger.error(f"Error fetching map data: {e}")
+            self.map_integration['map_data'] = self._get_simulated_map_data()
+    
+    def _get_simulated_map_data(self):
+        """Get simulated Pokemon Map data when API is not available"""
+        try:
+            lat = self.config['location']['lat']
+            lng = self.config['location']['lng']
+            
+            # Generate simulated Pokemon spawns around current location
+            pokemon_spawns = []
+            pokemon_names = ['Pidgey', 'Rattata', 'Caterpie', 'Weedle', 'Spearow', 'Pikachu', 
+                           'Charmander', 'Squirtle', 'Bulbasaur', 'Eevee', 'Dratini', 'Snorlax']
+            
+            for i in range(random.randint(5, 15)):  # 5-15 Pokemon spawns
+                # Generate random coordinates within 1km radius
+                offset_lat = random.uniform(-0.01, 0.01)
+                offset_lng = random.uniform(-0.01, 0.01)
+                
+                spawn = {
+                    'id': random.randint(1, 151),
+                    'name': random.choice(pokemon_names),
+                    'lat': lat + offset_lat,
+                    'lng': lng + offset_lng,
+                    'cp': random.randint(10, 2000),
+                    'iv': random.randint(0, 100),
+                    'level': random.randint(1, 35),
+                    'time_left': random.randint(300, 1800),  # 5-30 minutes
+                    'rarity': random.choice(['common', 'uncommon', 'rare', 'legendary']),
+                    'is_shiny': random.random() < 0.01,  # 1% shiny chance
+                    'weather_boost': random.choice(['sunny', 'rainy', 'snowy', 'cloudy', 'foggy', 'windy'])
+                }
+                pokemon_spawns.append(spawn)
+            
+            # Generate simulated Pokestops
+            pokestops = []
+            for i in range(random.randint(3, 8)):  # 3-8 Pokestops
+                offset_lat = random.uniform(-0.005, 0.005)
+                offset_lng = random.uniform(-0.005, 0.005)
+                
+                stop = {
+                    'id': f"stop_{i}",
+                    'name': f"Pokestop {i+1}",
+                    'lat': lat + offset_lat,
+                    'lng': lng + offset_lng,
+                    'lure_type': random.choice([None, 'normal', 'glacial', 'mossy', 'magnetic']),
+                    'lure_expires': random.randint(0, 1800) if random.random() < 0.3 else None,
+                    'last_spun': random.randint(0, 300)  # 0-5 minutes ago
+                }
+                pokestops.append(stop)
+            
+            # Generate simulated Gyms
+            gyms = []
+            for i in range(random.randint(1, 4)):  # 1-4 Gyms
+                offset_lat = random.uniform(-0.008, 0.008)
+                offset_lng = random.uniform(-0.008, 0.008)
+                
+                gym = {
+                    'id': f"gym_{i}",
+                    'name': f"Gym {i+1}",
+                    'lat': lat + offset_lat,
+                    'lng': lng + offset_lng,
+                    'team': random.choice(['Valor', 'Mystic', 'Instinct', 'Neutral']),
+                    'level': random.randint(1, 6),
+                    'defenders': random.randint(0, 6),
+                    'raid_boss': random.choice([None, 'Mewtwo', 'Rayquaza', 'Groudon', 'Kyogre']) if random.random() < 0.2 else None,
+                    'raid_tier': random.randint(1, 5) if random.random() < 0.2 else None
+                }
+                gyms.append(gym)
+            
+            # Generate simulated Nests
+            nests = []
+            if random.random() < 0.3:  # 30% chance of nest
+                nest_pokemon = random.choice(['Pikachu', 'Squirtle', 'Charmander', 'Bulbasaur', 'Eevee'])
+                nest = {
+                    'pokemon': nest_pokemon,
+                    'lat': lat + random.uniform(-0.01, 0.01),
+                    'lng': lng + random.uniform(-0.01, 0.01),
+                    'radius': random.randint(100, 500),
+                    'spawn_rate': random.uniform(0.1, 0.5)
+                }
+                nests.append(nest)
+            
+            return {
+                'pokemon_spawns': pokemon_spawns,
+                'pokestops': pokestops,
+                'gyms': gyms,
+                'nests': nests,
+                'weather': self.get_weather_data(),
+                'last_updated': time.time(),
+                'location': {
+                    'lat': lat,
+                    'lng': lng
+                }
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error generating simulated map data: {e}")
+            return {'pokemon_spawns': [], 'pokestops': [], 'gyms': [], 'nests': []}
+    
+    def get_nearby_pokemon(self, radius_km=1.0):
+        """Get Pokemon within specified radius from current location"""
+        try:
+            map_data = self.get_map_data()
+            pokemon_spawns = map_data.get('pokemon_spawns', [])
+            
+            current_lat = self.config['location']['lat']
+            current_lng = self.config['location']['lng']
+            
+            nearby_pokemon = []
+            for pokemon in pokemon_spawns:
+                distance = self.calculate_distance(
+                    current_lat, current_lng,
+                    pokemon['lat'], pokemon['lng']
+                )
+                
+                if distance <= radius_km:
+                    pokemon['distance_km'] = distance
+                    nearby_pokemon.append(pokemon)
+            
+            # Sort by distance
+            nearby_pokemon.sort(key=lambda x: x['distance_km'])
+            
+            return nearby_pokemon
+            
+        except Exception as e:
+            self.logger.error(f"Error getting nearby Pokemon: {e}")
+            return []
+    
+    def get_nearby_pokestops(self, radius_km=1.0):
+        """Get Pokestops within specified radius from current location"""
+        try:
+            map_data = self.get_map_data()
+            pokestops = map_data.get('pokestops', [])
+            
+            current_lat = self.config['location']['lat']
+            current_lng = self.config['location']['lng']
+            
+            nearby_stops = []
+            for stop in pokestops:
+                distance = self.calculate_distance(
+                    current_lat, current_lng,
+                    stop['lat'], stop['lng']
+                )
+                
+                if distance <= radius_km:
+                    stop['distance_km'] = distance
+                    nearby_stops.append(stop)
+            
+            # Sort by distance
+            nearby_stops.sort(key=lambda x: x['distance_km'])
+            
+            return nearby_stops
+            
+        except Exception as e:
+            self.logger.error(f"Error getting nearby Pokestops: {e}")
+            return []
+    
+    def get_nearby_gyms(self, radius_km=1.0):
+        """Get Gyms within specified radius from current location"""
+        try:
+            map_data = self.get_map_data()
+            gyms = map_data.get('gyms', [])
+            
+            current_lat = self.config['location']['lat']
+            current_lng = self.config['location']['lng']
+            
+            nearby_gyms = []
+            for gym in gyms:
+                distance = self.calculate_distance(
+                    current_lat, current_lng,
+                    gym['lat'], gym['lng']
+                )
+                
+                if distance <= radius_km:
+                    gym['distance_km'] = distance
+                    nearby_gyms.append(gym)
+            
+            # Sort by distance
+            nearby_gyms.sort(key=lambda x: x['distance_km'])
+            
+            return nearby_gyms
+            
+        except Exception as e:
+            self.logger.error(f"Error getting nearby Gyms: {e}")
+            return []
+    
+    def find_pokemon_by_name(self, pokemon_name, radius_km=2.0):
+        """Find specific Pokemon by name within radius"""
+        try:
+            nearby_pokemon = self.get_nearby_pokemon(radius_km)
+            
+            matching_pokemon = []
+            for pokemon in nearby_pokemon:
+                if pokemon_name.lower() in pokemon['name'].lower():
+                    matching_pokemon.append(pokemon)
+            
+            return matching_pokemon
+            
+        except Exception as e:
+            self.logger.error(f"Error finding Pokemon by name: {e}")
+            return []
+    
+    def find_rare_pokemon(self, radius_km=2.0):
+        """Find rare Pokemon within radius"""
+        try:
+            nearby_pokemon = self.get_nearby_pokemon(radius_km)
+            
+            rare_pokemon = []
+            for pokemon in nearby_pokemon:
+                if (pokemon['rarity'] in ['rare', 'legendary'] or 
+                    pokemon['is_shiny'] or 
+                    pokemon['cp'] > 1000 or 
+                    pokemon['iv'] > 90):
+                    rare_pokemon.append(pokemon)
+            
+            # Sort by rarity and CP
+            rare_pokemon.sort(key=lambda x: (x['rarity'] == 'legendary', x['is_shiny'], x['cp']), reverse=True)
+            
+            return rare_pokemon
+            
+        except Exception as e:
+            self.logger.error(f"Error finding rare Pokemon: {e}")
+            return []
+    
+    def get_optimal_route_from_map(self, max_distance_km=5.0):
+        """Calculate optimal route based on map data"""
+        try:
+            # Get all nearby points of interest
+            pokemon = self.get_nearby_pokemon(max_distance_km)
+            pokestops = self.get_nearby_pokestops(max_distance_km)
+            gyms = self.get_nearby_gyms(max_distance_km)
+            
+            # Combine all points
+            all_points = []
+            
+            # Add Pokemon (prioritize rare ones)
+            for p in pokemon:
+                priority = 1
+                if p['rarity'] == 'legendary':
+                    priority = 10
+                elif p['rarity'] == 'rare':
+                    priority = 5
+                elif p['is_shiny']:
+                    priority = 8
+                elif p['cp'] > 1000:
+                    priority = 3
+                
+                all_points.append({
+                    'type': 'pokemon',
+                    'name': p['name'],
+                    'lat': p['lat'],
+                    'lng': p['lng'],
+                    'priority': priority,
+                    'data': p
+                })
+            
+            # Add Pokestops
+            for s in pokestops:
+                all_points.append({
+                    'type': 'pokestop',
+                    'name': s['name'],
+                    'lat': s['lat'],
+                    'lng': s['lng'],
+                    'priority': 2,
+                    'data': s
+                })
+            
+            # Add Gyms
+            for g in gyms:
+                all_points.append({
+                    'type': 'gym',
+                    'name': g['name'],
+                    'lat': g['lat'],
+                    'lng': g['lng'],
+                    'priority': 3,
+                    'data': g
+                })
+            
+            # Sort by priority and distance
+            current_lat = self.config['location']['lat']
+            current_lng = self.config['location']['lng']
+            
+            for point in all_points:
+                point['distance'] = self.calculate_distance(
+                    current_lat, current_lng,
+                    point['lat'], point['lng']
+                )
+            
+            # Sort by priority (descending) then distance (ascending)
+            all_points.sort(key=lambda x: (-x['priority'], x['distance']))
+            
+            # Create route (limit to reasonable number of stops)
+            route = all_points[:20]  # Max 20 stops
+            
+            return route
+            
+        except Exception as e:
+            self.logger.error(f"Error calculating optimal route: {e}")
+            return []
+    
+    def refresh_map_data(self):
+        """Manually refresh map data"""
+        try:
+            self.update_status("🔄 Refreshing Pokemon Map data...")
+            self.map_integration['last_update'] = None  # Force refresh
+            map_data = self.get_map_data()
+            
+            pokemon_count = len(map_data.get('pokemon_spawns', []))
+            stops_count = len(map_data.get('pokestops', []))
+            gyms_count = len(map_data.get('gyms', []))
+            
+            self.update_status(f"✅ Map refreshed: {pokemon_count} Pokemon, {stops_count} Pokestops, {gyms_count} Gyms")
+            return True
+            
+        except Exception as e:
+            self.update_status(f"❌ Failed to refresh map data: {e}")
+            return False
+    
+    def set_map_auto_refresh(self, enabled, interval_seconds=30):
+        """Enable/disable automatic map data refresh"""
+        try:
+            self.map_integration['auto_refresh'] = enabled
+            self.map_integration['update_interval'] = interval_seconds
+            
+            status = "enabled" if enabled else "disabled"
+            self.update_status(f"🗺️ Map auto-refresh {status} (interval: {interval_seconds}s)")
+            return True
+            
+        except Exception as e:
+            self.update_status(f"❌ Failed to set map auto-refresh: {e}")
+            return False
+    
+    def get_map_status(self):
+        """Get current map integration status"""
+        try:
+            map_data = self.get_map_data()
+            
+            status = {
+                'enabled': self.map_integration['enabled'],
+                'auto_refresh': self.map_integration['auto_refresh'],
+                'refresh_interval': self.map_integration['update_interval'],
+                'last_update': self.map_integration['last_update'],
+                'pokemon_count': len(map_data.get('pokemon_spawns', [])),
+                'pokestop_count': len(map_data.get('pokestops', [])),
+                'gym_count': len(map_data.get('gyms', [])),
+                'nest_count': len(map_data.get('nests', [])),
+                'nearby_pokemon': len(self.get_nearby_pokemon(1.0)),
+                'nearby_pokestops': len(self.get_nearby_pokestops(1.0)),
+                'nearby_gyms': len(self.get_nearby_gyms(1.0)),
+                'rare_pokemon': len(self.find_rare_pokemon(2.0))
+            }
+            
+            return status
+            
+        except Exception as e:
+            self.logger.error(f"Error getting map status: {e}")
+            return {}
+    
+    def search_pokemon_by_type(self, pokemon_type, radius_km=2.0):
+        """Search for Pokemon by type (e.g., 'fire', 'water', 'electric')"""
+        try:
+            nearby_pokemon = self.get_nearby_pokemon(radius_km)
+            
+            # This would normally check Pokemon types from a database
+            # For now, we'll use a simple mapping
+            type_mapping = {
+                'fire': ['Charmander', 'Charmeleon', 'Charizard', 'Vulpix', 'Ninetales'],
+                'water': ['Squirtle', 'Wartortle', 'Blastoise', 'Psyduck', 'Golduck'],
+                'electric': ['Pikachu', 'Raichu', 'Voltorb', 'Electrode', 'Electabuzz'],
+                'grass': ['Bulbasaur', 'Ivysaur', 'Venusaur', 'Oddish', 'Gloom'],
+                'psychic': ['Abra', 'Kadabra', 'Alakazam', 'Mewtwo', 'Mew'],
+                'dragon': ['Dratini', 'Dragonair', 'Dragonite'],
+                'flying': ['Pidgey', 'Pidgeotto', 'Pidgeot', 'Spearow', 'Fearow'],
+                'normal': ['Rattata', 'Raticate', 'Eevee', 'Snorlax']
+            }
+            
+            matching_pokemon = []
+            if pokemon_type.lower() in type_mapping:
+                target_names = type_mapping[pokemon_type.lower()]
+                for pokemon in nearby_pokemon:
+                    if pokemon['name'] in target_names:
+                        matching_pokemon.append(pokemon)
+            
+            return matching_pokemon
+            
+        except Exception as e:
+            self.logger.error(f"Error searching Pokemon by type: {e}")
+            return []
+    
+    def get_map_heatmap(self, radius_km=2.0):
+        """Generate a heatmap of Pokemon spawns in the area"""
+        try:
+            map_data = self.get_map_data()
+            pokemon_spawns = map_data.get('pokemon_spawns', [])
+            
+            current_lat = self.config['location']['lat']
+            current_lng = self.config['location']['lng']
+            
+            # Create a grid for heatmap
+            grid_size = 0.01  # ~1km grid cells
+            grid_lat_min = current_lat - radius_km * 0.01
+            grid_lat_max = current_lat + radius_km * 0.01
+            grid_lng_min = current_lng - radius_km * 0.01
+            grid_lng_max = current_lng + radius_km * 0.01
+            
+            # Count Pokemon in each grid cell
+            heatmap_data = {}
+            for pokemon in pokemon_spawns:
+                if pokemon['lat'] >= grid_lat_min and pokemon['lat'] <= grid_lat_max and \
+                   pokemon['lng'] >= grid_lng_min and pokemon['lng'] <= grid_lng_max:
+                    
+                    # Calculate grid cell
+                    cell_lat = int((pokemon['lat'] - grid_lat_min) / grid_size)
+                    cell_lng = int((pokemon['lng'] - grid_lng_min) / grid_size)
+                    cell_key = f"{cell_lat}_{cell_lng}"
+                    
+                    if cell_key not in heatmap_data:
+                        heatmap_data[cell_key] = {
+                            'count': 0,
+                            'lat': grid_lat_min + cell_lat * grid_size,
+                            'lng': grid_lng_min + cell_lng * grid_size,
+                            'pokemon': []
+                        }
+                    
+                    heatmap_data[cell_key]['count'] += 1
+                    heatmap_data[cell_key]['pokemon'].append(pokemon)
+            
+            return list(heatmap_data.values())
+            
+        except Exception as e:
+            self.logger.error(f"Error generating heatmap: {e}")
+            return []
+    
+    def export_map_data(self, filename=None):
+        """Export map data to JSON file"""
+        try:
+            if filename is None:
+                filename = f"pokemon_map_data_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            
+            map_data = self.get_map_data()
+            
+            with open(filename, 'w') as f:
+                json.dump(map_data, f, indent=2, default=str)
+            
+            self.update_status(f"🗺️ Map data exported to {filename}")
+            return True
+            
+        except Exception as e:
+            self.update_status(f"❌ Failed to export map data: {e}")
+            return False
+    
+    def import_map_data(self, filename):
+        """Import map data from JSON file"""
+        try:
+            with open(filename, 'r') as f:
+                map_data = json.load(f)
+            
+            self.map_integration['map_data'] = map_data
+            self.map_integration['last_update'] = time.time()
+            
+            self.update_status(f"🗺️ Map data imported from {filename}")
+            return True
+            
+        except Exception as e:
+            self.update_status(f"❌ Failed to import map data: {e}")
+            return False
     
     def login(self):
         """Login to Pokemon GO using PokemonGoBot REST API with TZiggler3300 credentials"""
@@ -1871,82 +2452,270 @@ class ThunderboltPokemonGOBot:
             return False
     
     def _catching_mode(self):
-        """Pokemon catching mode"""
+        """Pokemon catching mode with map integration"""
         if not self.config['catch_pokemon']:
             return
         
-        # Simulate Pokemon catching
-        if random.random() < 0.3:  # 30% chance per cycle
-            pokemon_types = ['Pidgey', 'Rattata', 'Caterpie', 'Weedle', 'Pikachu', 'Charmander', 'Squirtle', 'Bulbasaur']
-            pokemon = random.choice(pokemon_types)
-            
-            # Simulate catch success
-            if random.random() < 0.8:  # 80% catch rate
-                self.stats['pokemon_caught'] += 1
-                self.stats['xp_gained'] += random.randint(100, 500)
-                self.stats['stardust_earned'] += random.randint(100, 300)
-                
-                # Check for shiny
-                if random.random() < 0.01:  # 1% shiny rate
-                    self.stats['shiny_caught'] += 1
-                    self.update_status(f"✨ Caught SHINY {pokemon}!")
-                else:
-                    self.update_status(f"🎯 Caught {pokemon}!")
-                
-                # Check for perfect IV
-                if random.random() < 0.001:  # 0.1% perfect IV rate
-                    self.stats['perfect_iv_caught'] += 1
-                    self.update_status(f"💎 Perfect IV {pokemon}!")
-            else:
-                self.update_status(f"❌ {pokemon} escaped!")
+        # Get nearby Pokemon from map
+        nearby_pokemon = self.get_nearby_pokemon(1.0)  # 1km radius
         
-        # Simulate Pokestop spinning
-        if self.config['spin_pokestops'] and random.random() < 0.2:  # 20% chance per cycle
-            self.stats['pokestops_spun'] += 1
-            self.stats['xp_gained'] += 50
-            self.update_status("🎡 Spun Pokestop!")
+        if nearby_pokemon:
+            # Prioritize rare Pokemon
+            rare_pokemon = [p for p in nearby_pokemon if p['rarity'] in ['rare', 'legendary'] or p['is_shiny']]
+            if rare_pokemon:
+                pokemon = rare_pokemon[0]  # Target the first rare Pokemon
+                self.update_status(f"🎯 Targeting RARE {pokemon['name']} (CP: {pokemon['cp']}, Distance: {pokemon['distance_km']:.2f}km)")
+            else:
+                pokemon = nearby_pokemon[0]  # Target the closest Pokemon
+                self.update_status(f"🎯 Targeting {pokemon['name']} (CP: {pokemon['cp']}, Distance: {pokemon['distance_km']:.2f}km)")
+            
+            # Simulate movement to Pokemon
+            if pokemon['distance_km'] > 0.1:  # If more than 100m away
+                self.update_status(f"🚶 Walking to {pokemon['name']}...")
+                time.sleep(2)  # Simulate walking time
+            
+            # Simulate catch attempt
+            catch_success = self._ai_smart_catching(pokemon)
+            
+            if catch_success:
+                if random.random() < 0.8:  # 80% catch rate
+                    self.stats['pokemon_caught'] += 1
+                    self.stats['xp_gained'] += random.randint(100, 500)
+                    self.stats['stardust_earned'] += random.randint(100, 300)
+                    
+                    # Check for shiny
+                    if pokemon.get('is_shiny', False):
+                        self.stats['shiny_caught'] += 1
+                        self.update_status(f"✨ Caught SHINY {pokemon['name']}!")
+                    else:
+                        self.update_status(f"🎯 Caught {pokemon['name']}!")
+                    
+                    # Check for perfect IV
+                    if pokemon.get('iv', 0) >= 100:
+                        self.stats['perfect_iv_caught'] += 1
+                        self.update_status(f"💎 Perfect IV {pokemon['name']}!")
+                else:
+                    self.update_status(f"❌ {pokemon['name']} escaped!")
+        else:
+            # No nearby Pokemon, simulate random encounter
+            if random.random() < 0.1:  # 10% chance per cycle
+                pokemon_types = ['Pidgey', 'Rattata', 'Caterpie', 'Weedle', 'Pikachu', 'Charmander', 'Squirtle', 'Bulbasaur']
+                pokemon_name = random.choice(pokemon_types)
+                
+                # Simulate catch success
+                if random.random() < 0.8:  # 80% catch rate
+                    self.stats['pokemon_caught'] += 1
+                    self.stats['xp_gained'] += random.randint(100, 500)
+                    self.stats['stardust_earned'] += random.randint(100, 300)
+                    self.update_status(f"🎯 Caught {pokemon_name}!")
+                else:
+                    self.update_status(f"❌ {pokemon_name} escaped!")
+        
+        # Simulate Pokestop spinning using map data
+        if self.config['spin_pokestops']:
+            nearby_stops = self.get_nearby_pokestops(0.5)  # 500m radius
+            if nearby_stops:
+                stop = nearby_stops[0]  # Closest stop
+                self.update_status(f"🎡 Spinning {stop['name']} (Distance: {stop['distance_km']:.2f}km)")
+                
+                # Simulate movement to stop
+                if stop['distance_km'] > 0.1:
+                    time.sleep(1)  # Simulate walking time
+                
+                self.stats['pokestops_spun'] += 1
+                self.stats['xp_gained'] += 50
+                self.update_status("✅ Pokestop spun!")
+            elif random.random() < 0.2:  # 20% chance per cycle if no stops nearby
+                self.stats['pokestops_spun'] += 1
+                self.stats['xp_gained'] += 50
+                self.update_status("🎡 Spun Pokestop!")
     
     def _raiding_mode(self):
-        """Raid battle mode"""
-        # Simulate raid battles
-        if random.random() < 0.1:  # 10% chance per cycle
-            raid_bosses = ['Mewtwo', 'Rayquaza', 'Groudon', 'Kyogre', 'Dialga', 'Palkia']
-            boss = random.choice(raid_bosses)
+        """Raid battle mode with map integration"""
+        # Get nearby gyms with raids
+        nearby_gyms = self.get_nearby_gyms(2.0)  # 2km radius
+        raid_gyms = [g for g in nearby_gyms if g.get('raid_boss') is not None]
+        
+        if raid_gyms:
+            gym = raid_gyms[0]  # Closest gym with raid
+            boss = gym['raid_boss']
+            tier = gym.get('raid_tier', 1)
             
-            self.update_status(f"🏰 Starting raid battle against {boss}!")
-            time.sleep(2)  # Simulate raid time
+            self.update_status(f"🏰 Raid found at {gym['name']} - {boss} (Tier {tier})")
+            self.update_status(f"🚶 Walking to raid location... (Distance: {gym['distance_km']:.2f}km)")
             
-            # Simulate raid success
-            if random.random() < 0.7:  # 70% success rate
+            # Simulate movement to raid
+            if gym['distance_km'] > 0.1:
+                time.sleep(3)  # Simulate walking time
+            
+            self.update_status(f"⚔️ Starting raid battle against {boss}!")
+            time.sleep(5)  # Simulate raid time
+            
+            # Simulate raid success based on tier
+            success_rate = 0.9 if tier <= 3 else 0.7 if tier <= 4 else 0.5
+            if random.random() < success_rate:
                 self.stats['raids_completed'] += 1
-                self.stats['xp_gained'] += random.randint(1000, 5000)
-                self.update_status(f"✅ Defeated {boss}!")
+                xp_gained = tier * random.randint(1000, 2000)
+                self.stats['xp_gained'] += xp_gained
+                self.update_status(f"✅ Defeated {boss}! (+{xp_gained} XP)")
             else:
                 self.update_status(f"❌ Failed to defeat {boss}!")
+        else:
+            # No raids nearby, simulate random raid
+            if random.random() < 0.05:  # 5% chance per cycle
+                raid_bosses = ['Mewtwo', 'Rayquaza', 'Groudon', 'Kyogre', 'Dialga', 'Palkia']
+                boss = random.choice(raid_bosses)
+                
+                self.update_status(f"🏰 Starting raid battle against {boss}!")
+                time.sleep(2)  # Simulate raid time
+                
+                # Simulate raid success
+                if random.random() < 0.7:  # 70% success rate
+                    self.stats['raids_completed'] += 1
+                    self.stats['xp_gained'] += random.randint(1000, 5000)
+                    self.update_status(f"✅ Defeated {boss}!")
+                else:
+                    self.update_status(f"❌ Failed to defeat {boss}!")
     
     def _battling_mode(self):
-        """Gym battle mode"""
+        """Gym battle mode with map integration"""
         if not self.config['battle_gyms']:
             return
         
-        # Simulate gym battles
-        if random.random() < 0.15:  # 15% chance per cycle
-            self.stats['gyms_battled'] += 1
-            self.stats['xp_gained'] += random.randint(200, 800)
-            self.update_status("⚔️ Battling gym!")
+        # Get nearby gyms
+        nearby_gyms = self.get_nearby_gyms(1.5)  # 1.5km radius
+        
+        if nearby_gyms:
+            gym = nearby_gyms[0]  # Closest gym
+            team = gym.get('team', 'Neutral')
+            level = gym.get('level', 1)
+            defenders = gym.get('defenders', 0)
+            
+            self.update_status(f"⚔️ Battling {gym['name']} (Team: {team}, Level: {level}, Defenders: {defenders})")
+            self.update_status(f"🚶 Walking to gym... (Distance: {gym['distance_km']:.2f}km)")
+            
+            # Simulate movement to gym
+            if gym['distance_km'] > 0.1:
+                time.sleep(2)  # Simulate walking time
+            
+            # Simulate battle success based on gym level and defenders
+            success_rate = 0.9 if level <= 3 else 0.7 if level <= 5 else 0.5
+            if random.random() < success_rate:
+                self.stats['gyms_battled'] += 1
+                xp_gained = level * random.randint(200, 400)
+                self.stats['xp_gained'] += xp_gained
+                self.update_status(f"✅ Gym battle won! (+{xp_gained} XP)")
+            else:
+                self.update_status("❌ Gym battle lost!")
+        else:
+            # No gyms nearby, simulate random battle
+            if random.random() < 0.1:  # 10% chance per cycle
+                self.stats['gyms_battled'] += 1
+                self.stats['xp_gained'] += random.randint(200, 800)
+                self.update_status("⚔️ Battling gym!")
     
     def _exploring_mode(self):
-        """Exploration mode"""
-        # Simulate walking and exploring
-        if random.random() < 0.25:  # 25% chance per cycle
-            self.update_status("🚶 Walking to new area...")
-            time.sleep(1)  # Simulate walking time
+        """Exploration mode with map integration"""
+        # Get optimal route from map
+        route = self.get_optimal_route_from_map(2.0)  # 2km radius
+        
+        if route:
+            # Follow the optimal route
+            next_point = route[0]
+            point_type = next_point['type']
+            point_name = next_point['name']
+            distance = next_point['distance']
+            
+            if point_type == 'pokemon':
+                self.update_status(f"🎯 Exploring to find {point_name} (Distance: {distance:.2f}km)")
+            elif point_type == 'pokestop':
+                self.update_status(f"🎡 Exploring to {point_name} (Distance: {distance:.2f}km)")
+            elif point_type == 'gym':
+                self.update_status(f"🏰 Exploring to {point_name} (Distance: {distance:.2f}km)")
+            
+            # Simulate movement
+            if distance > 0.1:
+                self.update_status("🚶 Walking to new area...")
+                time.sleep(2)  # Simulate walking time
+        else:
+            # No route available, simulate random exploration
+            if random.random() < 0.25:  # 25% chance per cycle
+                self.update_status("🚶 Walking to new area...")
+                time.sleep(1)  # Simulate walking time
         
         # Simulate finding items
         if random.random() < 0.1:  # 10% chance per cycle
             items = ['Potion', 'Revive', 'Rare Candy', 'Golden Razz Berry']
             item = random.choice(items)
             self.update_status(f"📦 Found {item}!")
+    
+    def _map_mode(self):
+        """Map mode - focused on map data analysis and navigation"""
+        try:
+            # Refresh map data
+            if self.map_integration['auto_refresh']:
+                self.refresh_map_data()
+            
+            # Get comprehensive map data
+            map_data = self.get_map_data()
+            
+            # Analyze nearby Pokemon
+            nearby_pokemon = self.get_nearby_pokemon(1.0)
+            if nearby_pokemon:
+                rare_pokemon = [p for p in nearby_pokemon if p['rarity'] in ['rare', 'legendary'] or p['is_shiny']]
+                if rare_pokemon:
+                    self.update_status(f"🌟 Found {len(rare_pokemon)} rare Pokemon nearby!")
+                    for pokemon in rare_pokemon[:3]:  # Show top 3
+                        self.update_status(f"  • {pokemon['name']} (CP: {pokemon['cp']}, Distance: {pokemon['distance_km']:.2f}km)")
+                else:
+                    self.update_status(f"🎯 Found {len(nearby_pokemon)} Pokemon nearby")
+            
+            # Analyze nearby Pokestops
+            nearby_stops = self.get_nearby_pokestops(1.0)
+            if nearby_stops:
+                lured_stops = [s for s in nearby_stops if s.get('lure_type') is not None]
+                if lured_stops:
+                    self.update_status(f"🎡 Found {len(lured_stops)} lured Pokestops nearby!")
+                else:
+                    self.update_status(f"🎡 Found {len(nearby_stops)} Pokestops nearby")
+            
+            # Analyze nearby Gyms
+            nearby_gyms = self.get_nearby_gyms(1.0)
+            if nearby_gyms:
+                raid_gyms = [g for g in nearby_gyms if g.get('raid_boss') is not None]
+                if raid_gyms:
+                    self.update_status(f"🏰 Found {len(raid_gyms)} raids nearby!")
+                    for gym in raid_gyms[:2]:  # Show top 2
+                        self.update_status(f"  • {gym['name']} - {gym['raid_boss']} (Tier {gym.get('raid_tier', 1)})")
+                else:
+                    self.update_status(f"🏰 Found {len(nearby_gyms)} Gyms nearby")
+            
+            # Check for nests
+            nests = map_data.get('nests', [])
+            if nests:
+                self.update_status(f"🌿 Found {len(nests)} Pokemon nests nearby!")
+                for nest in nests:
+                    self.update_status(f"  • {nest['pokemon']} nest (Spawn rate: {nest['spawn_rate']:.1%})")
+            
+            # Calculate optimal route
+            route = self.get_optimal_route_from_map(2.0)
+            if route:
+                self.update_status(f"🗺️ Optimal route calculated with {len(route)} stops")
+                
+                # Show route summary
+                pokemon_stops = len([p for p in route if p['type'] == 'pokemon'])
+                pokestop_stops = len([p for p in route if p['type'] == 'pokestop'])
+                gym_stops = len([p for p in route if p['type'] == 'gym'])
+                
+                self.update_status(f"  • {pokemon_stops} Pokemon, {pokestop_stops} Pokestops, {gym_stops} Gyms")
+            
+            # Auto-refresh map data
+            if self.map_integration['auto_refresh']:
+                time.sleep(self.map_integration['update_interval'])
+            
+        except Exception as e:
+            self.logger.error(f"Map mode error: {e}")
+            self.update_status(f"❌ Map mode error: {e}")
     
     def _idle_mode(self):
         """Idle mode - bot is running but not actively doing anything"""
@@ -2046,3 +2815,75 @@ if __name__ == "__main__":
         print(f"{key}: {value}")
     
     print("Bot test completed!")
+    
+    # Test Pokemon Map integration
+    print("\n" + "="*50)
+    print("Testing Pokemon Map Integration...")
+    print("="*50)
+    
+    # Test opening Pokemon Map
+    print("🗺️ Testing Pokemon Map opening...")
+    if bot.open_pokemon_map():
+        print("✅ Pokemon Map opened successfully!")
+    else:
+        print("❌ Failed to open Pokemon Map")
+    
+    # Test map data retrieval
+    print("\n📊 Testing map data retrieval...")
+    map_data = bot.get_map_data()
+    print(f"✅ Map data retrieved: {len(map_data.get('pokemon_spawns', []))} Pokemon, {len(map_data.get('pokestops', []))} Pokestops, {len(map_data.get('gyms', []))} Gyms")
+    
+    # Test nearby Pokemon search
+    print("\n🎯 Testing nearby Pokemon search...")
+    nearby_pokemon = bot.get_nearby_pokemon(1.0)
+    print(f"✅ Found {len(nearby_pokemon)} Pokemon within 1km")
+    for pokemon in nearby_pokemon[:3]:  # Show first 3
+        print(f"  • {pokemon['name']} (CP: {pokemon['cp']}, Distance: {pokemon['distance_km']:.2f}km)")
+    
+    # Test rare Pokemon search
+    print("\n🌟 Testing rare Pokemon search...")
+    rare_pokemon = bot.find_rare_pokemon(2.0)
+    print(f"✅ Found {len(rare_pokemon)} rare Pokemon within 2km")
+    for pokemon in rare_pokemon[:2]:  # Show first 2
+        print(f"  • {pokemon['name']} (CP: {pokemon['cp']}, Rarity: {pokemon['rarity']})")
+    
+    # Test optimal route calculation
+    print("\n🗺️ Testing optimal route calculation...")
+    route = bot.get_optimal_route_from_map(2.0)
+    print(f"✅ Calculated optimal route with {len(route)} stops")
+    for point in route[:5]:  # Show first 5 stops
+        print(f"  • {point['type'].title()}: {point['name']} (Priority: {point['priority']}, Distance: {point['distance']:.2f}km)")
+    
+    # Test map status
+    print("\n📈 Testing map status...")
+    map_status = bot.get_map_status()
+    print(f"✅ Map Status:")
+    print(f"  • Enabled: {map_status.get('enabled', False)}")
+    print(f"  • Auto-refresh: {map_status.get('auto_refresh', False)}")
+    print(f"  • Nearby Pokemon: {map_status.get('nearby_pokemon', 0)}")
+    print(f"  • Nearby Pokestops: {map_status.get('nearby_pokestops', 0)}")
+    print(f"  • Nearby Gyms: {map_status.get('nearby_gyms', 0)}")
+    print(f"  • Rare Pokemon: {map_status.get('rare_pokemon', 0)}")
+    
+    # Test Pokemon type search
+    print("\n🔍 Testing Pokemon type search...")
+    fire_pokemon = bot.search_pokemon_by_type('fire', 2.0)
+    print(f"✅ Found {len(fire_pokemon)} Fire-type Pokemon")
+    for pokemon in fire_pokemon[:2]:
+        print(f"  • {pokemon['name']} (CP: {pokemon['cp']})")
+    
+    # Test map mode
+    print("\n🗺️ Testing map mode...")
+    bot.set_mode('map_mode')
+    print("✅ Switched to map mode")
+    
+    # Test map data export
+    print("\n💾 Testing map data export...")
+    if bot.export_map_data("test_map_data.json"):
+        print("✅ Map data exported successfully!")
+    else:
+        print("❌ Failed to export map data")
+    
+    print("\n" + "="*50)
+    print("Pokemon Map Integration Test Completed!")
+    print("="*50)
