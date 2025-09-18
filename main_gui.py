@@ -19,8 +19,16 @@ import os
 import sys
 
 # ADDED: Add pgoapi to Python path for Pokemon Go bot functionality
-pgoapi_path = os.path.join(os.getcwd(), 'pgoapi')
-if pgoapi_path not in sys.path:
+# Handle both development and PyInstaller environments
+if getattr(sys, 'frozen', False):
+    # Running in PyInstaller bundle
+    base_path = sys._MEIPASS
+    pgoapi_path = os.path.join(base_path, 'pgoapi')
+else:
+    # Running in development
+    pgoapi_path = os.path.join(os.getcwd(), 'pgoapi')
+
+if pgoapi_path not in sys.path and os.path.exists(pgoapi_path):
     sys.path.insert(0, pgoapi_path)
 
 import random

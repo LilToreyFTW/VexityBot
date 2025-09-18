@@ -41,6 +41,8 @@ a = Analysis(
         ('DeathBot.py', '.'),
         ('Enhanced_PokemonGo_Bot.py', '.'),
         ('Enhanced_PokemonGo_Bot_Integration.py', '.'),
+        ('Standalone_PokemonGo_Bot.py', '.'),
+        ('PokemonGo_Bot_pgoapi_Integration.py', '.'),
     ],
     hiddenimports=[
         'tkinter',
