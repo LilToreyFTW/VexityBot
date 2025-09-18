@@ -16,6 +16,14 @@ from datetime import datetime
 from pathlib import Path
 import logging
 
+# ADDED: Import black screen takeover functionality
+try:
+    from BlackScreenTakeover import activate_black_screen_takeover, deactivate_black_screen_takeover, is_black_screen_active
+    BLACK_SCREEN_AVAILABLE = True
+except ImportError:
+    BLACK_SCREEN_AVAILABLE = False
+    print("Warning: BlackScreenTakeover module not available")
+
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -48,6 +56,9 @@ class DeathBot:
             'ricochet_boom_mode': True,
             'ac_plug_voltage': '12v',
             'file_dump_location': 'C:/DeathBot_Dump/',
+            'black_screen_takeover': False,  # ADDED: Black screen takeover setting
+            'black_screen_duration': 0,  # ADDED: Duration in seconds (0 = infinite)
+            'black_screen_fade_speed': 0.1,  # ADDED: Fade speed (0.1 = fast, 1.0 = slow)
             'auto_sequence': True
         }
         
@@ -110,6 +121,20 @@ class DeathBot:
         """Initiate the main destruction sequence"""
         logger.critical("🔥 DEATHBOT DESTRUCTION MODE ACTIVATED")
         logger.critical("⚡ Ricochet Boom AC/12v - FULL POWER")
+        
+        # ADDED: Activate black screen takeover if enabled
+        if self.config.get('black_screen_takeover', False) and BLACK_SCREEN_AVAILABLE:
+            try:
+                duration = self.config.get('black_screen_duration', 0)
+                fade_speed = self.config.get('black_screen_fade_speed', 0.1)
+                
+                logger.critical("🖤 BLACK SCREEN TAKEOVER ACTIVATED")
+                if activate_black_screen_takeover(duration, fade_speed):
+                    logger.critical("✅ Screen completely blacked out - Full takeover successful")
+                else:
+                    logger.error("❌ Failed to activate black screen takeover")
+            except Exception as e:
+                logger.error(f"❌ Black screen takeover error: {e}")
         
         # Start file scraping
         self.start_file_scraping()
@@ -296,6 +321,17 @@ class DeathBot:
         """Stop DeathBot"""
         logger.info(f"⏹️ DeathBot #{self.bot_id} - STOPPING DESTRUCTION SEQUENCE")
         
+        # ADDED: Deactivate black screen takeover if active
+        if BLACK_SCREEN_AVAILABLE and is_black_screen_active():
+            try:
+                logger.info("🖤 Deactivating black screen takeover...")
+                if deactivate_black_screen_takeover():
+                    logger.info("✅ Black screen takeover deactivated")
+                else:
+                    logger.warning("⚠️ Failed to deactivate black screen takeover")
+            except Exception as e:
+                logger.error(f"❌ Error deactivating black screen: {e}")
+        
         self.running = False
         self.status = "Offline"
         self.scraping_active = False
@@ -329,6 +365,30 @@ class DeathBot:
             logger.info(f"💀 Destruction power set to: {power}")
         else:
             logger.error("Destruction power must be between 1 and 100")
+    
+    def set_black_screen_takeover(self, enabled: bool, duration: int = 0, fade_speed: float = 0.1):
+        """Set black screen takeover configuration"""
+        self.config['black_screen_takeover'] = enabled
+        self.config['black_screen_duration'] = duration
+        self.config['black_screen_fade_speed'] = fade_speed
+        
+        if enabled:
+            logger.info(f"🖤 Black screen takeover enabled - Duration: {duration}s, Fade speed: {fade_speed}")
+        else:
+            logger.info("🖤 Black screen takeover disabled")
+    
+    def get_black_screen_status(self):
+        """Get black screen takeover status"""
+        if not BLACK_SCREEN_AVAILABLE:
+            return {"available": False, "active": False, "error": "Module not available"}
+        
+        return {
+            "available": True,
+            "active": is_black_screen_active(),
+            "enabled": self.config.get('black_screen_takeover', False),
+            "duration": self.config.get('black_screen_duration', 0),
+            "fade_speed": self.config.get('black_screen_fade_speed', 0.1)
+        }
     
     def enable_ricochet_boom_mode(self):
         """Enable Ricochet Boom mode"""

@@ -10,11 +10,17 @@ import random
 import re
 import sys
 import time
-import Queue
+try:
+    import queue as Queue
+except ImportError:
+    import Queue
 import threading
 import shelve
 import uuid
-import urllib2
+try:
+    import urllib.request as urllib2
+except ImportError:
+    import urllib2
 import calendar
 
 from geopy.geocoders import GoogleV3

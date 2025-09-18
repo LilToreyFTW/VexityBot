@@ -1,11 +1,17 @@
 # Thunderbolt Pokemon GO Bot Requirements
 # Core Pokemon GO bot dependencies
 
-# Pokemon GO API
-pgoapi>=1.1.8
-protobuf>=3.0.0
-requests>=2.25.0
+# ADDED: Enhanced pgoapi integration requirements
+# Pokemon GO API (from downloaded pgoapi repository)
+# Note: pgoapi is now included locally in the pgoapi/ directory
+protobuf>=3.5.1
+requests[socks]>=2.10.0
 urllib3>=1.26.0
+gpsoauth>=0.4.0
+protobuf3-to-dict>=0.1.4
+future
+six
+pycrypt>=0.7.1
 
 # Geographic and location services
 geopy>=2.0.0
