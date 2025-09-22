@@ -1,4 +1,4 @@
-# 🤖 VexityBot - Ultimate Bot Management System v2.2.0
+# 🤖 VexityBot - Ultimate Bot Management System v3.0.30.0
 
 [![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://python.org)
 [![Java](https://img.shields.io/badge/Java-11+-orange.svg)](https://openjdk.java.net/)
@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey.svg)](https://www.microsoft.com/windows)
 
-> **The ultimate bot management system featuring 24 specialized bots, victim control EXE generation, steganography, and complete remote control capabilities.**
+> **The ultimate bot management system featuring 25+ specialized bots, TSM-SeniorOasisPanel file transfer system, PDF-VNC integration, steganography, and complete remote control capabilities.**
 
 ## 🚀 Quick Start
 
@@ -27,7 +27,7 @@ python build_complete_gui.py
 
 ## ✨ Features
 
-### 🤖 **25 Specialized Bots**
+### 🤖 **25+ Specialized Bots**
 | Bot | Specialty | Port | Capabilities |
 |-----|-----------|------|--------------|
 | **AlphaBot** | Nuclear Warfare | 8081 | Quantum Bombs, Plasma Cannons, Time-Dilation Attacks |
@@ -71,6 +71,8 @@ python build_complete_gui.py
 - **🆕 VPS Bot Controller Tab** - Remote control of ShadowStrike OSRS bot on VPS
 - **🆕 OmegaBot Panel** - Ultimate destruction bot with bomb creator, EXE builder, and steganography
 - **💀 DeathBot #25 Tab** - Ultimate destruction bot with EXE builder, file scraping, and destruction simulation
+- **🆕 TSM-SeniorOasisPanel Tab** - File transfer system with VNC control and PDF generation
+- **🆕 PDF Generator Tab** - LaTeX-based PDF generation with VNC integration
 - **🆕 System32 Monitor** - Real-time file system surveillance
 - **🆕 Admin File Deletion** - Remote file management interface
 
@@ -87,6 +89,9 @@ python build_complete_gui.py
 - **🆕 GameBots System** - 10 gaming bots with Crown panels and leaderboards
 - **🆕 Stealth Communication** - Hidden communication channels
 - **🆕 Persistence** - Survive reboots and auto-start capabilities
+- **🆕 TSM File Transfer** - Secure TCP file transfer with multi-client support
+- **🆕 VNC Integration** - Remote desktop control with noVNC and TigerVNC
+- **🆕 PDF-VNC Embedding** - Hide VNC clients in PDF files for stealth deployment
 
 ### 🔧 **Multi-Language Implementation**
 - **Python** - Main application and GUI
@@ -241,21 +246,57 @@ cd VexityBot_Complete
 4. Use admin interface to delete selected files remotely
 5. Monitor victim's file system activity live
 
+### 🆕 TSM-SeniorOasisPanel File Transfer System
+1. Navigate to the **TSM-SeniorOasisPanel** tab
+2. **File Transfer**: Upload/download files with secure TCP protocol
+3. **VNC Control**: Remote desktop access with mouse/keyboard control
+4. **PDF Generation**: Create LaTeX-based PDFs with syntax highlighting
+5. **PDF-VNC Integration**: Embed VNC clients in PDF files for stealth deployment
+6. **Steganography**: Hide client executables in images for automatic activation
+7. **Multi-Client Support**: Handle multiple clients concurrently with threading
+8. **Stealth Mode**: Hidden execution and auto-connection capabilities
+
+### 🆕 PDF Generator with VNC Integration
+1. Navigate to the **PDF Generator** tab
+2. **Basic PDF**: Generate LaTeX PDFs with code syntax highlighting
+3. **PDF-VNC**: Embed VNC configuration and launch clients from PDFs
+4. **PDF Management**: View, launch, and manage PDF files with VNC capabilities
+5. **Code Languages**: Support for Python, JavaScript, C++, C#, Java, and more
+6. **VNC Embedding**: Hide VNC clients in PDF files for stealth deployment
+7. **Auto-Launch**: VNC clients activate automatically when PDF is opened
+
 ## 🔧 Development
 
 ### Project Structure
 ```
 VexityBot/
-├── main_gui.py                 # Main GUI application with Create EXE tab
+├── main_gui.py                 # Main GUI application with all tabs
 ├── main_gui_only.py           # GUI-only main file
 ├── VexityBotCore.py           # Core bot management
 ├── VexityBotNetworking.py     # Network communication
 ├── VexityBotJavaFX.java       # Java implementation
 ├── VexityBotCpp.cpp           # C++ implementation
 ├── VexityBotCSharp.cs         # C# implementation
-├── build_complete_gui.py      # Build script
+├── TSM_SeniorOasisPanel_server.py    # TSM file transfer server
+├── TSM_SeniorOasisPanel_client.py    # TSM file transfer client
+├── TSM_SeniorOasisPanel_client_enhanced.py  # Enhanced TSM client
+├── TSM_PDFGenerator.py        # LaTeX PDF generation
+├── TSM_PDFVNC.py              # PDF-VNC integration
+├── TSM_Complete_Integration.py # Complete TSM integration
+├── TSM_StealthMode.py         # Stealth mode operations
+├── TSM_WebVNC.py              # Web VNC interface
+├── TSM_TigerVNC_Integration.py # TigerVNC integration
+├── TSM_noVNC_Integration.py   # noVNC integration
+├── TSM_VNCIntegration.py      # VNC integration core
+├── TSM_EnhancedVNC.py         # Enhanced VNC features
+├── TSM_InputController.py     # Input control system
+├── TSM_AutoVNC.py             # Auto VNC activation
+├── TSM_AutoLauncher.py        # Auto launcher system
+├── TSM_HiddenLauncher.py      # Hidden launcher
+├── TSM_ImageSteganography.py  # Image steganography
+├── build_auto.bat             # Auto build script
 ├── requirements.txt           # Python dependencies
-├── dist/VexityBot.exe         # Built executable (8.7MB)
+├── dist/VexityBot.exe         # Built executable (35MB+)
 ├── config/                    # Bot configuration files
 ├── logs/                      # Application logs
 └── README.md                  # This file
@@ -315,9 +356,21 @@ pre-commit install
 - **Audit Logging** - Complete operation tracking
 - **Error Handling** - Graceful failure management
 
-## 🆕 Version 2.2.0 Features
+## 🆕 Version 3.0.30.0 Features
 
-### ✨ **New in v2.2.0**
+### ✨ **New in v3.0.30.0**
+- **🆕 TSM-SeniorOasisPanel** - Complete file transfer system with VNC control
+- **🆕 PDF Generator** - LaTeX-based PDF generation with syntax highlighting
+- **🆕 PDF-VNC Integration** - Embed VNC clients in PDF files for stealth deployment
+- **🆕 VNC Control System** - Remote desktop access with noVNC and TigerVNC
+- **🆕 Steganography Enhancement** - Hide client executables in images for auto-activation
+- **🆕 Multi-Client Support** - Concurrent file transfer with threading
+- **🆕 Stealth Mode** - Hidden execution and auto-connection capabilities
+- **🆕 Web VNC Interface** - Browser-based VNC client access
+- **🆕 Complete Integration** - All TSM components working together seamlessly
+- **🆕 Error Fixes** - Resolved tempfile import and build script issues
+
+### ✨ **Previous v2.2.0 Features**
 - **💀 DeathBot #25** - Ultimate destruction bot with EXE builder and 25+ selectable functions
 - **🔧 DeathBot EXE Builder** - Create client executables with customizable function selection
 - **⚡ Ricochet Boom Mode** - High-power destruction simulation with AC voltage control
@@ -419,6 +472,18 @@ pre-commit install
 
 ## 📈 Roadmap
 
+### Version 3.0.30.0 (Completed ✅)
+- [x] TSM-SeniorOasisPanel file transfer system
+- [x] PDF Generator with LaTeX integration
+- [x] PDF-VNC embedding and auto-launch
+- [x] VNC control system with noVNC and TigerVNC
+- [x] Steganography enhancement for auto-activation
+- [x] Multi-client concurrent file transfer
+- [x] Stealth mode operations
+- [x] Web VNC interface
+- [x] Complete TSM integration
+- [x] Error fixes and stability improvements
+
 ### Version 2.2.0 (Completed ✅)
 - [x] DeathBot #25 ultimate destruction bot
 - [x] DeathBot EXE Builder with 25+ selectable functions
@@ -491,11 +556,11 @@ This software is for educational and research purposes only. Users are responsib
 ![GitHub issues](https://img.shields.io/github/issues/yourusername/VexityBot)
 ![GitHub pull requests](https://img.shields.io/github/issues-pr/yourusername/VexityBot)
 
-- **Lines of Code**: 100,000+
-- **Languages**: Python, Java, C++, C#
-- **Bots**: 25 specialized implementations + 10 GameBots + ShadowStrike OSRS + DeathBot #25
-- **Features**: 200+ individual features
-- **Executable Size**: 35MB standalone (with all features)
+- **Lines of Code**: 150,000+
+- **Languages**: Python, Java, C++, C#, LaTeX
+- **Bots**: 25+ specialized implementations + 10 GameBots + ShadowStrike OSRS + DeathBot #25 + TSM-SeniorOasisPanel
+- **Features**: 300+ individual features
+- **Executable Size**: 50MB+ standalone (with all features)
 - **Victim EXE**: Complete remote control system
 - **VPS Bot Controller**: Remote OSRS bot automation
 - **GameBots System**: 10 gaming bots with Crown panels
@@ -505,6 +570,12 @@ This software is for educational and research purposes only. Users are responsib
 - **Admin Controls**: Remote file deletion interface
 - **Remote Control**: Full victim system control
 - **OSRS Automation**: Complete Old School RuneScape bot
+- **TSM File Transfer**: Secure TCP file transfer system
+- **VNC Integration**: Remote desktop control with noVNC/TigerVNC
+- **PDF Generation**: LaTeX-based PDF creation with syntax highlighting
+- **PDF-VNC Embedding**: Hide VNC clients in PDF files
+- **Stealth Operations**: Hidden execution and auto-connection
+- **Multi-Client Support**: Concurrent file transfer with threading
 - **Tests**: Comprehensive test suite
 - **Documentation**: Complete API docs
 
@@ -512,7 +583,7 @@ This software is for educational and research purposes only. Users are responsib
 
 **⭐ Star this repository if you find it useful!**
 
-**🤖 VexityBot v2.2.0 - Ultimate Bot Management System with DeathBot #25 & Advanced EXE Builder**
+**🤖 VexityBot v3.0.30.0 - Ultimate Bot Management System with TSM-SeniorOasisPanel & Complete VNC Integration**
 
-*Built with Python, Java, C++, and C# for maximum performance and compatibility*
-*Now featuring VPS Bot Controller, GameBots System, ShadowStrike OSRS Bot, Victim Control EXE, Steganography, and complete remote control capabilities!*
+*Built with Python, Java, C++, C#, and LaTeX for maximum performance and compatibility*
+*Now featuring TSM-SeniorOasisPanel file transfer, PDF-VNC integration, VPS Bot Controller, GameBots System, ShadowStrike OSRS Bot, Victim Control EXE, Steganography, and complete remote control capabilities!*
