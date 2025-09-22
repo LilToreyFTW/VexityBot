@@ -1,0 +1,27 @@
+# TSM-SeniorOasisPanel Requirements
+# Core dependencies for the TSM file transfer and steganography system
+
+# Image processing and steganography
+Pillow>=9.0.0
+
+# Optional: Enhanced image processing
+# opencv-python>=4.5.0
+
+# Optional: Advanced compression
+# lz4>=3.1.0
+
+# Optional: Encryption support
+# cryptography>=3.4.0
+
+# Optional: GUI components (if needed)
+# tkinter  # Usually included with Python
+
+# Optional: Network utilities
+# requests>=2.25.0
+
+# Optional: Logging enhancements
+# colorlog>=6.6.0
+
+# Development and testing dependencies
+# pytest>=6.0.0
+# pytest-cov>=2.10.0

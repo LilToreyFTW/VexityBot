@@ -1,0 +1,233 @@
+{
+  "pokemon_spawns": [
+    {
+      "id": 144,
+      "name": "Dratini",
+      "lat": 40.76810830017846,
+      "lng": -73.9794016987504,
+      "cp": 1723,
+      "iv": 76,
+      "level": 30,
+      "time_left": 1694,
+      "rarity": "uncommon",
+      "is_shiny": false,
+      "weather_boost": "foggy"
+    },
+    {
+      "id": 56,
+      "name": "Snorlax",
+      "lat": 40.768091876599826,
+      "lng": -73.98774036425422,
+      "cp": 376,
+      "iv": 7,
+      "level": 32,
+      "time_left": 323,
+      "rarity": "common",
+      "is_shiny": false,
+      "weather_boost": "cloudy"
+    },
+    {
+      "id": 31,
+      "name": "Bulbasaur",
+      "lat": 40.75573349115948,
+      "lng": -73.98047074745007,
+      "cp": 1066,
+      "iv": 72,
+      "level": 1,
+      "time_left": 1651,
+      "rarity": "rare",
+      "is_shiny": false,
+      "weather_boost": "snowy"
+    },
+    {
+      "id": 5,
+      "name": "Pikachu",
+      "lat": 40.75882805573449,
+      "lng": -73.97988589534742,
+      "cp": 242,
+      "iv": 17,
+      "level": 28,
+      "time_left": 1189,
+      "rarity": "common",
+      "is_shiny": false,
+      "weather_boost": "windy"
+    },
+    {
+      "id": 107,
+      "name": "Bulbasaur",
+      "lat": 40.76517077707558,
+      "lng": -73.98526133497911,
+      "cp": 42,
+      "iv": 89,
+      "level": 21,
+      "time_left": 1647,
+      "rarity": "common",
+      "is_shiny": false,
+      "weather_boost": "rainy"
+    },
+    {
+      "id": 40,
+      "name": "Spearow",
+      "lat": 40.749141864509184,
+      "lng": -73.97551004957765,
+      "cp": 429,
+      "iv": 34,
+      "level": 2,
+      "time_left": 514,
+      "rarity": "common",
+      "is_shiny": false,
+      "weather_boost": "foggy"
+    },
+    {
+      "id": 94,
+      "name": "Charmander",
+      "lat": 40.760544243116485,
+      "lng": -73.98208571069297,
+      "cp": 818,
+      "iv": 43,
+      "level": 26,
+      "time_left": 849,
+      "rarity": "rare",
+      "is_shiny": false,
+      "weather_boost": "rainy"
+    },
+    {
+      "id": 45,
+      "name": "Eevee",
+      "lat": 40.76408165609477,
+      "lng": -73.98870113842534,
+      "cp": 1127,
+      "iv": 69,
+      "level": 8,
+      "time_left": 1336,
+      "rarity": "uncommon",
+      "is_shiny": false,
+      "weather_boost": "cloudy"
+    },
+    {
+      "id": 79,
+      "name": "Rattata",
+      "lat": 40.74925184418154,
+      "lng": -73.98299008085968,
+      "cp": 413,
+      "iv": 77,
+      "level": 4,
+      "time_left": 666,
+      "rarity": "common",
+      "is_shiny": false,
+      "weather_boost": "rainy"
+    },
+    {
+      "id": 106,
+      "name": "Eevee",
+      "lat": 40.752337251561585,
+      "lng": -73.98183507294473,
+      "cp": 629,
+      "iv": 77,
+      "level": 4,
+      "time_left": 485,
+      "rarity": "rare",
+      "is_shiny": false,
+      "weather_boost": "snowy"
+    },
+    {
+      "id": 151,
+      "name": "Squirtle",
+      "lat": 40.75712294040102,
+      "lng": -73.98072552108736,
+      "cp": 1214,
+      "iv": 16,
+      "level": 11,
+      "time_left": 742,
+      "rarity": "uncommon",
+      "is_shiny": false,
+      "weather_boost": "cloudy"
+    }
+  ],
+  "pokestops": [
+    {
+      "id": "stop_0",
+      "name": "Pokestop 1",
+      "lat": 40.75551791933676,
+      "lng": -73.98498120364721,
+      "lure_type": null,
+      "lure_expires": null,
+      "last_spun": 129
+    },
+    {
+      "id": "stop_1",
+      "name": "Pokestop 2",
+      "lat": 40.75732842782338,
+      "lng": -73.98809574326798,
+      "lure_type": "magnetic",
+      "lure_expires": 1714,
+      "last_spun": 97
+    },
+    {
+      "id": "stop_2",
+      "name": "Pokestop 3",
+      "lat": 40.75731667095559,
+      "lng": -73.9852581837885,
+      "lure_type": null,
+      "lure_expires": null,
+      "last_spun": 158
+    },
+    {
+      "id": "stop_3",
+      "name": "Pokestop 4",
+      "lat": 40.76152110165444,
+      "lng": -73.98600049943916,
+      "lure_type": "mossy",
+      "lure_expires": null,
+      "last_spun": 204
+    }
+  ],
+  "gyms": [
+    {
+      "id": "gym_0",
+      "name": "Gym 1",
+      "lat": 40.75389318676592,
+      "lng": -73.98024794711462,
+      "team": "Instinct",
+      "level": 5,
+      "defenders": 0,
+      "raid_boss": null,
+      "raid_tier": 1
+    },
+    {
+      "id": "gym_1",
+      "name": "Gym 2",
+      "lat": 40.76251037799446,
+      "lng": -73.9925417769186,
+      "team": "Valor",
+      "level": 6,
+      "defenders": 6,
+      "raid_boss": null,
+      "raid_tier": null
+    }
+  ],
+  "nests": [
+    {
+      "pokemon": "Eevee",
+      "lat": 40.75944683758384,
+      "lng": -73.97799803496133,
+      "radius": 176,
+      "spawn_rate": 0.27924083107719794
+    }
+  ],
+  "weather": {
+    "condition": "foggy",
+    "temperature": 77,
+    "humidity": 73,
+    "wind_speed": 13,
+    "pokemon_boost": [
+      "ghost",
+      "dark"
+    ]
+  },
+  "last_updated": 1758524508.5739207,
+  "location": {
+    "lat": 40.7589,
+    "lng": -73.9851
+  }
+}

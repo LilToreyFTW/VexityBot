@@ -1,0 +1,64 @@
+# TSM-SeniorOasisPanel VNC Integration Requirements
+# متطلبات دمج VNC مع TSM-SeniorOasisPanel
+
+# Core Dependencies - المتطلبات الأساسية
+Pillow>=9.0.0
+pywin32>=306
+
+# VNC Integration Dependencies - متطلبات دمج VNC
+# noVNC and TigerVNC are included as git submodules
+# noVNC و TigerVNC مدرجان كـ git submodules
+
+# Web Server Dependencies - متطلبات خادم الويب
+# Built-in Python HTTP server is used
+# يتم استخدام خادم HTTP المدمج في Python
+
+# Optional Dependencies - المتطلبات الاختيارية
+# opencv-python>=4.5.0  # For advanced image processing
+# cryptography>=3.4.0   # For encryption support
+# requests>=2.25.0      # For network utilities
+# colorlog>=6.6.0       # For enhanced logging
+# websockets>=10.0      # For WebSocket support
+
+# Development Dependencies - متطلبات التطوير
+# pytest>=6.0.0
+# pytest-cov>=2.10.0
+
+# System Requirements - متطلبات النظام
+# Python 3.7 or higher
+# Windows 10/11 (for win32api support)
+# Network connectivity
+# Sufficient disk space for VNC data
+# Modern web browser for noVNC interface
+
+# Installation Instructions - تعليمات التثبيت
+# 1. pip install -r requirements_vnc_integration.txt
+# 2. Ensure noVNC and TigerVNC are cloned in the project directory
+# 3. Run TSM_VNC_Launcher.bat or python TSM_Complete_Integration.py start
+
+# VNC Integration Features - ميزات دمج VNC
+# - noVNC for browser-based VNC control
+# - TigerVNC for high-performance VNC server
+# - Web VNC with custom TSM interface
+# - Complete integration with TSM stealth system
+# - Advanced dashboard for system monitoring
+# - Multi-client support with load balancing
+# - Real-time performance monitoring
+# - Secure WebSocket connections
+# - Cross-platform compatibility
+
+# Security Features - ميزات الأمان
+# - Encrypted VNC connections
+# - Authentication and authorization
+# - Input blocking and system control
+# - Stealth mode operation
+# - Comprehensive logging
+# - Protection against common attacks
+
+# Performance Features - ميزات الأداء
+# - Adaptive quality adjustment
+# - Intelligent compression
+# - Memory management
+# - Connection pooling
+# - Load balancing
+# - Real-time monitoring
